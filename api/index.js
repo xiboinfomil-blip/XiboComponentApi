@@ -17,14 +17,43 @@ let swaggerSetupMiddleware = null;
 if (swaggerDocument && typeof swaggerDocument.then === 'function') {
   swaggerDocument
     .then(doc => {
-      swaggerSetupMiddleware = swaggerUi.setup(doc);
+      // Use CDN-hosted assets for Vercel compatibility
+      swaggerSetupMiddleware = swaggerUi.setup(doc, {
+        customCssUrl: 'https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.10.3/swagger-ui.css',
+        customJs: [
+          'https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.10.3/swagger-ui-bundle.js',
+          'https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.10.3/swagger-ui-standalone-preset.js'
+        ],
+        customfavIcon: 'https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.10.3/favicon-32x32.png',
+        swaggerOptions: {
+          persistAuthorization: true,
+          displayRequestDuration: true,
+          filter: true,
+          showExtensions: true,
+          showCommonExtensions: true
+        }
+      });
       console.log('✓ Swagger document loaded successfully (Async)');
     })
     .catch(err => {
       console.error('❌ Failed to load Swagger document:', err);
     });
 } else {
-  swaggerSetupMiddleware = swaggerUi.setup(swaggerDocument);
+  swaggerSetupMiddleware = swaggerUi.setup(swaggerDocument, {
+    customCssUrl: 'https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.10.3/swagger-ui.css',
+    customJs: [
+      'https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.10.3/swagger-ui-bundle.js',
+      'https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.10.3/swagger-ui-standalone-preset.js'
+    ],
+    customfavIcon: 'https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.10.3/favicon-32x32.png',
+    swaggerOptions: {
+      persistAuthorization: true,
+      displayRequestDuration: true,
+      filter: true,
+      showExtensions: true,
+      showCommonExtensions: true
+    }
+  });
   console.log('✓ Swagger document loaded successfully (Sync)');
 }
 
@@ -39,9 +68,9 @@ app.use(helmet({
     directives: {
       defaultSrc: ["'self'"],
       scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://cdn.jsdelivr.net"],
-      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdn.jsdelivr.net"],
       fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"],
-      imgSrc: ["'self'", "data:", "https://validator.swagger.io"],
+      imgSrc: ["'self'", "data:", "https://validator.swagger.io", "https://cdn.jsdelivr.net"],
     },
   },
   noSniff: true,
@@ -188,7 +217,8 @@ if (fs.existsSync(globalRoutesPath)) {
 // 5. ROUTES & SWAGGER
 // ==========================================
 
-app.use('/swagger', swaggerUi.serve, (req, res, next) => {
+// Swagger route - only serve HTML, no static files
+app.use('/swagger', (req, res, next) => {
   if (swaggerSetupMiddleware) {
     swaggerSetupMiddleware(req, res, next);
   } else {
