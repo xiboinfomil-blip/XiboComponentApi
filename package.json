@@ -1,0 +1,33 @@
+{
+  "name": "express-api-swagger-ejs",
+  "version": "1.0.0",
+  "description": "Express server with REST API, Swagger docs, external API integration, and EJS views",
+  "main": "api/index.js",
+  "scripts": {
+    "start": "node api/index.js",
+    "dev": "nodemon api/index.js"
+  },
+  "dependencies": {
+    "axios": "^1.6.7",
+    "cors": "^2.8.6",
+    "dotenv": "^16.4.1",
+    "ejs": "^3.1.9",
+    "express": "^4.18.2",
+    "express-rate-limit": "^8.5.2",
+    "helmet": "^8.2.0",
+    "hpp": "^0.2.3",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.3"
+  },
+  "keywords": [
+    "express",
+    "swagger",
+    "ejs",
+    "api"
+  ],
+  "author": "",
+  "license": "ISC"
+}

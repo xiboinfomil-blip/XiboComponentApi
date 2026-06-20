@@ -1,0 +1,50 @@
+<!-- components/todayMatches/view.ejs -->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <!-- Browser caches this CSS for 1 year -->
+    <link rel="stylesheet" href="/assets/todayMatches/style.css?v=1.0.0">
+</head>
+<body style="background: transparent; margin: 0; padding: 2rem 1rem; display: flex; justify-content: center; align-items: center; min-height: 100vh;">
+    
+    <div id="today-matches-slider-wrapper" class="tm-wrapper">
+        <div class="tm-card-container">
+            <!-- Initial loading state (will be replaced by script.js) -->
+            <div class="tm-card-worldcup">
+                <div class="tm-bg-effects">
+                    <div class="tm-gradient-orb tm-orb-1"></div>
+                    <div class="tm-gradient-orb tm-orb-2"></div>
+                    <div class="tm-gradient-orb tm-orb-3"></div>
+                    <div class="tm-mesh-gradient"></div>
+                </div>
+                <div class="tm-glass-overlay"></div>
+                <div class="tm-card-content">
+                    <div class="tm-empty-state">
+                        <div class="tm-empty-icon">
+                            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="M12 8v4m0 4h.01"/>
+                            </svg>
+                        </div>
+                        <h3>Chargement des matchs...</h3>
+                        <p>Veuillez patienter</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pass server-side configuration to the client-side script -->
+    <script>
+        window.TODAY_MATCHES_CONFIG = {
+            sliderSpeed: <%= typeof sliderSpeed !== 'undefined' ? sliderSpeed : 8000 %>
+        };
+    </script>
+
+    <!-- Browser caches this JS for 1 year -->
+    <script src="/assets/todayMatches/script.js?v=1.0.0"></script>
+</body>
+</html>
