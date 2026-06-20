@@ -4,8 +4,8 @@
   "description": "Express server with REST API, Swagger docs, external API integration, and EJS views",
   "main": "api/index.js",
   "scripts": {
-    "start": "node api/index.js",
-    "dev": "nodemon api/index.js"
+    "start": "node --inspect api/index.js",
+    "dev": "nodemon --inspect api/index.js"
   },
   "dependencies": {
     "axios": "^1.6.7",

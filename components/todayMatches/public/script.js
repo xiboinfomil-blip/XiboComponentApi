@@ -1,218 +1,183 @@
-// components/todayMatches/public/script.js
-
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', () => {
     const config = window.TODAY_MATCHES_CONFIG || { sliderSpeed: 8000 };
-    const sliderSpeed = Number(config.sliderSpeed) || 8000;
+    let matches = [];
+    let currentMatchIndex = 0;
+    let timerInterval;
+    let sliderInterval;
 
-    const container = document.querySelector('.tm-card-container');
-    if (!container) return;
-
-    let currentMatchesData = [];
-    let currentIndex = 0;
-
-    // Helper to get flag image path
-    const getFlagPath = (teamName) => {
-        if (!teamName) return '';
-        const cleanName = teamName.toLowerCase().replace(/[^a-z]/g, '');
-        // Note: Ensure your flags are stored in the root 'public/flags' folder 
-        // or adjust this path to match where you put them.
-        return `/assets/flags/${cleanName}.png`; 
+    // DOM Elements
+    const els = {
+        card: document.getElementById('main-card'),
+        statusBadge: document.getElementById('match-status-badge'),
+        statusLabel: document.getElementById('status-label'),
+        liveDot: document.getElementById('live-indicator'),
+        timer: document.getElementById('match-timer'),
+        stadium: document.getElementById('stadium-name'),
+        teamA: {
+            container: document.getElementById('team-a-container'),
+            name: document.getElementById('name-a'),
+            score: document.getElementById('score-a'),
+            flag: document.getElementById('flag-a'),
+            fallback: document.querySelector('#team-a-container .tm-flag-fallback')
+        },
+        teamB: {
+            container: document.getElementById('team-b-container'),
+            name: document.getElementById('name-b'),
+            score: document.getElementById('score-b'),
+            flag: document.getElementById('flag-b'),
+            fallback: document.querySelector('#team-b-container .tm-flag-fallback')
+        },
+        dateDisplay: document.getElementById('match-date-display'),
+        prevBtn: document.getElementById('prev-match'),
+        nextBtn: document.getElementById('next-match')
     };
 
-    // Function to generate the HTML for a single match card
-    const renderCard = (match) => {
-        if (!match) {
-            return `
-            <div class="tm-card-worldcup">
-                <div class="tm-bg-effects">
-                    <div class="tm-gradient-orb tm-orb-1"></div>
-                    <div class="tm-gradient-orb tm-orb-2"></div>
-                    <div class="tm-gradient-orb tm-orb-3"></div>
-                    <div class="tm-mesh-gradient"></div>
-                </div>
-                <div class="tm-glass-overlay"></div>
-                <div class="tm-card-content">
-                    <div class="tm-empty-state">
-                        <div class="tm-empty-icon">
-                            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                <circle cx="12" cy="12" r="10"/>
-                                <path d="M12 8v4m0 4h.01"/>
-                            </svg>
-                        </div>
-                        <h3>Aucun Match Aujourd'hui</h3>
-                        <p>Revenez demain pour des matchs excitants !</p>
-                    </div>
-                </div>
-            </div>`;
-        }
-
-        const time = match.date ? match.date.split(' ')[1]?.substring(0, 5) : "--:--";
-        const isFinished = match.fulltime === true;
-        const statusText = isFinished ? "TERMINÉ" : "À VENIR";
-        const statusColor = isFinished ? "#10b981" : "#f59e0b";
-        const statusBg = isFinished ? "rgba(16, 185, 129, 0.15)" : "rgba(245, 158, 11, 0.15)";
-
-        let winnerTeam = null;
-        if (isFinished && match.fulltime_a !== undefined && match.fulltime_b !== undefined) {
-            if (match.fulltime_a > match.fulltime_b) winnerTeam = 'a';
-            else if (match.fulltime_b > match.fulltime_a) winnerTeam = 'b';
-        }
-
-        return `
-        <div class="tm-card-worldcup">
-            <div class="tm-bg-effects">
-                <div class="tm-gradient-orb tm-orb-1"></div>
-                <div class="tm-gradient-orb tm-orb-2"></div>
-                <div class="tm-gradient-orb tm-orb-3"></div>
-                <div class="tm-mesh-gradient"></div>
-            </div>
-            <div class="tm-glass-overlay"></div>
-            <div class="tm-card-content">
-                <div class="tm-card-header">
-                    <div class="tm-tournament-badge">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-                            <path d="M2 17l10 5 10-5"/>
-                            <path d="M2 12l10 5 10-5"/>
-                        </svg>
-                        <span>${match.group || 'Coupe du Monde 2026'}</span>
-                    </div>
-                    <div class="tm-status-indicator" style="background: ${statusBg}; color: ${statusColor}; border-color: ${statusColor}40;">
-                        <span class="tm-status-dot" style="background: ${statusColor};"></span>
-                        <span>${statusText}</span>
-                    </div>
-                </div>
-                <div class="tm-venue-info">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-                        <circle cx="12" cy="10" r="3"/>
-                    </svg>
-                    <span>${match.stadium || 'Stade'}</span>
-                </div>
-                <div class="tm-matchup-container">
-                    <div class="tm-team tm-team-a ${winnerTeam === 'a' ? 'tm-winner' : ''}">
-                        <div class="tm-flag-wrapper">
-                            <div class="tm-flag-container">
-                                <img src="${getFlagPath(match.team_a)}" alt="${match.team_a}" loading="lazy" class="tm-flag-image"
-                                     onerror="this.parentElement.classList.add('tm-flag-error'); this.style.display='none'; this.nextElementSibling.style.display='flex'">
-                                <div class="tm-flag-fallback" style="display:none">${match.team_a ? match.team_a.charAt(0).toUpperCase() : '?'}</div>
-                            </div>
-                            ${winnerTeam === 'a' ? '<div class="tm-winner-badge">👑</div>' : ''}
-                        </div>
-                        <h3 class="tm-team-name">${match.team_a || 'Équipe A'}</h3>
-                        ${isFinished ? `<div class="tm-team-score">${match.fulltime_a ?? '-'}</div>` : ''}
-                    </div>
-                    <div class="tm-center-display">
-                        ${isFinished ? `
-                            <div class="tm-final-score"><span class="tm-score-separator">-</span></div>
-                            <div class="tm-match-result">${winnerTeam ? 'VAINQUEUR' : 'MATCH NUL'}</div>
-                        ` : `
-                            <div class="tm-vs-badge">VS</div>
-                            <div class="tm-kickoff-time">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                    <circle cx="12" cy="12" r="10"/>
-                                    <polyline points="12 6 12 12 16 14"/>
-                                </svg>
-                                <span>${time}</span>
-                            </div>
-                        `}
-                    </div>
-                    <div class="tm-team tm-team-b ${winnerTeam === 'b' ? 'tm-winner' : ''}">
-                        <div class="tm-flag-wrapper">
-                            <div class="tm-flag-container">
-                                <img src="${getFlagPath(match.team_b)}" alt="${match.team_b}" loading="lazy" class="tm-flag-image"
-                                     onerror="this.parentElement.classList.add('tm-flag-error'); this.style.display='none'; this.nextElementSibling.style.display='flex'">
-                                <div class="tm-flag-fallback" style="display:none">${match.team_b ? match.team_b.charAt(0).toUpperCase() : '?'}</div>
-                            </div>
-                            ${winnerTeam === 'b' ? '<div class="tm-winner-badge">👑</div>' : ''}
-                        </div>
-                        <h3 class="tm-team-name">${match.team_b || 'Équipe B'}</h3>
-                        ${isFinished ? `<div class="tm-team-score">${match.fulltime_b ?? '-'}</div>` : ''}
-                    </div>
-                </div>
-                <div class="tm-card-footer">
-                    <div class="tm-match-date">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                            <line x1="16" y1="2" x2="16" y2="6"/>
-                            <line x1="8" y1="2" x2="8" y2="6"/>
-                            <line x1="3" y1="10" x2="21" y2="10"/>
-                        </svg>
-                        <span>AUJOURD'HUI</span>
-                    </div>
-                </div>
-            </div>
-        </div>`;
-    };
-
-    // Function to handle the fade-out, data fetch, cycling, and fade-in
-    const updateCard = async () => {
-        const card = container.querySelector('.tm-card-worldcup');
-        
-        // 1. Fade out current card
-        if (card) {
-            card.classList.add('fade-out');
-            await new Promise(resolve => setTimeout(resolve, 800)); // Wait for CSS transition
-        }
-        
+    const fetchMatches = async () => {
         try {
-            // 2. Fetch fresh data from API (ensures scores/status are up to date)
+            // Assuming you have an API endpoint set up in your Express app
+            // e.g., app.get('/api/todayMatches', (req, res) => res.json(service.getTodayMatches()))
             const response = await fetch('/api/todayMatches');
-            const result = await response.json();
+            if (!response.ok) throw new Error('Network response was not ok');
             
-            if (result.status === 'success' && result.data) {
-                currentMatchesData = result.data;
-            }
-            
-            // 3. Cycle to the next match index
-            if (currentMatchesData.length > 0) {
-                currentIndex = (currentIndex + 1) % currentMatchesData.length;
+            const data = await response.json();
+            if (data && data.length > 0) {
+                matches = data;
+                renderMatch(currentMatchIndex);
+                startTimer();
+                startSlider();
             } else {
-                currentIndex = 0;
-            }
-            
-            // 4. Render the new card
-            const match = currentMatchesData.length > 0 ? currentMatchesData[currentIndex] : null;
-            const newCardHtml = renderCard(match);
-            container.innerHTML = newCardHtml;
-            
-            // 5. Fade in the new card
-            const newCard = container.querySelector('.tm-card-worldcup');
-            if (newCard) {
-                requestAnimationFrame(() => {
-                    newCard.classList.remove('fade-out');
-                });
+                showEmptyState();
             }
         } catch (error) {
-            console.error("Error updating card:", error);
-            // If fetch fails, fade the old card back in
-            if (card) card.classList.remove('fade-out');
+            console.error("Failed to load matches", error);
+            showEmptyState();
         }
     };
 
-    // --- INITIAL LOAD ---
-    try {
-        const response = await fetch('/api/todayMatches');
-        const result = await response.json();
-        if (result.status === 'success' && result.data) {
-            currentMatchesData = result.data;
-        }
-    } catch (e) { 
-        console.error("Initial fetch error:", e); 
+    const showEmptyState = () => {
+        els.card.innerHTML = `
+            <div class="tm-bg-effects"></div>
+            <div class="tm-glass-overlay"></div>
+            <div class="tm-card-content">
+                <div class="tm-empty-state">
+                    <div class="tm-empty-icon">
+                        <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M12 8v4m0 4h.01"/>
+                        </svg>
+                    </div>
+                    <h3>Aucun match aujourd'hui</h3>
+                    <p>Revenez plus tard pour voir les prochains matchs.</p>
+                </div>
+            </div>
+        `;
+    };
+
+    const renderMatch = (index) => {
+        if (matches.length === 0) return;
+        const match = matches[index];
+
+        // Update Text Content
+        els.stadium.textContent = match.stadium || 'Stadium';
+        els.teamA.name.textContent = match.team_a;
+        els.teamB.name.textContent = match.team_b;
+        
+        // Scores
+        els.teamA.score.textContent = match.fulltime_a !== null ? match.fulltime_a : '-';
+        els.teamB.score.textContent = match.fulltime_b !== null ? match.fulltime_b : '-';
+
+        // Flags (Using a placeholder service or local assets)
+        // Note: You might need to map team names to country codes for flags
+        els.teamA.flag.src = `https://flagcdn.com/w160/${getCountryCode(match.team_a)}.png`;
+        els.teamB.flag.src = `https://flagcdn.com/w160/${getCountryCode(match.team_b)}.png`;
+
+        // Date
+        const dateObj = new Date(match.date.replace(' ', 'T') + 'Z');
+        els.dateDisplay.textContent = dateObj.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+
+        // Status UI
+        updateStatusUI(match.statusInfo);
+    };
+
+    const updateStatusUI = (statusInfo) => {
+        els.statusBadge.className = `tm-status-badge tm-status-${statusInfo.status}`;
+        els.statusLabel.textContent = statusInfo.label;
+        els.liveDot.style.display = statusInfo.isLive ? 'block' : 'none';
+        
+        // Initial timer text
+        els.timer.textContent = statusInfo.timeString;
+    };
+
+    const startTimer = () => {
+        if (timerInterval) clearInterval(timerInterval);
+        
+        timerInterval = setInterval(() => {
+            if (matches.length === 0) return;
+            
+            const match = matches[currentMatchIndex];
+            const now = new Date();
+            const matchDate = new Date(match.date.replace(' ', 'T') + 'Z');
+            const diffMs = matchDate.getTime() - now.getTime();
+            
+            // Recalculate time string locally
+            const absMs = Math.abs(diffMs);
+            const seconds = Math.floor((absMs / 1000) % 60);
+            const minutes = Math.floor((absMs / (1000 * 60)) % 60);
+            const hours = Math.floor((absMs / (1000 * 60 * 60)) % 24);
+            
+            let timeStr = '';
+            if (hours > 0) timeStr += `${hours}h `;
+            timeStr += `${minutes}m ${seconds}s`;
+
+            els.timer.textContent = diffMs > 0 ? timeStr : `+${timeStr}`;
+
+            // If a match just started (crossed 0), refresh data to get scores
+            if (diffMs <= 0 && diffMs > -2000 && match.statusInfo.status !== 'live') {
+                fetchMatches(); 
+            }
+        }, 1000);
+    };
+
+    const startSlider = () => {
+        if (sliderInterval) clearInterval(sliderInterval);
+        if (matches.length <= 1) return;
+
+        sliderInterval = setInterval(() => {
+            currentMatchIndex = (currentMatchIndex + 1) % matches.length;
+            
+            // Add fade-out effect
+            els.card.classList.add('fade-out');
+            
+            setTimeout(() => {
+                renderMatch(currentMatchIndex);
+                els.card.classList.remove('fade-out');
+            }, 400); // Wait for half the transition time
+        }, config.sliderSpeed);
+    };
+
+    // Helper to map team names to ISO codes for flags
+    const getCountryCode = (teamName) => {
+        const map = {
+            'Allemagne': 'de', 'Écosse': 'gb-sct', 'Espagne': 'es', 'Italie': 'it',
+            'France': 'fr', 'Angleterre': 'gb-eng', 'Portugal': 'pt', 'Belgique': 'be'
+        };
+        return map[teamName] || 'unknown';
+    };
+
+    // Button Listeners
+    if (els.prevBtn) {
+        els.prevBtn.addEventListener('click', () => {
+            currentMatchIndex = (currentMatchIndex - 1 + matches.length) % matches.length;
+            renderMatch(currentMatchIndex);
+        });
+    }
+    if (els.nextBtn) {
+        els.nextBtn.addEventListener('click', () => {
+            currentMatchIndex = (currentMatchIndex + 1) % matches.length;
+            renderMatch(currentMatchIndex);
+        });
     }
 
-    // Render the first card immediately (no fade out)
-    const firstMatch = currentMatchesData.length > 0 ? currentMatchesData[0] : null;
-    container.innerHTML = renderCard(firstMatch);
-    const firstCard = container.querySelector('.tm-card-worldcup');
-    if(firstCard) firstCard.classList.remove('fade-out');
-
-    // --- START SLIDER LOOP ---
-    // Only start the interval if we have more than 1 match to cycle through
-    if (currentMatchesData.length > 1) {
-        setTimeout(() => {
-            updateCard(); // First update after the initial delay
-            setInterval(updateCard, sliderSpeed); // Recurring updates
-        }, sliderSpeed);
-    }
+    // Initialize
+    fetchMatches();
 });

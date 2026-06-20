@@ -1,56 +1,47 @@
 <!-- components/leaderboard/view.ejs -->
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= title %></title>
-    <!-- Browser caches this CSS for 1 year -->
-    <link rel="stylesheet" href="/assets/leaderboard/style.css?v=1.0.0">
-</head>
-<body style="background: transparent; margin: 0; padding: 20px 0; display: flex; justify-content: center;">
-    
-    <div id="leaderboard-container">
-        <div class="leaderboard-header">
-            <h2 class="leaderboard-title">Classement Pronostics</h2>
-        </div>
-        
-        <!-- Empty container: Podium will be injected here by script.js -->
-        <div id="podium-section" class="podium-container"></div>
+<link rel="stylesheet" href="/assets/leaderboard/style.css?v=3.0.0">
 
-        <div class="table-wrapper" id="scroll-wrapper">
-            <table>
-                <thead>
-                    <tr>
-                        <th style="width: 25%">Rang</th>
-                        <th style="width: 50%">Nom</th>
-                        <th class="col-right" style="width: 25%">Points</th>
-                    </tr>
-                </thead>
-                <tbody id="table-body">
-                    <!-- Empty container: Rows will be injected here by script.js -->
-                    <tr>
-                        <td colspan="3" class="loading-status">
-                            <div class="empty-state">
-                                <div class="empty-icon"><div class="empty-trophy"></div></div>
-                                <div class="empty-text">Chargement des données...</div>
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+<div id="leaderboard-container">
+    <!-- Ambient background effects -->
+    <div class="ambient-glow"></div>
+    
+    <div class="leaderboard-header">
+        <h2 class="leaderboard-title">Classement Pronostics</h2>
+        <p class="leaderboard-subtitle">TOP 10</p>
+    </div>
+    
+    <!-- Podium Container -->
+    <div id="podium-section" class="podium-container">
+        <!-- JS will inject podium items here -->
     </div>
 
-    <!-- Pass server-side configuration to the client-side script -->
-    <script>
-        window.LEADERBOARD_CONFIG = {
-            scrollSpeed: <%= typeof scrollSpeed !== 'undefined' ? scrollSpeed : 3000 %>,
-            showPodium: <%= showPodium !== false ? 'true' : 'false' %>
-        };
-    </script>
+    <div class="table-wrapper" id="scroll-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 20%">Rang</th>
+                    <th style="width: 55%">Nom</th>
+                    <th class="col-right" style="width: 25%">Points</th>
+                </tr>
+            </thead>
+            <tbody id="table-body">
+                <tr>
+                    <td colspan="3" class="loading-status">
+                        <div class="empty-state">
+                            <div class="loading-spinner"></div>
+                            <div class="empty-text">Chargement des données...</div>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
 
-    <!-- Browser caches this JS for 1 year -->
-    <script src="/assets/leaderboard/script.js?v=1.0.0"></script>
-</body>
-</html>
+<script>
+    window.LEADERBOARD_CONFIG = {
+        scrollSpeed: <%= typeof scrollSpeed !== 'undefined' ? scrollSpeed : 3000 %>,
+        showPodium: <%= showPodium !== false ? 'true' : 'false' %>
+    };
+</script>
+<script src="/assets/leaderboard/script.js?v=3.0.0"></script>
