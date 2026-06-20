@@ -142,14 +142,6 @@ tr[data-rank="3"] .rank-badge { background: linear-gradient(135deg, rgba(249, 11
 .pts-highlight { font-weight: 900; color: #f1f5f9; font-size: 16px; line-height: 1; }
 .pts-label { font-weight: 700; color: #94a3b8; font-size: 11px; letter-spacing: 0.5px; }
 
-tr.focused-row { background: linear-gradient(90deg, rgba(59, 130, 246, 0.25) 0%, rgba(37, 99, 235, 0.2) 100%) !important; transform: scale(1.03); z-index: 50; box-shadow: 0 12px 40px -8px rgba(59, 130, 246, 0.5), 0 0 0 2px rgba(96, 165, 250, 0.6), inset 0 0 0 1px rgba(255, 255, 255, 0.1); }
-tr.focused-row::before { background: linear-gradient(180deg, #60a5fa 0%, #3b82f6 100%); box-shadow: 0 0 20px rgba(59, 130, 246, 0.8); }
-tr.focused-row .rank-badge { transform: scale(1.15); box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4); }
-tr.focused-row .team-name { color: #ffffff; font-weight: 800; text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4); }
-tr.focused-row .points-badge { background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); border-color: #60a5fa; box-shadow: 0 4px 20px rgba(59, 130, 246, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.2); }
-tr.focused-row .pts-highlight { color: #ffffff; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); }
-tr.focused-row .pts-label { color: rgba(255, 255, 255, 0.8); }
-
 .loading-status { text-align: center; padding: 60px 20px; color: #64748b; }
 .empty-state { display: flex; flex-direction: column; align-items: center; gap: 16px; }
 .empty-icon { width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; opacity: 0.4; }
