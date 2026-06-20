@@ -10,7 +10,14 @@ const options = {
       description: 'Dynamic API for XIBO components',
     },
     servers: [
-      { url: 'http://localhost:3000', description: 'Local Development' },
+      { 
+        url: process.env.NODE_ENV === 'production' 
+          ? 'https://xibo-component-api.vercel.app' 
+          : 'http://localhost:3000', 
+        description: process.env.NODE_ENV === 'production' 
+          ? 'Production (Vercel)' 
+          : 'Local Development' 
+      },
     ],
   },
   apis: ['./components/*/router.js', './routes/global/router.js'],
