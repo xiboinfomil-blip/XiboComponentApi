@@ -34,5 +34,6 @@ exports.getLeaderboardData = async (useDummyData = false) => {
         }
     }
 
-    return rankingData;
+    // Return only the top 10 items
+    return rankingData.slice(0, 10);
 };
