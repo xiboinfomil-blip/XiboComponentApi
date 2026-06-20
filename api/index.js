@@ -71,6 +71,7 @@ app.use(helmet({
       styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdn.jsdelivr.net"],
       fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"],
       imgSrc: ["'self'", "data:", "https://validator.swagger.io", "https://cdn.jsdelivr.net"],
+      connectSrc: ["'self'", "https://cdn.jsdelivr.net", "https://xibo-component-api.vercel.app"],
     },
   },
   noSniff: true,
@@ -217,14 +218,25 @@ if (fs.existsSync(globalRoutesPath)) {
 // 5. ROUTES & SWAGGER
 // ==========================================
 
-// Swagger route - only serve HTML, no static files
-app.use('/swagger', (req, res, next) => {
+// Swagger route - serve HTML only, no static file serving
+app.get('/swagger', (req, res, next) => {
   if (swaggerSetupMiddleware) {
     swaggerSetupMiddleware(req, res, next);
   } else {
     res.status(503).send('Swagger is still initializing...');
   }
 });
+
+// Serve Swagger JSON spec
+app.get('/swagger.json', async (req, res) => {
+  try {
+    const spec = await swaggerDocument;
+    res.json(spec);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to load Swagger spec' });
+  }
+});
+
 console.log('✓ Swagger docs will be available at /swagger');
 
 app.get('/', (req, res) => {
