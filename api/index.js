@@ -17,7 +17,6 @@ let swaggerSetupMiddleware = null;
 if (swaggerDocument && typeof swaggerDocument.then === 'function') {
   swaggerDocument
     .then(doc => {
-      // Use CDN-hosted assets for Vercel compatibility
       swaggerSetupMiddleware = swaggerUi.setup(doc, {
         customCssUrl: 'https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.10.3/swagger-ui.css',
         customJs: [
@@ -63,35 +62,25 @@ const app = express();
 // 1. SECURITY & PROTECTION MIDDLEWARE
 // ==========================================
 
+// Note: Helmet is good, but ensure it doesn't block your specific needs.
+// We keep it but rely on our explicit CORS middleware below for cross-origin access.
 app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://cdn.jsdelivr.net"],
-      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdn.jsdelivr.net"],
-      fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"],
-      imgSrc: ["'self'", "data:", "https://validator.swagger.io", "https://cdn.jsdelivr.net"],
-    },
-  },
-  noSniff: true,
-  frameguard: { action: 'deny' }
+  contentSecurityPolicy: false, // Disable CSP for now to avoid conflicts with dynamic iframe/content loading. 
+                                // If you need CSP, configure it strictly for your domains.
+  crossOriginEmbedderPolicy: false,
+  crossOriginOpenerPolicy: false,
+  crossOriginResourcePolicy: false
 }));
 
 const allowedOrigins = process.env.ALLOWED_ORIGINS 
   ? process.env.ALLOWED_ORIGINS.split(',') 
-  : ['http://localhost:3000', 'http://localhost:5173', 'http://localhost:8080'];
+  : ['http://localhost:3000', 'http://localhost:5173', 'http://localhost:8080', 'https://xibo-component-placement-admin.vercel.app'];
 
-// ✅ UPDATED CORS CONFIGURATION
+// ✅ GLOBAL CORS MIDDLEWARE
 app.use(cors({
   origin: (origin, callback) => {
-    // 1. Allow requests with no origin (like mobile apps, curl, Postman)
     if (!origin) return callback(null, true);
-    
-    // 2. ✅ ALLOW SANDBOXED IFRAMES & BLOB URLs 
-    // (Browsers send the literal string "null" for these)
     if (origin === 'null') return callback(null, true);
-    
-    // 3. Allow configured origins or development mode
     if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV === 'development') {
       callback(null, true);
     } else {
@@ -102,6 +91,20 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
 }));
+
+// ✅ EXPLICIT CORS HEADERS FOR STATIC ASSETS
+// This ensures that even if the global cors middleware misses static files, 
+// these headers are always present for /assets/ requests.
+app.use('/assets/', (req, res, next) => {
+  const origin = req.headers.origin;
+  // Allow any origin from our list, or all origins in dev
+  if (allowedOrigins.includes(origin) || process.env.NODE_ENV === 'development' || !origin) {
+    res.header('Access-Control-Allow-Origin', origin || '*');
+    res.header('Access-Control-Allow-Methods', 'GET');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  }
+  next();
+});
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -120,6 +123,8 @@ app.use(hpp());
 
 app.use(express.json({ limit: '10kb' })); 
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));
+
+// Serve static files from public directory
 app.use(express.static(path.join(__dirname, '../public')));
 
 // ==========================================
@@ -134,16 +139,16 @@ app.use('/api/', (req, res, next) => {
   next();
 });
 
+// ✅ UPDATED ASSET CACHING WITH CORS COMPATIBILITY
 app.use('/assets/', (req, res, next) => {
+  // Cache for 1 year, but ensure CORS headers are already set by the middleware above
   res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
   next();
 });
 
 app.use((req, res, next) => {
-  console.log(`📦 Asset request: ${req.path}`);
   if (req.method === 'GET' && req.accepts('html') && !res.getHeader('Cache-Control')) {
     res.setHeader('Cache-Control', 'public, max-age=3600');
-    console.log(`🕒 Set Cache-Control for HTML: ${req.path}`);
   }
   next();
 });
@@ -156,60 +161,59 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, '../components'));
 
 const componentsDir = path.join(__dirname, '../components');
-const components = fs.readdirSync(componentsDir);
+// Check if directory exists before reading
+if (fs.existsSync(componentsDir)) {
+  const components = fs.readdirSync(componentsDir);
 
-components.forEach(component => {
-  const componentPath = path.join(componentsDir, component);
-  
-  if (fs.statSync(componentPath).isDirectory()) {
-    try {
-      // A. Serve Component Static Assets
-      const publicPath = path.join(componentPath, 'public');
-      if (fs.existsSync(publicPath)) {
-        app.use(`/assets/${component}`, express.static(publicPath));
-        console.log(`✓ Loaded assets: /assets/${component}`);
-      }
+  components.forEach(component => {
+    const componentPath = path.join(componentsDir, component);
+    
+    if (fs.statSync(componentPath).isDirectory()) {
+      try {
+        // A. Serve Component Static Assets
+        const publicPath = path.join(componentPath, 'public');
+        if (fs.existsSync(publicPath)) {
+          app.use(`/assets/${component}`, express.static(publicPath));
+          console.log(`✓ Loaded assets: /assets/${component}`);
+        }
 
-      // B. Serve Component EJS View with Query Param Overrides
-      const viewPath = path.join(componentPath, 'view.ejs');
-      if (fs.existsSync(viewPath)) {
-        app.get(`/${component}`, (req, res) => {
-          // ✅ Merge defaults with URL query parameters for runtime overrides
-          const locals = {
-            componentName: component,
-            title: component.charAt(0).toUpperCase() + component.slice(1),
-            
-            // Leaderboard-specific defaults (overridable via ?showPodium=false&scrollSpeed=5000)
-            scrollSpeed: Number(req.query.scrollSpeed) || 3000,
-            showPodium: req.query.showPodium !== 'false', 
-            
-            // TodayMatches-specific defaults (overridable via ?sliderSpeed=3000)
-            sliderSpeed: Number(req.query.sliderSpeed) || 8000,
-          };
+        // B. Serve Component EJS View with Query Param Overrides
+        const viewPath = path.join(componentPath, 'view.ejs');
+        if (fs.existsSync(viewPath)) {
+          app.get(`/${component}`, (req, res) => {
+            const locals = {
+              componentName: component,
+              title: component.charAt(0).toUpperCase() + component.slice(1),
+              scrollSpeed: Number(req.query.scrollSpeed) || 3000,
+              showPodium: req.query.showPodium !== 'false', 
+              sliderSpeed: Number(req.query.sliderSpeed) || 8000,
+            };
+            res.render(viewPath, locals);
+          });
+          console.log(`✓ Loaded view: /${component}`);
+        }
 
-          res.render(viewPath, locals);
-        });
-        console.log(`✓ Loaded view: /${component}`);
+        // C. Serve Component API Routes
+        const routerPath = path.join(componentPath, 'router.js');
+        if (fs.existsSync(routerPath)) {
+          const router = require(routerPath);
+          app.use(`/api/${component}`, router);
+          console.log(`✓ Loaded router: /api/${component}`);
+        }
+        
+        // D. Pre-load Controller
+        const controllerPath = path.join(componentPath, 'controller.js');
+        if (fs.existsSync(controllerPath)) {
+          require(controllerPath); 
+        }
+      } catch (error) {
+        console.error(`✗ Error loading component ${component}:`, error.message);
       }
-
-      // C. Serve Component API Routes
-      const routerPath = path.join(componentPath, 'router.js');
-      if (fs.existsSync(routerPath)) {
-        const router = require(routerPath);
-        app.use(`/api/${component}`, router);
-        console.log(`✓ Loaded router: /api/${component}`);
-      }
-      
-      // D. Pre-load Controller
-      const controllerPath = path.join(componentPath, 'controller.js');
-      if (fs.existsSync(controllerPath)) {
-        require(controllerPath); 
-      }
-    } catch (error) {
-      console.error(`✗ Error loading component ${component}:`, error.message);
     }
-  }
-});
+  });
+} else {
+  console.warn('⚠️ Components directory not found at:', componentsDir);
+}
 
 // Global Routes
 const globalRoutesPath = path.join(__dirname, '../routes/global/router.js');
@@ -227,7 +231,6 @@ if (fs.existsSync(globalRoutesPath)) {
 // 5. ROUTES & SWAGGER
 // ==========================================
 
-// Swagger route - only serve HTML, no static files
 app.use('/swagger', (req, res, next) => {
   if (swaggerSetupMiddleware) {
     swaggerSetupMiddleware(req, res, next);
@@ -245,9 +248,11 @@ app.get('/health', (req, res) => {
   res.json({ 
     status: 'OK', 
     timestamp: new Date().toISOString(),
-    components: components.filter(c => 
-      fs.statSync(path.join(componentsDir, c)).isDirectory()
-    )
+    components: fs.existsSync(componentsDir) 
+      ? fs.readdirSync(componentsDir).filter(c => 
+          fs.statSync(path.join(componentsDir, c)).isDirectory()
+        )
+      : []
   });
 });
 
