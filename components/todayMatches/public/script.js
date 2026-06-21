@@ -1,5 +1,3 @@
-// public/js/todayMatches.js
-
 document.addEventListener('DOMContentLoaded', () => {
     const config = window.TODAY_MATCHES_CONFIG || { sliderSpeed: 8000 };
     let matches = [];
@@ -29,19 +27,17 @@ document.addEventListener('DOMContentLoaded', () => {
             flag: document.getElementById('flag-b'),
             fallback: document.querySelector('#team-b-container .tm-flag-fallback')
         },
-        dateDisplay: document.getElementById('match-date-display'),
-        prevBtn: document.getElementById('prev-match'),
-        nextBtn: document.getElementById('next-match')
+        dateDisplay: document.getElementById('match-date-display')
     };
 
     const fetchMatches = async () => {
         try {
-            // Fetch from YOUR backend endpoint, not the external API directly
             const response = await fetch('/api/todayMatches');
             if (!response.ok) throw new Error('Network response was not ok');
             
             const result = await response.json();
-            const data = result.data; // Adjust based on your controller's response structure
+            // Adjust 'data' key based on your actual API response structure
+            const data = result.data || result; 
 
             if (data && data.length > 0) {
                 matches = data;
@@ -65,7 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="tm-card-content">
                 <div class="tm-empty-state">
                     <div class="tm-empty-icon">
-                        <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="12" cy="12" r="10"/>
                             <path d="M12 8v4m0 4h.01"/>
                         </svg>
@@ -90,14 +86,46 @@ document.addEventListener('DOMContentLoaded', () => {
         if (els.teamA.score) els.teamA.score.textContent = match.fulltime_a !== null ? match.fulltime_a : '-';
         if (els.teamB.score) els.teamB.score.textContent = match.fulltime_b !== null ? match.fulltime_b : '-';
 
-        // Flags
-        if (els.teamA.flag) els.teamA.flag.src = `https://flagcdn.com/w160/${getCountryCode(match.team_a)}.png`;
-        if (els.teamB.flag) els.teamB.flag.src = `https://flagcdn.com/w160/${getCountryCode(match.team_b)}.png`;
+        // Flags - Fetching from API
+        // We assume the API returns 'team_a_flag' and 'team_b_flag' as URLs.
+        // If your API returns country codes, use the getCountryCode helper below.
+        
+        const setFlag = (teamObj, flagUrl, fallbackText) => {
+            if (!teamObj.flag || !teamObj.fallback) return;
+            
+            // Reset display states
+            teamObj.flag.style.display = 'none';
+            teamObj.fallback.style.display = 'flex';
+            teamObj.fallback.textContent = fallbackText;
+
+            if (flagUrl) {
+                teamObj.flag.src = flagUrl;
+                teamObj.flag.onload = () => {
+                    teamObj.flag.style.display = 'block';
+                    teamObj.fallback.style.display = 'none';
+                };
+                teamObj.flag.onerror = () => {
+                    teamObj.flag.style.display = 'none';
+                    teamObj.fallback.style.display = 'flex';
+                };
+            }
+        };
+
+        // Use API flag URLs if available, otherwise fall back to flagcdn using country code
+        const flagA = match.team_a_flag || `https://flagcdn.com/w160/${getCountryCode(match.team_a)}.png`;
+        const flagB = match.team_b_flag || `https://flagcdn.com/w160/${getCountryCode(match.team_b)}.png`;
+
+        setFlag(els.teamA, flagA, match.team_a ? match.team_a.charAt(0).toUpperCase() : 'A');
+        setFlag(els.teamB, flagB, match.team_b ? match.team_b.charAt(0).toUpperCase() : 'B');
 
         // Date
         if (els.dateDisplay) {
-            const dateObj = new Date(match.date.replace(' ', 'T') + 'Z');
-            els.dateDisplay.textContent = dateObj.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+            try {
+                const dateObj = new Date(match.date.replace(' ', 'T') + 'Z');
+                els.dateDisplay.textContent = dateObj.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+            } catch (e) {
+                els.dateDisplay.textContent = match.date;
+            }
         }
 
         // Status UI
@@ -110,7 +138,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (els.statusLabel) els.statusLabel.textContent = statusInfo.label;
         if (els.liveDot) els.liveDot.style.display = statusInfo.isLive ? 'block' : 'none';
         
-        // Initial timer text
         if (els.timer) els.timer.textContent = statusInfo.timeString;
     };
 
@@ -125,7 +152,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const matchDate = new Date(match.date.replace(' ', 'T') + 'Z');
             const diffMs = matchDate.getTime() - now.getTime();
             
-            // Recalculate time string locally
             const absMs = Math.abs(diffMs);
             const seconds = Math.floor((absMs / 1000) % 60);
             const minutes = Math.floor((absMs / (1000 * 60)) % 60);
@@ -133,13 +159,12 @@ document.addEventListener('DOMContentLoaded', () => {
             
             let timeStr = '';
             if (hours > 0) timeStr += `${hours}h `;
-            timeStr += `${minutes}m ${seconds}s`;
+            timeStr += `${minutes.toString().padStart(2, '0')}m ${seconds.toString().padStart(2, '0')}s`;
 
             if (els.timer) {
                 els.timer.textContent = diffMs > 0 ? timeStr : `+${timeStr}`;
             }
 
-            // If a match just started (crossed 0), refresh data to get scores
             if (diffMs <= 0 && diffMs > -2000 && match.statusInfo.status !== 'live') {
                 fetchMatches(); 
             }
@@ -153,39 +178,34 @@ document.addEventListener('DOMContentLoaded', () => {
         sliderInterval = setInterval(() => {
             currentMatchIndex = (currentMatchIndex + 1) % matches.length;
             
-            // Add fade-out effect
             if (els.card) els.card.classList.add('fade-out');
             
             setTimeout(() => {
                 renderMatch(currentMatchIndex);
                 if (els.card) els.card.classList.remove('fade-out');
-            }, 400); // Wait for half the transition time
+            }, 400);
         }, config.sliderSpeed);
     };
 
-    // Helper to map team names to ISO codes for flags
     const getCountryCode = (teamName) => {
         const map = {
-            'Allemagne': 'de', 'Écosse': 'gb-sct', 'Espagne': 'es', 'Italie': 'it',
-            'France': 'fr', 'Angleterre': 'gb-eng', 'Portugal': 'pt', 'Belgique': 'be'
+            'Canada': 'ca', 'Mexico': 'mx', 'United States': 'us',
+            'Australia': 'au', 'Iran': 'ir', 'Iraq': 'iq', 'Japan': 'jp',
+            'Jordan': 'jo', 'Qatar': 'qa', 'Saudi Arabia': 'sa', 'South Korea': 'kr',
+            'Uzbekistan': 'uz', 'Algeria': 'dz', 'Cabo Verde': 'cv', 'Cameroon': 'cm',
+            'DR Congo': 'cd', 'Egypt': 'eg', 'Ghana': 'gh', 'Ivory Coast': 'ci',
+            'Morocco': 'ma', 'Senegal': 'sn', 'South Africa': 'za', 'Tunisia': 'tn',
+            'Costa Rica': 'cr', 'Curaçao': 'cw', 'Haiti': 'ht', 'Panama': 'pa',
+            'Argentina': 'ar', 'Brazil': 'br', 'Colombia': 'co', 'Ecuador': 'ec',
+            'Paraguay': 'py', 'Uruguay': 'uy', 'New Zealand': 'nz',
+            'Austria': 'at', 'Belgium': 'be', 'Bosnia and Herzegovina': 'ba',
+            'Croatia': 'hr', 'Czechia': 'cz', 'England': 'gb-eng', 'France': 'fr',
+            'Germany': 'de', 'Italy': 'it', 'Netherlands': 'nl', 'Norway': 'no',
+            'Portugal': 'pt', 'Scotland': 'gb-sct', 'Spain': 'es', 'Sweden': 'se',
+            'Switzerland': 'ch', 'Turkey': 'tr'
         };
         return map[teamName] || 'unknown';
     };
 
-    // Button Listeners
-    if (els.prevBtn) {
-        els.prevBtn.addEventListener('click', () => {
-            currentMatchIndex = (currentMatchIndex - 1 + matches.length) % matches.length;
-            renderMatch(currentMatchIndex);
-        });
-    }
-    if (els.nextBtn) {
-        els.nextBtn.addEventListener('click', () => {
-            currentMatchIndex = (currentMatchIndex + 1) % matches.length;
-            renderMatch(currentMatchIndex);
-        });
-    }
-
-    // Initialize
     fetchMatches();
 });

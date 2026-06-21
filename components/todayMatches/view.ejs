@@ -1,105 +1,85 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= title %></title>
-    <link rel="stylesheet" href="/assets/todayMatches/style.css?v=1.0.1">
-</head>
-<body style="background: transparent; margin: 0; padding: 2rem 1rem; display: flex; justify-content: center; align-items: center; min-height: 100vh;">
-    
-    <div id="today-matches-slider-wrapper" class="tm-wrapper">
-        <div class="tm-card-container">
-            <!-- Initial loading state -->
-            <div class="tm-card-worldcup" id="main-card">
-                <div class="tm-bg-effects">
-                    <div class="tm-gradient-orb tm-orb-1"></div>
-                    <div class="tm-gradient-orb tm-orb-2"></div>
-                    <div class="tm-gradient-orb tm-orb-3"></div>
-                    <div class="tm-mesh-gradient"></div>
+<link rel="stylesheet" href="/assets/todayMatches/style.css?v=1.0.1">
+<div id="today-matches-slider-wrapper" class="tm-wrapper">
+    <div class="tm-card-container">
+        <!-- Initial loading state -->
+        <div class="tm-card-worldcup" id="main-card">
+            <div class="tm-bg-effects">
+                <div class="tm-gradient-orb tm-orb-1"></div>
+                <div class="tm-gradient-orb tm-orb-2"></div>
+                <div class="tm-gradient-orb tm-orb-3"></div>
+                <div class="tm-mesh-gradient"></div>
+            </div>
+            <div class="tm-glass-overlay"></div>
+            <div class="tm-card-content">
+                
+                <!-- Header -->
+                <div class="tm-card-header">
+                    <div class="tm-tournament-badge">
+                        <span>World Cup 2026</span>
+                    </div>
+                    <div id="match-status-badge" class="tm-status-badge tm-status-upcoming">
+                        <span id="status-label">Chargement...</span>
+                        <div id="live-indicator" class="tm-live-dot" style="display: none;"></div>
+                    </div>
                 </div>
-                <div class="tm-glass-overlay"></div>
-                <div class="tm-card-content">
-                    
-                    <!-- Header -->
-                    <div class="tm-card-header">
-                        <div class="tm-tournament-badge">
-                            <span>Euro 2024</span>
-                        </div>
-                        <div id="match-status-badge" class="tm-status-badge tm-status-upcoming">
-                            <!-- Translated default text -->
-                            <span id="status-label">Chargement...</span>
-                            <div id="live-indicator" class="tm-live-dot" style="display: none;"></div>
-                        </div>
-                    </div>
 
-                    <!-- Venue -->
-                    <div class="tm-venue-info">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                        <!-- Translated placeholder -->
-                        <span id="stadium-name">Stade</span>
-                    </div>
-
-                    <!-- Matchup -->
-                    <div class="tm-matchup-container">
-                        <!-- Team A -->
-                        <div class="tm-team" id="team-a-container">
-                            <div class="tm-flag-wrapper">
-                                <div class="tm-flag-container">
-                                    <img id="flag-a" src="" alt="Drapeau A" class="tm-flag-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
-                                    <div class="tm-flag-fallback" style="display:none">A</div>
-                                </div>
-                            </div>
-                            <!-- Translated placeholder -->
-                            <div class="tm-team-name" id="name-a">Équipe A</div>
-                            <div class="tm-team-score" id="score-a">-</div>
-                        </div>
-
-                        <!-- Center Display -->
-                        <div class="tm-center-display">
-                            <div class="tm-vs-badge">VS</div>
-                            <div id="match-timer" class="tm-dynamic-time">--:--:--</div>
-                        </div>
-
-                        <!-- Team B -->
-                        <div class="tm-team" id="team-b-container">
-                            <div class="tm-flag-wrapper">
-                                <div class="tm-flag-container">
-                                    <img id="flag-b" src="" alt="Drapeau B" class="tm-flag-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
-                                    <div class="tm-flag-fallback" style="display:none">B</div>
-                                </div>
-                            </div>
-                            <!-- Translated placeholder -->
-                            <div class="tm-team-name" id="name-b">Équipe B</div>
-                            <div class="tm-team-score" id="score-b">-</div>
-                        </div>
-                    </div>
-
-                    <!-- Footer -->
-                    <div class="tm-card-footer">
-                        <div class="tm-match-date">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                            <span id="match-date-display">Date</span>
-                        </div>
-                    </div>
-
+                <!-- Venue -->
+                <div class="tm-venue-info">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                    <span id="stadium-name">Stade</span>
                 </div>
+
+                <!-- Matchup -->
+                <div class="tm-matchup-container">
+                    <!-- Team A -->
+                    <div class="tm-team" id="team-a-container">
+                        <div class="tm-flag-wrapper">
+                            <div class="tm-flag-container">
+                                <img id="flag-a" src="" alt="Drapeau A" class="tm-flag-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+                                <div class="tm-flag-fallback" style="display:none">A</div>
+                            </div>
+                        </div>
+                        <div class="tm-team-name" id="name-a">Équipe A</div>
+                        <div class="tm-team-score" id="score-a">-</div>
+                    </div>
+
+                    <!-- Center Display -->
+                    <div class="tm-center-display">
+                        <div class="tm-vs-badge">VS</div>
+                        <div id="match-timer" class="tm-dynamic-time">--:--:--</div>
+                    </div>
+
+                    <!-- Team B -->
+                    <div class="tm-team" id="team-b-container">
+                        <div class="tm-flag-wrapper">
+                            <div class="tm-flag-container">
+                                <img id="flag-b" src="" alt="Drapeau B" class="tm-flag-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+                                <div class="tm-flag-fallback" style="display:none">B</div>
+                            </div>
+                        </div>
+                        <div class="tm-team-name" id="name-b">Équipe B</div>
+                        <div class="tm-team-score" id="score-b">-</div>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="tm-card-footer">
+                    <div class="tm-match-date">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        <span id="match-date-display">Date</span>
+                    </div>
+                </div>
+
             </div>
         </div>
-        
-        <!-- Slider Controls (Optional) -->
-        <div class="tm-slider-controls" style="position: absolute; bottom: -40px; left: 0; right: 0; display: flex; justify-content: center; gap: 10px;">
-            <!-- Added aria-labels for accessibility -->
-            <button id="prev-match" aria-label="Match précédent" style="background: rgba(255,255,255,0.1); border: none; color: white; padding: 8px 16px; border-radius: 20px; cursor: pointer;">&larr;</button>
-            <button id="next-match" aria-label="Match suivant" style="background: rgba(255,255,255,0.1); border: none; color: white; padding: 8px 16px; border-radius: 20px; cursor: pointer;">&rarr;</button>
-        </div>
     </div>
+</div>
 
-    <script>
-        window.TODAY_MATCHES_CONFIG = {
-            sliderSpeed: <%= typeof sliderSpeed !== 'undefined' ? sliderSpeed : 8000 %>
-        };
-    </script>
-    <script src="/assets/todayMatches/script.js?v=1.0.1"></script>
-</body>
-</html>
+<script>
+    // Pass config from server if available, otherwise default
+    window.TODAY_MATCHES_CONFIG = {
+        sliderSpeed: <%= typeof sliderSpeed !== 'undefined' ? sliderSpeed : 8000 %>
+    };
+</script>
+<!-- Ensure this script is loaded after the DOM element exists -->
+<script src="/assets/todayMatches/script.js?v=1.0.2"></script>
