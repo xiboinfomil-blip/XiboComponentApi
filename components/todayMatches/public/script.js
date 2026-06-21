@@ -1,3 +1,5 @@
+// public/js/todayMatches.js
+
 document.addEventListener('DOMContentLoaded', () => {
     const config = window.TODAY_MATCHES_CONFIG || { sliderSpeed: 8000 };
     let matches = [];
@@ -34,12 +36,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const fetchMatches = async () => {
         try {
-            // Assuming you have an API endpoint set up in your Express app
-            // e.g., app.get('/api/todayMatches', (req, res) => res.json(service.getTodayMatches()))
+            // Fetch from YOUR backend endpoint, not the external API directly
             const response = await fetch('/api/todayMatches');
             if (!response.ok) throw new Error('Network response was not ok');
             
-            const data = await response.json();
+            const result = await response.json();
+            const data = result.data; // Adjust based on your controller's response structure
+
             if (data && data.length > 0) {
                 matches = data;
                 renderMatch(currentMatchIndex);
@@ -55,6 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const showEmptyState = () => {
+        if (!els.card) return;
         els.card.innerHTML = `
             <div class="tm-bg-effects"></div>
             <div class="tm-glass-overlay"></div>
@@ -74,38 +78,40 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const renderMatch = (index) => {
-        if (matches.length === 0) return;
+        if (matches.length === 0 || !els.card) return;
         const match = matches[index];
 
         // Update Text Content
-        els.stadium.textContent = match.stadium || 'Stadium';
-        els.teamA.name.textContent = match.team_a;
-        els.teamB.name.textContent = match.team_b;
+        if (els.stadium) els.stadium.textContent = match.stadium || 'Stadium';
+        if (els.teamA.name) els.teamA.name.textContent = match.team_a;
+        if (els.teamB.name) els.teamB.name.textContent = match.team_b;
         
         // Scores
-        els.teamA.score.textContent = match.fulltime_a !== null ? match.fulltime_a : '-';
-        els.teamB.score.textContent = match.fulltime_b !== null ? match.fulltime_b : '-';
+        if (els.teamA.score) els.teamA.score.textContent = match.fulltime_a !== null ? match.fulltime_a : '-';
+        if (els.teamB.score) els.teamB.score.textContent = match.fulltime_b !== null ? match.fulltime_b : '-';
 
-        // Flags (Using a placeholder service or local assets)
-        // Note: You might need to map team names to country codes for flags
-        els.teamA.flag.src = `https://flagcdn.com/w160/${getCountryCode(match.team_a)}.png`;
-        els.teamB.flag.src = `https://flagcdn.com/w160/${getCountryCode(match.team_b)}.png`;
+        // Flags
+        if (els.teamA.flag) els.teamA.flag.src = `https://flagcdn.com/w160/${getCountryCode(match.team_a)}.png`;
+        if (els.teamB.flag) els.teamB.flag.src = `https://flagcdn.com/w160/${getCountryCode(match.team_b)}.png`;
 
         // Date
-        const dateObj = new Date(match.date.replace(' ', 'T') + 'Z');
-        els.dateDisplay.textContent = dateObj.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+        if (els.dateDisplay) {
+            const dateObj = new Date(match.date.replace(' ', 'T') + 'Z');
+            els.dateDisplay.textContent = dateObj.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+        }
 
         // Status UI
         updateStatusUI(match.statusInfo);
     };
 
     const updateStatusUI = (statusInfo) => {
+        if (!els.statusBadge) return;
         els.statusBadge.className = `tm-status-badge tm-status-${statusInfo.status}`;
-        els.statusLabel.textContent = statusInfo.label;
-        els.liveDot.style.display = statusInfo.isLive ? 'block' : 'none';
+        if (els.statusLabel) els.statusLabel.textContent = statusInfo.label;
+        if (els.liveDot) els.liveDot.style.display = statusInfo.isLive ? 'block' : 'none';
         
         // Initial timer text
-        els.timer.textContent = statusInfo.timeString;
+        if (els.timer) els.timer.textContent = statusInfo.timeString;
     };
 
     const startTimer = () => {
@@ -129,7 +135,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (hours > 0) timeStr += `${hours}h `;
             timeStr += `${minutes}m ${seconds}s`;
 
-            els.timer.textContent = diffMs > 0 ? timeStr : `+${timeStr}`;
+            if (els.timer) {
+                els.timer.textContent = diffMs > 0 ? timeStr : `+${timeStr}`;
+            }
 
             // If a match just started (crossed 0), refresh data to get scores
             if (diffMs <= 0 && diffMs > -2000 && match.statusInfo.status !== 'live') {
@@ -146,11 +154,11 @@ document.addEventListener('DOMContentLoaded', () => {
             currentMatchIndex = (currentMatchIndex + 1) % matches.length;
             
             // Add fade-out effect
-            els.card.classList.add('fade-out');
+            if (els.card) els.card.classList.add('fade-out');
             
             setTimeout(() => {
                 renderMatch(currentMatchIndex);
-                els.card.classList.remove('fade-out');
+                if (els.card) els.card.classList.remove('fade-out');
             }, 400); // Wait for half the transition time
         }, config.sliderSpeed);
     };

@@ -12,6 +12,7 @@ exports.getData = async (req, res, next) => {
             data: data
         });
     } catch (error) {
+        console.error("Controller Error:", error);
         next(error);
     }
 };
