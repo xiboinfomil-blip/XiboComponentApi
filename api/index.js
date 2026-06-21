@@ -132,8 +132,10 @@ app.use('/assets/', (req, res, next) => {
 });
 
 app.use((req, res, next) => {
+  console.log(`📦 Asset request: ${req.path}`);
   if (req.method === 'GET' && req.accepts('html') && !res.getHeader('Cache-Control')) {
     res.setHeader('Cache-Control', 'public, max-age=3600');
+    console.log(`🕒 Set Cache-Control for HTML: ${req.path}`);
   }
   next();
 });

@@ -6,7 +6,7 @@ let cacheExpirationTime = 0;
 const getNextExpirationTime = () => {
     const now = new Date();
     const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
-    // Mauritius is UTC+4, so 6 AM Mauritius is 2 AM UTC
+    // L'île Maurice est à UTC+4, donc 6h à l'île Maurice correspond à 2h UTC
     const targetHourUTC = 2; 
     
     let nextExpiration = new Date(today);
@@ -34,32 +34,32 @@ const formatDuration = (ms) => {
 
 const getMatchStatusInfo = (matchDateStr) => {
     const now = new Date();
-    // Ensure we parse as UTC if the string doesn't specify timezone
+    // S'assurer que la date est analysée en UTC si la chaîne ne spécifie pas de fuseau horaire
     const matchDate = new Date(matchDateStr.replace(' ', 'T') + 'Z'); 
     const diffMs = matchDate.getTime() - now.getTime();
     
-    // Assume a match is "Live" for 2 hours after kickoff for this demo
+    // Supposons qu'un match est "En direct" pendant 2 heures après le coup d'envoi pour cette démo
     const LIVE_WINDOW_MS = 2 * 60 * 60 * 1000; 
 
     if (diffMs > 0) {
         return {
             status: 'upcoming',
-            label: 'Starts in',
+            label: 'Commence dans',
             timeString: formatDuration(diffMs),
             isLive: false
         };
     } else if (Math.abs(diffMs) < LIVE_WINDOW_MS) {
         return {
             status: 'live',
-            label: 'LIVE',
+            label: 'EN DIRECT',
             timeString: `+${formatDuration(Math.abs(diffMs))}`,
             isLive: true
         };
     } else {
         return {
             status: 'finished',
-            label: 'FT',
-            timeString: 'Finished',
+            label: 'FT', // Fin du temps réglementaire (Full Time)
+            timeString: 'Terminé',
             isLive: false
         };
     }
@@ -69,12 +69,12 @@ exports.getTodayMatches = async (useDummyData = false) => {
     const apiUrl = "https://euro.omediainteractive.net/imleuro/items/matches";
     
     console.log("=".repeat(80));
-    console.log("[getTodayMatches] Function called");
+    console.log("[getTodayMatches] Fonction appelée");
     console.log("[getTodayMatches] useDummyData:", useDummyData);
-    console.log("[getTodayMatches] Current time:", new Date().toISOString());
-    console.log("[getTodayMatches] Cache exists:", !!cachedMatches);
-    console.log("[getTodayMatches] Cache expiration:", cacheExpirationTime ? new Date(cacheExpirationTime).toISOString() : 'N/A');
-    console.log("[getTodayMatches] Cache valid:", cachedMatches && Date.now() < cacheExpirationTime);
+    console.log("[getTodayMatches] Heure actuelle:", new Date().toISOString());
+    console.log("[getTodayMatches] Cache existe:", !!cachedMatches);
+    console.log("[getTodayMatches] Expiration du cache:", cacheExpirationTime ? new Date(cacheExpirationTime).toISOString() : 'N/A');
+    console.log("[getTodayMatches] Cache valide:", cachedMatches && Date.now() < cacheExpirationTime);
     console.log("=".repeat(80));
 
     const getDummyMatches = () => {
@@ -105,9 +105,9 @@ exports.getTodayMatches = async (useDummyData = false) => {
 
     const now = Date.now();
 
-    // Return cached data with fresh time calculations if still valid
+    // Retourner les données mises en cache avec des calculs de temps actualisés si toujours valides
     if (!useDummyData && cachedMatches && now < cacheExpirationTime) {
-        console.log("[getTodayMatches] ✅ Returning cached matches");
+        console.log("[getTodayMatches] ✅ Retour des matchs en cache");
         return cachedMatches.map(m => ({ ...m, statusInfo: getMatchStatusInfo(m.date) }));
     }
 
@@ -115,31 +115,31 @@ exports.getTodayMatches = async (useDummyData = false) => {
 
     try {
         if (useDummyData) {
-            console.log("[getTodayMatches] Using dummy data");
+            console.log("[getTodayMatches] Utilisation des données fictives");
             matchesData = getDummyMatches();
         } else {
-            console.log("[getTodayMatches] 🔄 Fetching fresh matches from API...");
-            console.log("[getTodayMatches] API URL:", apiUrl);
+            console.log("[getTodayMatches] 🔄 Récupération des nouveaux matchs depuis l'API...");
+            console.log("[getTodayMatches] URL de l'API:", apiUrl);
             
-            // Check if fetch is available
+            // Vérifier si fetch est disponible
             console.log("[getTodayMatches] typeof fetch:", typeof fetch);
-            console.log("[getTodayMatches] global.fetch available:", typeof global.fetch !== 'undefined');
+            console.log("[getTodayMatches] global.fetch disponible:", typeof global.fetch !== 'undefined');
             
             const controller = new AbortController();
             const timeoutMs = 10000;
-            console.log(`[getTodayMatches] Setting timeout to ${timeoutMs}ms`);
+            console.log(`[getTodayMatches] Délai d'attente défini à ${timeoutMs}ms`);
             
             const timeoutId = setTimeout(() => {
-                console.log("[getTodayMatches] ⏰ Timeout reached! Aborting request...");
+                console.log("[getTodayMatches] ⏰ Délai d'attente atteint ! Abandon de la requête...");
                 controller.abort();
             }, timeoutMs);
 
             const startTime = Date.now();
-            console.log("[getTodayMatches] Request started at:", new Date(startTime).toISOString());
+            console.log("[getTodayMatches] Requête démarrée à:", new Date(startTime).toISOString());
 
             try {
-                // Note: In Node.js, ensure you are using Node 18+ for native fetch, 
-                // or use node-fetch library if on older versions.
+                // Note : Dans Node.js, assurez-vous d'utiliser Node 18+ pour fetch natif, 
+                // ou utilisez la bibliothèque node-fetch si vous êtes sur des versions plus anciennes.
                 const response = await fetch(apiUrl, { 
                     signal: controller.signal,
                     headers: { 
@@ -150,95 +150,95 @@ exports.getTodayMatches = async (useDummyData = false) => {
                 
                 const endTime = Date.now();
                 const duration = endTime - startTime;
-                console.log("[getTodayMatches] Response received in", duration, "ms");
-                console.log("[getTodayMatches] Response status:", response.status);
-                console.log("[getTodayMatches] Response ok:", response.ok);
-                console.log("[getTodayMatches] Response headers:", Object.fromEntries(response.headers.entries()));
+                console.log("[getTodayMatches] Réponse reçue en", duration, "ms");
+                console.log("[getTodayMatches] Statut de la réponse:", response.status);
+                console.log("[getTodayMatches] Réponse ok:", response.ok);
+                console.log("[getTodayMatches] En-têtes de la réponse:", Object.fromEntries(response.headers.entries()));
 
                 clearTimeout(timeoutId);
 
                 if (!response.ok) {
-                    console.error("[getTodayMatches] ❌ HTTP error! status:", response.status);
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                    console.error("[getTodayMatches] ❌ Erreur HTTP ! statut:", response.status);
+                    throw new Error(`Erreur HTTP ! statut : ${response.status}`);
                 }
 
-                console.log("[getTodayMatches] Parsing JSON...");
+                console.log("[getTodayMatches] Analyse du JSON...");
                 const payload = await response.json();
-                console.log("[getTodayMatches] JSON parsed successfully");
-                console.log("[getTodayMatches] Payload keys:", Object.keys(payload || {}));
-                console.log("[getTodayMatches] Payload.data exists:", !!payload?.data);
-                console.log("[getTodayMatches] Payload.data length:", payload?.data?.length || 0);
+                console.log("[getTodayMatches] JSON analysé avec succès");
+                console.log("[getTodayMatches] Clés du payload:", Object.keys(payload || {}));
+                console.log("[getTodayMatches] Payload.data existe:", !!payload?.data);
+                console.log("[getTodayMatches] Longueur de Payload.data:", payload?.data?.length || 0);
                 
-                // Debugging: Log the raw payload to see structure
-                console.log("[getTodayMatches] First item sample:", JSON.stringify(payload?.data?.[0], null, 2));
+                // Débogage : Afficher l'échantillon brut du payload pour voir la structure
+                console.log("[getTodayMatches] Échantillon du premier élément:", JSON.stringify(payload?.data?.[0], null, 2));
 
                 const rawMatches = payload?.data || [];
                 const todayStr = new Date().toISOString().split('T')[0];
-                console.log("[getTodayMatches] Today's date string:", todayStr);
+                console.log("[getTodayMatches] Chaîne de date d'aujourd'hui:", todayStr);
 
                 matchesData = rawMatches.filter(match => {
                     if (!match.date) {
-                        console.log("[getTodayMatches] Skipping match without date:", match);
+                        console.log("[getTodayMatches] Ignorer le match sans date:", match);
                         return false;
                     }
                     const matchDate = match.date.substring(0, 10);
                     const isToday = matchDate === todayStr;
                     if (!isToday) {
-                        console.log("[getTodayMatches] Skipping non-today match:", matchDate, "!==", todayStr);
+                        console.log("[getTodayMatches] Ignorer le match non actuel:", matchDate, "!==", todayStr);
                     }
                     return isToday;
                 });
 
-                console.log("[getTodayMatches] Filtered matches count:", matchesData.length);
+                console.log("[getTodayMatches] Nombre de matchs filtrés:", matchesData.length);
 
             } catch (fetchError) {
                 clearTimeout(timeoutId);
-                console.error("[getTodayMatches] ❌ Fetch error details:");
-                console.error("[getTodayMatches] Error name:", fetchError.name);
-                console.error("[getTodayMatches] Error message:", fetchError.message);
-                console.error("[getTodayMatches] Error stack:", fetchError.stack);
-                throw fetchError; // Re-throw to be caught by outer try-catch
+                console.error("[getTodayMatches] ❌ Détails de l'erreur de récupération :");
+                console.error("[getTodayMatches] Nom de l'erreur:", fetchError.name);
+                console.error("[getTodayMatches] Message d'erreur:", fetchError.message);
+                console.error("[getTodayMatches] Pile d'erreurs:", fetchError.stack);
+                throw fetchError; // Relancer pour être capturé par le try-catch externe
             }
         }
 
-        console.log("[getTodayMatches] Enriching matches with status info...");
-        // Enrich matches with status info
+        console.log("[getTodayMatches] Enrichissement des matchs avec les informations de statut...");
+        // Enrichir les matchs avec les informations de statut
         const enrichedMatches = matchesData.map(match => ({
             ...match,
             statusInfo: getMatchStatusInfo(match.date)
         }));
 
-        console.log("[getTodayMatches] Enriched matches count:", enrichedMatches.length);
+        console.log("[getTodayMatches] Nombre de matchs enrichis:", enrichedMatches.length);
 
         if (enrichedMatches.length > 0 || useDummyData) {
-            console.log("[getTodayMatches] 💾 Caching matches");
+            console.log("[getTodayMatches] 💾 Mise en cache des matchs");
             cachedMatches = enrichedMatches;
             cacheExpirationTime = getNextExpirationTime();
-            console.log("[getTodayMatches] Cache expiration set to:", new Date(cacheExpirationTime).toISOString());
+            console.log("[getTodayMatches] Expiration du cache définie à:", new Date(cacheExpirationTime).toISOString());
         }
 
-        console.log("[getTodayMatches] ✅ Returning", enrichedMatches.length, "matches");
+        console.log("[getTodayMatches] ✅ Retour de", enrichedMatches.length, "matchs");
         console.log("=".repeat(80));
         return enrichedMatches;
 
     } catch (error) {
         console.error("=".repeat(80));
-        console.error("[getTodayMatches] ❌ ERROR CAUGHT:");
-        console.error("[getTodayMatches] Error name:", error.name);
-        console.error("[getTodayMatches] Error message:", error.message);
-        console.error("[getTodayMatches] Error stack:", error.stack);
+        console.error("[getTodayMatches] ❌ ERREUR CAPTURÉE :");
+        console.error("[getTodayMatches] Nom de l'erreur:", error.name);
+        console.error("[getTodayMatches] Message d'erreur:", error.message);
+        console.error("[getTodayMatches] Pile d'erreurs:", error.stack);
         console.error("=".repeat(80));
         
         if (cachedMatches) {
-            console.log("[getTodayMatches] ⚠️ Falling back to cached matches");
+            console.log("[getTodayMatches] ⚠️ Retour aux matchs en cache");
             return cachedMatches.map(m => ({ ...m, statusInfo: getMatchStatusInfo(m.date) }));
         }
         if (!useDummyData) {
-            console.log("[getTodayMatches] ⚠️ No cache, returning empty array");
+            console.log("[getTodayMatches] ⚠️ Pas de cache, retour d'un tableau vide");
             return [];
         }
     }
 
-    console.log("[getTodayMatches] Final return with", matchesData.length, "matches");
+    console.log("[getTodayMatches] Retour final avec", matchesData.length, "matchs");
     return matchesData.map(m => ({ ...m, statusInfo: getMatchStatusInfo(m.date) }));
 };

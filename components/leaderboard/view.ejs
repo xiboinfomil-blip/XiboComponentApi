@@ -1,47 +1,57 @@
 <!-- components/leaderboard/view.ejs -->
-<link rel="stylesheet" href="/assets/leaderboard/style.css?v=3.0.0">
-
-<div id="leaderboard-container">
-    <!-- Ambient background effects -->
-    <div class="ambient-glow"></div>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/assets/leaderboard/style.css?v=3.0.0">
+</head>
+<body style="background: transparent; margin: 0; padding: 2rem 1rem; display: flex; justify-content: center; align-items: center; min-height: 100vh;">
     
-    <div class="leaderboard-header">
-        <h2 class="leaderboard-title">Classement Pronostics</h2>
-        <p class="leaderboard-subtitle">TOP 10</p>
-    </div>
-    
-    <!-- Podium Container -->
-    <div id="podium-section" class="podium-container">
-        <!-- JS will inject podium items here -->
+    <div id="leaderboard-container">
+        <!-- Ambient background effects -->
+        <div class="ambient-glow"></div>
+        
+        <div class="leaderboard-header">
+            <h2 class="leaderboard-title">Classement Pronostics</h2>
+            <p class="leaderboard-subtitle">TOP 10</p>
+        </div>
+        
+        <!-- Podium Container -->
+        <div id="podium-section" class="podium-container">
+            <!-- JS will inject podium items here -->
+        </div>
+
+        <div class="table-wrapper" id="scroll-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 20%">Rang</th>
+                        <th style="width: 55%">Nom</th>
+                        <th class="col-right" style="width: 25%">Points</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                    <tr>
+                        <td colspan="3" class="loading-status">
+                            <div class="empty-state">
+                                <div class="loading-spinner"></div>
+                                <div class="empty-text">Chargement des données...</div>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 
-    <div class="table-wrapper" id="scroll-wrapper">
-        <table>
-            <thead>
-                <tr>
-                    <th style="width: 20%">Rang</th>
-                    <th style="width: 55%">Nom</th>
-                    <th class="col-right" style="width: 25%">Points</th>
-                </tr>
-            </thead>
-            <tbody id="table-body">
-                <tr>
-                    <td colspan="3" class="loading-status">
-                        <div class="empty-state">
-                            <div class="loading-spinner"></div>
-                            <div class="empty-text">Chargement des données...</div>
-                        </div>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-</div>
-
-<script>
-    window.LEADERBOARD_CONFIG = {
-        scrollSpeed: <%= typeof scrollSpeed !== 'undefined' ? scrollSpeed : 3000 %>,
-        showPodium: <%= showPodium !== false ? 'true' : 'false' %>
-    };
-</script>
-<script src="/assets/leaderboard/script.js?v=3.0.0"></script>
+    <script>
+        window.LEADERBOARD_CONFIG = {
+            scrollSpeed: <%= typeof scrollSpeed !== 'undefined' ? scrollSpeed : 3000 %>,
+            showPodium: <%= showPodium !== false ? 'true' : 'false' %>
+        };
+    </script>
+    <script src="/assets/leaderboard/script.js?v=3.0.0"></script>
+</body>
+</html>
