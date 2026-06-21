@@ -5,6 +5,13 @@ document.addEventListener('DOMContentLoaded', () => {
     let timerInterval;
     let sliderInterval;
 
+    // Cache configuration
+    const CACHE_KEY = 'today_matches_cache';
+    const CACHE_TIMESTAMP_KEY = 'today_matches_timestamp';
+    
+    // GMT+4 timezone offset in milliseconds (4 * 60 * 60 * 1000)
+    const GMT4_OFFSET = 4 * 60 * 60 * 1000;
+
     // DOM Elements
     const els = {
         card: document.getElementById('main-card'),
@@ -18,19 +25,89 @@ document.addEventListener('DOMContentLoaded', () => {
             name: document.getElementById('name-a'),
             score: document.getElementById('score-a'),
             flag: document.getElementById('flag-a'),
-            fallback: document.querySelector('#team-a-container .tm-flag-fallback')
+            fallback: document.querySelector('#team-a-container .tm-flag-fallback'),
+            badge: document.getElementById('badge-a')
         },
         teamB: {
             container: document.getElementById('team-b-container'),
             name: document.getElementById('name-b'),
             score: document.getElementById('score-b'),
             flag: document.getElementById('flag-b'),
-            fallback: document.querySelector('#team-b-container .tm-flag-fallback')
+            fallback: document.querySelector('#team-b-container .tm-flag-fallback'),
+            badge: document.getElementById('badge-b')
         },
         dateDisplay: document.getElementById('match-date-display')
     };
 
+    /**
+     * Checks if the cached data is expired.
+     * Expires daily at 2:00 AM GMT+4.
+     */
+    const isCacheExpired = () => {
+        const cachedTimestamp = localStorage.getItem(CACHE_TIMESTAMP_KEY);
+        if (!cachedTimestamp) return true;
+
+        const lastFetchTime = parseInt(cachedTimestamp, 10);
+        const now = new Date();
+        
+        // Convert current time to GMT+4
+        const nowGMT4 = new Date(now.getTime() + GMT4_OFFSET);
+        
+        // Get the start of the current day in GMT+4 (midnight)
+        const startOfDayGMT4 = new Date(nowGMT4);
+        startOfDayGMT4.setUTCHours(0, 0, 0, 0);
+        
+        // Calculate the expiration time: 2:00 AM GMT+4 today
+        const expirationTimeGMT4 = new Date(startOfDayGMT4.getTime() + 2 * 60 * 60 * 1000);
+        
+        // Convert expiration time back to UTC for comparison with lastFetchTime (which is UTC timestamp)
+        const expirationTimeUTC = new Date(expirationTimeGMT4.getTime() - GMT4_OFFSET);
+        
+        // If last fetch was before today's 2 AM GMT+4, cache is expired
+        return lastFetchTime < expirationTimeUTC.getTime();
+    };
+
+    /**
+     * Saves matches to cache with current timestamp
+     */
+    const saveToCache = (data) => {
+        try {
+            localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+            localStorage.setItem(CACHE_TIMESTAMP_KEY, Date.now().toString());
+        } catch (e) {
+            console.warn('Failed to save to cache:', e);
+        }
+    };
+
+    /**
+     * Retrieves matches from cache
+     */
+    const getFromCache = () => {
+        try {
+            const cachedData = localStorage.getItem(CACHE_KEY);
+            return cachedData ? JSON.parse(cachedData) : null;
+        } catch (e) {
+            console.warn('Failed to retrieve from cache:', e);
+            return null;
+        }
+    };
+
     const fetchMatches = async () => {
+        // Check cache first
+        const cachedMatches = getFromCache();
+        const cacheExpired = isCacheExpired();
+        
+        if (cachedMatches && !cacheExpired && cachedMatches.length > 0) {
+            console.log('Using cached matches');
+            matches = cachedMatches;
+            renderMatch(currentMatchIndex);
+            startTimer();
+            startSlider();
+            return;
+        }
+
+        console.log('Fetching fresh matches from API');
+        
         try {
             const response = await fetch('/api/todayMatches');
             if (!response.ok) throw new Error('Network response was not ok');
@@ -41,6 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (data && data.length > 0) {
                 matches = data;
+                saveToCache(data); // Save to cache
                 renderMatch(currentMatchIndex);
                 startTimer();
                 startSlider();
@@ -49,7 +127,16 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (error) {
             console.error("Failed to load matches", error);
-            showEmptyState();
+            // If API fails but we have cached data, use it even if expired
+            if (cachedMatches && cachedMatches.length > 0) {
+                console.log('API failed, using expired cache as fallback');
+                matches = cachedMatches;
+                renderMatch(currentMatchIndex);
+                startTimer();
+                startSlider();
+            } else {
+                showEmptyState();
+            }
         }
     };
 
@@ -87,9 +174,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (els.teamB.score) els.teamB.score.textContent = match.fulltime_b !== null ? match.fulltime_b : '-';
 
         // Flags - Fetching from API
-        // We assume the API returns 'team_a_flag' and 'team_b_flag' as URLs.
-        // If your API returns country codes, use the getCountryCode helper below.
-        
         const setFlag = (teamObj, flagUrl, fallbackText) => {
             if (!teamObj.flag || !teamObj.fallback) return;
             
@@ -130,6 +214,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Status UI
         updateStatusUI(match.statusInfo);
+        
+        // Winner/Draw highlighting
+        highlightResult(match);
     };
 
     const updateStatusUI = (statusInfo) => {
@@ -138,7 +225,73 @@ document.addEventListener('DOMContentLoaded', () => {
         if (els.statusLabel) els.statusLabel.textContent = statusInfo.label;
         if (els.liveDot) els.liveDot.style.display = statusInfo.isLive ? 'block' : 'none';
         
-        if (els.timer) els.timer.textContent = statusInfo.timeString;
+        // Hide timer if match is finished
+        if (els.timer) {
+            if (statusInfo.status === 'finished') {
+                els.timer.style.display = 'none';
+            } else {
+                els.timer.style.display = 'block';
+                els.timer.textContent = statusInfo.timeString;
+            }
+        }
+    };
+
+    const highlightResult = (match) => {
+        // Reset states
+        els.teamA.container.classList.remove('tm-winner', 'tm-draw');
+        els.teamB.container.classList.remove('tm-winner', 'tm-draw');
+        
+        if (els.teamA.badge) els.teamA.badge.style.display = 'none';
+        if (els.teamB.badge) els.teamB.badge.style.display = 'none';
+
+        // Only highlight if match is finished and scores are available
+        if (match.statusInfo.status === 'finished' && match.fulltime_a !== null && match.fulltime_b !== null) {
+            const scoreA = parseInt(match.fulltime_a);
+            const scoreB = parseInt(match.fulltime_b);
+
+            if (scoreA > scoreB) {
+                // Team A wins
+                els.teamA.container.classList.add('tm-winner');
+                if (els.teamA.badge) {
+                    els.teamA.badge.innerHTML = `
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3L19 12L5 21V3Z"/></svg>
+                        <span>Vainqueur</span>
+                    `;
+                    els.teamA.badge.style.display = 'inline-flex';
+                }
+            } else if (scoreB > scoreA) {
+                // Team B wins
+                els.teamB.container.classList.add('tm-winner');
+                if (els.teamB.badge) {
+                    els.teamB.badge.innerHTML = `
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3L19 12L5 21V3Z"/></svg>
+                        <span>Vainqueur</span>
+                    `;
+                    els.teamB.badge.style.display = 'inline-flex';
+                }
+            } else {
+                // It's a draw
+                els.teamA.container.classList.add('tm-draw');
+                els.teamB.container.classList.add('tm-draw');
+                
+                const drawBadgeHTML = `
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="5" y1="12" x2="19" y2="12"/>
+                    </svg>
+                    <span>Match Nul</span>
+                `;
+                
+                if (els.teamA.badge) {
+                    els.teamA.badge.innerHTML = drawBadgeHTML;
+                    els.teamA.badge.style.display = 'inline-flex';
+                }
+                
+                if (els.teamB.badge) {
+                    els.teamB.badge.innerHTML = drawBadgeHTML;
+                    els.teamB.badge.style.display = 'inline-flex';
+                }
+            }
+        }
     };
 
     const startTimer = () => {
@@ -148,6 +301,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (matches.length === 0) return;
             
             const match = matches[currentMatchIndex];
+            
+            // Don't update timer if match is finished
+            if (match.statusInfo.status === 'finished') {
+                return;
+            }
+            
             const now = new Date();
             const matchDate = new Date(match.date.replace(' ', 'T') + 'Z');
             const diffMs = matchDate.getTime() - now.getTime();

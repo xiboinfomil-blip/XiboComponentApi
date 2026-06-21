@@ -433,7 +433,7 @@
     scrollbar-color: rgba(99, 102, 241, 0.5) transparent;
     scroll-behavior: smooth;
     background: transparent;
-    padding: clamp(6px, 1.5vw, 10px) 0;
+    /* ✅ REMOVED top/bottom padding so header sits flush */
     max-height: clamp(320px, 65vh, 620px);
 }
 
@@ -466,7 +466,8 @@ thead {
     position: sticky; 
     top: 0; 
     z-index: 100;
-    background: rgba(15, 23, 42, 0.98);
+    /* ✅ Solid opaque background so no data bleeds through */
+    background: var(--primary-bg);
 }
 
 th {
@@ -504,7 +505,6 @@ tr::before {
     border-radius: 0 10px 10px 0;
 }
 
-/* Enhanced hover effect */
 tr:hover {
     background: rgba(255, 255, 255, 0.08);
     transform: translateX(6px);
