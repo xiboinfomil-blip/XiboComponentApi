@@ -74,7 +74,7 @@ app.use(helmet({
 
 const allowedOrigins = process.env.ALLOWED_ORIGINS 
   ? process.env.ALLOWED_ORIGINS.split(',') 
-  : ['http://localhost:3000', 'http://localhost:5173', 'http://localhost:8080', 'https://xibo-component-placement-admin.vercel.app'];
+  : ['http://localhost:3000', 'http://localhost:5173', 'http://localhost:8080', 'https://xibo-component-placement-admin.vercel.app','https://xibo-component-placement.vercel.app'];
 
 // ✅ GLOBAL CORS MIDDLEWARE
 app.use(cors({
