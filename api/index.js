@@ -62,49 +62,56 @@ const app = express();
 // 1. SECURITY & PROTECTION MIDDLEWARE
 // ==========================================
 
-// Note: Helmet is good, but ensure it doesn't block your specific needs.
-// We keep it but rely on our explicit CORS middleware below for cross-origin access.
 app.use(helmet({
-  contentSecurityPolicy: false, // Disable CSP for now to avoid conflicts with dynamic iframe/content loading. 
-                                // If you need CSP, configure it strictly for your domains.
+  contentSecurityPolicy: false,
   crossOriginEmbedderPolicy: false,
   crossOriginOpenerPolicy: false,
   crossOriginResourcePolicy: false
 }));
 
+// ✅ FIXED: Include ALL your Vercel domains
 const allowedOrigins = process.env.ALLOWED_ORIGINS 
   ? process.env.ALLOWED_ORIGINS.split(',') 
-  : ['http://localhost:3000', 'http://localhost:5173', 'http://localhost:8080', 'https://xibo-component-placement-admin.vercel.app','https://xibo-component-placement.vercel.app'];
+  : [
+      'http://localhost:3000', 
+      'http://localhost:5173', 
+      'http://localhost:8080', 
+      'https://xibo-component-placement-admin.vercel.app',
+      'https://xibo-component-placement.vercel.app'  // ← ADDED THIS
+    ];
 
-// ✅ GLOBAL CORS MIDDLEWARE
+// ✅ IMPROVED CORS CONFIGURATION
 app.use(cors({
   origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
+    
+    // Allow null origin (some browsers send this)
     if (origin === 'null') return callback(null, true);
-    if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV === 'development') {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
+    
+    // Check if origin is in allowed list
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
     }
+    
+    // In development, allow all origins
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`🔓 Allowing origin in dev mode: ${origin}`);
+      return callback(null, true);
+    }
+    
+    // Log blocked origins for debugging
+    console.log(`🚫 Blocked origin: ${origin}`);
+    callback(new Error('Not allowed by CORS'));
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+  exposedHeaders: ['Content-Range', 'X-Content-Range']
 }));
 
-// ✅ EXPLICIT CORS HEADERS FOR STATIC ASSETS
-// This ensures that even if the global cors middleware misses static files, 
-// these headers are always present for /assets/ requests.
-app.use('/assets/', (req, res, next) => {
-  const origin = req.headers.origin;
-  // Allow any origin from our list, or all origins in dev
-  if (allowedOrigins.includes(origin) || process.env.NODE_ENV === 'development' || !origin) {
-    res.header('Access-Control-Allow-Origin', origin || '*');
-    res.header('Access-Control-Allow-Methods', 'GET');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  }
-  next();
-});
+// ✅ Handle preflight requests explicitly
+app.options('*', cors());
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -139,9 +146,7 @@ app.use('/api/', (req, res, next) => {
   next();
 });
 
-// ✅ UPDATED ASSET CACHING WITH CORS COMPATIBILITY
 app.use('/assets/', (req, res, next) => {
-  // Cache for 1 year, but ensure CORS headers are already set by the middleware above
   res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
   next();
 });
@@ -161,7 +166,6 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, '../components'));
 
 const componentsDir = path.join(__dirname, '../components');
-// Check if directory exists before reading
 if (fs.existsSync(componentsDir)) {
   const components = fs.readdirSync(componentsDir);
 
@@ -170,14 +174,12 @@ if (fs.existsSync(componentsDir)) {
     
     if (fs.statSync(componentPath).isDirectory()) {
       try {
-        // A. Serve Component Static Assets
         const publicPath = path.join(componentPath, 'public');
         if (fs.existsSync(publicPath)) {
           app.use(`/assets/${component}`, express.static(publicPath));
           console.log(`✓ Loaded assets: /assets/${component}`);
         }
 
-        // B. Serve Component EJS View with Query Param Overrides
         const viewPath = path.join(componentPath, 'view.ejs');
         if (fs.existsSync(viewPath)) {
           app.get(`/${component}`, (req, res) => {
@@ -193,7 +195,6 @@ if (fs.existsSync(componentsDir)) {
           console.log(`✓ Loaded view: /${component}`);
         }
 
-        // C. Serve Component API Routes
         const routerPath = path.join(componentPath, 'router.js');
         if (fs.existsSync(routerPath)) {
           const router = require(routerPath);
@@ -201,7 +202,6 @@ if (fs.existsSync(componentsDir)) {
           console.log(`✓ Loaded router: /api/${component}`);
         }
         
-        // D. Pre-load Controller
         const controllerPath = path.join(componentPath, 'controller.js');
         if (fs.existsSync(controllerPath)) {
           require(controllerPath); 
@@ -223,7 +223,7 @@ if (fs.existsSync(globalRoutesPath)) {
     app.use('/api', globalRouter);
     console.log('✓ Loaded global routes');
   } else {
-    console.error(` Invalid export from ${globalRoutesPath}. Expected express.Router, got:`, typeof globalRouter);
+    console.error(`Invalid export from ${globalRoutesPath}. Expected express.Router, got:`, typeof globalRouter);
   }
 }
 
@@ -288,6 +288,6 @@ if (require.main === module) {
   const PORT = process.env.PORT || 3000;
   app.listen(PORT, () => {
     console.log(`\n🚀 Server running securely on http://localhost:${PORT}`);
-    console.log(` API Docs: http://localhost:${PORT}/swagger\n`);
+    console.log(`API Docs: http://localhost:${PORT}/swagger\n`);
   });
 }
