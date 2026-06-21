@@ -81,9 +81,17 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(',') 
   : ['http://localhost:3000', 'http://localhost:5173', 'http://localhost:8080'];
 
+// ✅ UPDATED CORS CONFIGURATION
 app.use(cors({
   origin: (origin, callback) => {
+    // 1. Allow requests with no origin (like mobile apps, curl, Postman)
     if (!origin) return callback(null, true);
+    
+    // 2. ✅ ALLOW SANDBOXED IFRAMES & BLOB URLs 
+    // (Browsers send the literal string "null" for these)
+    if (origin === 'null') return callback(null, true);
+    
+    // 3. Allow configured origins or development mode
     if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV === 'development') {
       callback(null, true);
     } else {
