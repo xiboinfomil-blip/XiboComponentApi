@@ -203,7 +203,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Date
         if (els.dateDisplay) {
             try {
-                const dateObj = new Date(match.date.replace(' ', 'T') + 'Z');
+                const dateObj = new Date(match.date.replace(' ', 'T') + '+04:00');
                 els.dateDisplay.textContent = dateObj.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
             } catch (e) {
                 els.dateDisplay.textContent = match.date;
@@ -306,7 +306,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
             const now = new Date();
-            const matchDate = new Date(match.date.replace(' ', 'T') + 'Z');
+            const matchDate = new Date(match.date.replace(' ', 'T') + '+04:00');
             const diffMs = matchDate.getTime() - now.getTime();
             
             const absMs = Math.abs(diffMs);
