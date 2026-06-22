@@ -1,6 +1,5 @@
 require('dotenv').config();
 const express = require('express');
-const helmet = require('helmet');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 const hpp = require('hpp');
@@ -59,58 +58,21 @@ if (swaggerDocument && typeof swaggerDocument.then === 'function') {
 const app = express();
 
 // ==========================================
-// 1. SECURITY & PROTECTION MIDDLEWARE
+// 1. SECURITY & ALLOW-ALL CORS MIDDLEWARE
 // ==========================================
 
-app.use(helmet({
-  contentSecurityPolicy: false,
-  crossOriginEmbedderPolicy: false,
-  crossOriginOpenerPolicy: false,
-  crossOriginResourcePolicy: false
-}));
+// Helmet has been completely removed from here.
 
-// ✅ FIXED: Include ALL your Vercel domains
-const allowedOrigins = process.env.ALLOWED_ORIGINS 
-  ? process.env.ALLOWED_ORIGINS.split(',') 
-  : [
-      'http://localhost:3000', 
-      'http://localhost:5173', 
-      'http://localhost:8080', 
-      'https://xibo-component-placement-admin.vercel.app',
-      'https://xibo-component-placement.vercel.app'  // ← ADDED THIS
-    ];
-
-// ✅ IMPROVED CORS CONFIGURATION
+// Wide-open CORS config (Allows absolutely everything)
 app.use(cors({
-  origin: (origin, callback) => {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    
-    // Allow null origin (some browsers send this)
-    if (origin === 'null') return callback(null, true);
-    
-    // Check if origin is in allowed list
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-    
-    // In development, allow all origins
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`🔓 Allowing origin in dev mode: ${origin}`);
-      return callback(null, true);
-    }
-    
-    // Log blocked origins for debugging
-    console.log(`🚫 Blocked origin: ${origin}`);
-    callback(new Error('Not allowed by CORS'));
-  },
+  origin: true, // Echoes back whatever origin requested it, satisfying credentials requirement
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+  allowedHeaders: '*', // Allows all headers sent by the client
   exposedHeaders: ['Content-Range', 'X-Content-Range']
 }));
 
-// ✅ Handle preflight requests explicitly
+// Handle preflight requests explicitly
 app.options('*', cors());
 
 const limiter = rateLimit({
