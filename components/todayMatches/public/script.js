@@ -19,7 +19,6 @@ document.addEventListener('DOMContentLoaded', () => {
         statusLabel: document.getElementById('status-label'),
         liveDot: document.getElementById('live-indicator'),
         timer: document.getElementById('match-timer'),
-        stadium: document.getElementById('stadium-name'),
         teamA: {
             container: document.getElementById('team-a-container'),
             name: document.getElementById('name-a'),
@@ -165,7 +164,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const match = matches[index];
 
         // Update Text Content
-        if (els.stadium) els.stadium.textContent = match.stadium || 'Stadium';
         if (els.teamA.name) els.teamA.name.textContent = match.team_a;
         if (els.teamB.name) els.teamB.name.textContent = match.team_b;
         
