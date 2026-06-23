@@ -258,7 +258,6 @@ function showEmptyState(message) {
 function initializeAutoscroll(speed) {
     const rows = scrollWrapper.querySelectorAll("tbody tr");
     
-    // If there is only 1 row or no rows, no need to scroll
     if (rows.length <= 1) {
         if (window.parent && typeof window.parent.postMessage === "function") {
             window.parent.postMessage("stop", "*");
@@ -266,20 +265,22 @@ function initializeAutoscroll(speed) {
         return;
     }
 
-    // Clear any existing interval/animation to prevent duplicates
     if (scrollInterval) clearInterval(scrollInterval);
     if (animationFrameId) cancelAnimationFrame(animationFrameId);
 
-    let currentScroll = 0;
+    // fall back to 0.5 if speed config missing, then convert to pixels-per-second base
+    const speedFactor = (typeof speed === 'number' && speed > 0) ? speed : 0.5;
+    const pixelsPerSecond = speedFactor * 60; 
+
+    let currentScroll = scrollWrapper.scrollTop;
     let isScrollingDown = true;
     let pauseTimer = null;
+    let lastTime = null;
     
-    // Calculate total scrollable height
     const scrollHeight = scrollWrapper.scrollHeight;
     const clientHeight = scrollWrapper.clientHeight;
     const maxScroll = scrollHeight - clientHeight;
     
-    // If content fits without scrolling, don't scroll
     if (maxScroll <= 0) {
         if (window.parent && typeof window.parent.postMessage === "function") {
             window.parent.postMessage("stop", "*");
@@ -287,41 +288,41 @@ function initializeAutoscroll(speed) {
         return;
     }
 
-    // Use requestAnimationFrame for smooth scrolling
-    function scrollStep() {
-        if (!document.getElementById("scroll-wrapper")) {
-            return;
-        }
+    // Frame-rate independent smooth scrolling step
+    function scrollStep(timestamp) {
+        if (!document.getElementById("scroll-wrapper")) return;
+
+        if (!lastTime) lastTime = timestamp;
+        const deltaTime = timestamp - lastTime;
+        lastTime = timestamp;
 
         if (pauseTimer) {
-            // Still pausing, check again next frame
             animationFrameId = requestAnimationFrame(scrollStep);
             return;
         }
 
+        // Calculate precise movement amount for this frame based on elapsed time
+        const step = (pixelsPerSecond * deltaTime) / 1000;
+
         if (isScrollingDown) {
-            // Scroll down slowly
-            currentScroll += 0.5; // Adjust this value for speed (lower = slower)
-            
+            currentScroll += step;
             if (currentScroll >= maxScroll) {
                 currentScroll = maxScroll;
-                // Pause at bottom before going up
                 pauseTimer = setTimeout(() => {
                     pauseTimer = null;
+                    lastTime = null; // Clear time delta to prevent physics jumps after pause
                     isScrollingDown = false;
-                }, 2000); // 2 second pause at bottom
+                }, 2000); 
             }
         } else {
-            // Scroll up slowly
-            currentScroll -= 0.5; // Adjust this value for speed (lower = slower)
-            
+            currentScroll -= step;
             if (currentScroll <= 0) {
                 currentScroll = 0;
-                // Pause at top before going down
                 pauseTimer = setTimeout(() => {
                     pauseTimer = null;
+                    lastTime = null; // Clear time delta to prevent physics jumps after pause
                     isScrollingDown = true;
-                }, 2000); // 2 second pause at top
+                }, 2000);
             }
         }
 
@@ -329,7 +330,6 @@ function initializeAutoscroll(speed) {
         animationFrameId = requestAnimationFrame(scrollStep);
     }
 
-    // Start the animation
     animationFrameId = requestAnimationFrame(scrollStep);
 }
 
