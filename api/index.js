@@ -64,6 +64,18 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '../public')));
 
 // ==========================================
+// NEW: ALLOW IFRAME EMBEDDING (Universal Fix for Xibo)
+// ==========================================
+app.use((req, res, next) => {
+  // Remove X-Frame-Options completely so Xibo can frame the components
+  res.removeHeader('X-Frame-Options');
+  
+  // Overrides standard Content-Security-Policy to allow framing anywhere
+  res.setHeader("Content-Security-Policy", "frame-ancestors *;");
+  next();
+});
+
+// ==========================================
 // 2. CLIENT-SIDE CACHING HEADERS
 // ==========================================
 app.use('/api/', (req, res, next) => {
