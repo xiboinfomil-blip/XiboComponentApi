@@ -268,9 +268,11 @@ function initializeAutoscroll(speed) {
     if (scrollInterval) clearInterval(scrollInterval);
     if (animationFrameId) cancelAnimationFrame(animationFrameId);
 
-    // fall back to 0.5 if speed config missing, then convert to pixels-per-second base
+    // Fallback factor if configuration is missing
     const speedFactor = (typeof speed === 'number' && speed > 0) ? speed : 0.5;
-    const pixelsPerSecond = speedFactor * 60; 
+    
+    // REDUCED BASELINE: Changed multiplier from 60 to 15 for a slow-motion crawl
+    const pixelsPerSecond = speedFactor * 15; 
 
     let currentScroll = scrollWrapper.scrollTop;
     let isScrollingDown = true;
@@ -310,7 +312,7 @@ function initializeAutoscroll(speed) {
                 currentScroll = maxScroll;
                 pauseTimer = setTimeout(() => {
                     pauseTimer = null;
-                    lastTime = null; // Clear time delta to prevent physics jumps after pause
+                    lastTime = null; 
                     isScrollingDown = false;
                 }, 2000); 
             }
@@ -320,7 +322,7 @@ function initializeAutoscroll(speed) {
                 currentScroll = 0;
                 pauseTimer = setTimeout(() => {
                     pauseTimer = null;
-                    lastTime = null; // Clear time delta to prevent physics jumps after pause
+                    lastTime = null; 
                     isScrollingDown = true;
                 }, 2000);
             }
