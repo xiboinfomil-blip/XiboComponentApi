@@ -13,7 +13,8 @@
     min-width: 320px; 
     margin: 0 auto;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    min-height: 450px; 
+    min-height: 100vh;
+    
     position: relative; 
     display: flex; 
     justify-content: center; 
