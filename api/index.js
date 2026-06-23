@@ -1,8 +1,5 @@
 require('dotenv').config();
 const express = require('express');
-const cors = require('cors');
-const rateLimit = require('express-rate-limit');
-const hpp = require('hpp');
 const path = require('path');
 const fs = require('fs');
 const swaggerUi = require('swagger-ui-express');
@@ -58,48 +55,17 @@ if (swaggerDocument && typeof swaggerDocument.then === 'function') {
 const app = express();
 
 // ==========================================
-// 1. SECURITY & ALLOW-ALL CORS MIDDLEWARE
+// 1. CORE BODY PARSERS (Limits Removed)
 // ==========================================
-
-// Helmet has been completely removed from here.
-
-// Wide-open CORS config (Allows absolutely everything)
-app.use(cors({
-  origin: true, // Echoes back whatever origin requested it, satisfying credentials requirement
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: '*', // Allows all headers sent by the client
-  exposedHeaders: ['Content-Range', 'X-Content-Range']
-}));
-
-// Handle preflight requests explicitly
-app.options('*', cors());
-
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100,
-  message: { error: 'Too many requests, please try again later.', retryAfter: '15 minutes' },
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-app.use('/api/', limiter); 
-
-app.use(hpp());
-
-// ==========================================
-// 2. CORE MIDDLEWARE
-// ==========================================
-
-app.use(express.json({ limit: '10kb' })); 
-app.use(express.urlencoded({ extended: true, limit: '10kb' }));
+app.use(express.json()); 
+app.use(express.urlencoded({ extended: true }));
 
 // Serve static files from public directory
 app.use(express.static(path.join(__dirname, '../public')));
 
 // ==========================================
-// 3. CLIENT-SIDE CACHING HEADERS
+// 2. CLIENT-SIDE CACHING HEADERS
 // ==========================================
-
 app.use('/api/', (req, res, next) => {
   res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
   res.setHeader('Pragma', 'no-cache');
@@ -121,9 +87,8 @@ app.use((req, res, next) => {
 });
 
 // ==========================================
-// 4. DYNAMIC COMPONENT LOADING (WITH QUERY OVERRIDES)
+// 3. DYNAMIC COMPONENT LOADING (WITH QUERY OVERRIDES)
 // ==========================================
-
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, '../components'));
 
@@ -190,9 +155,8 @@ if (fs.existsSync(globalRoutesPath)) {
 }
 
 // ==========================================
-// 5. ROUTES & SWAGGER
+// 4. ROUTES & SWAGGER
 // ==========================================
-
 app.use('/swagger', (req, res, next) => {
   if (swaggerSetupMiddleware) {
     swaggerSetupMiddleware(req, res, next);
@@ -219,9 +183,8 @@ app.get('/health', (req, res) => {
 });
 
 // ==========================================
-// 6. ERROR HANDLING & 404
+// 5. ERROR HANDLING & 404
 // ==========================================
-
 app.all('*', (req, res, next) => {
   res.status(404).json({ 
     status: 'fail', 
@@ -241,15 +204,14 @@ app.use((err, req, res, next) => {
 });
 
 // ==========================================
-// 7. EXPORT & LOCAL SERVER
+// 6. EXPORT & LOCAL SERVER
 // ==========================================
-
 module.exports = app;
 
 if (require.main === module) {
   const PORT = process.env.PORT || 3000;
   app.listen(PORT, () => {
-    console.log(`\n🚀 Server running securely on http://localhost:${PORT}`);
+    console.log(`\n🚀 Server running on http://localhost:${PORT}`);
     console.log(`API Docs: http://localhost:${PORT}/swagger\n`);
   });
 }
