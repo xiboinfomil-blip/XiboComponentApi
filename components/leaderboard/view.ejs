@@ -1,4 +1,3 @@
-<!-- components/leaderboard/view.ejs -->
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -10,7 +9,6 @@
 <body style="background: transparent; margin: 0; padding: 2rem 1rem; display: flex; justify-content: center; align-items: center; min-height: 100vh;">
     
     <div id="leaderboard-container">
-        <!-- Ambient background effects -->
         <div class="ambient-glow"></div>
         
         <div class="leaderboard-header">
@@ -18,10 +16,8 @@
             <p class="leaderboard-subtitle">TOP 10</p>
         </div>
         
-        <!-- Podium Container -->
         <div id="podium-section" class="podium-container">
-            <!-- JS will inject podium items here -->
-        </div>
+            </div>
 
         <div class="table-wrapper" id="scroll-wrapper">
             <table>
@@ -33,7 +29,7 @@
                     </tr>
                 </thead>
                 <tbody id="table-body">
-                    <tr>
+                    <tr id="loading-row">
                         <td colspan="3" class="loading-status">
                             <div class="empty-state">
                                 <div class="loading-spinner"></div>

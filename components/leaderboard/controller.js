@@ -1,4 +1,3 @@
-// components/leaderboard/controller.js
 const leaderboardService = require('./service');
 
 exports.getData = async (req, res, next) => {
@@ -6,8 +5,9 @@ exports.getData = async (req, res, next) => {
         // Allow forcing dummy data via query param: /api/leaderboard?dummy=true
         const useDummyData = req.query.dummy === 'true';
         const data = await leaderboardService.getLeaderboardData(useDummyData);
+        
         console.log(`Fetched ${data.length} leaderboard items (dummy: ${useDummyData})`);
-        console.log('Leaderboard data:', data);
+        
         res.json({
             status: 'success',
             results: data.length,

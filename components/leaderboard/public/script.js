@@ -1,5 +1,3 @@
-// components/leaderboard/public/script.js
-
 const scrollWrapper = document.getElementById("scroll-wrapper");
 let scrollInterval;
 let animationFrameId;
@@ -9,7 +7,7 @@ let animationFrameId;
  */
 async function initLeaderboard() {
     try {
-        // 1. Fetch data from the local API route
+        // 1. Fetch data from the API
         const response = await fetch('/api/leaderboard');
         
         if (!response.ok) {
@@ -17,10 +15,7 @@ async function initLeaderboard() {
         }
 
         const result = await response.json();
-        
-        // CORRECTED EXTRACTION: Match backend payload layout -> result.data[0].pronostiques
-        const record = result?.data?.[0];
-        const data = record?.pronostiques || record?.ranking_json || [];
+        const data = result.data || [];
 
         // 2. Remove loading state
         const loadingRow = document.getElementById('loading-row');
@@ -107,7 +102,7 @@ function renderPodium(data) {
                 </div>
             </div>
             <div class="podium-rank">1</div>
-            <div class="podium-name">${item.key || item.user}</div>
+            <div class="podium-name">${item.key || "Inconnu"}</div>
             <div class="podium-points">${item.point || 0} pts</div>
             <div class="podium-bar gold"></div>
         </div>`;
@@ -128,7 +123,7 @@ function renderPodium(data) {
                     </div>
                 </div>
                 <div class="podium-rank">#2</div>
-                <div class="podium-name">${item.key || item.user}</div>
+                <div class="podium-name">${item.key || "Inconnu"}</div>
                 <div class="podium-points">${item.point || 0} pts</div>
                 <div class="podium-bar silver"></div>
             </div>
@@ -150,7 +145,7 @@ function renderPodium(data) {
                     </div>
                 </div>
                 <div class="podium-rank">#3</div>
-                <div class="podium-name">${item.key || item.user}</div>
+                <div class="podium-name">${item.key || "Inconnu"}</div>
                 <div class="podium-points">${item.point || 0} pts</div>
                 <div class="podium-bar bronze"></div>
             </div>
@@ -171,17 +166,12 @@ function renderTable(data) {
     // Get the ranks that are displayed in the podium
     const podiumRanks = new Set();
     const rankCounts = {};
-    const rankMap = {};
     
     data.forEach(item => {
         if (!rankCounts[item.rank]) {
             rankCounts[item.rank] = 0;
         }
         rankCounts[item.rank]++;
-        
-        if (!rankMap[item.rank]) {
-            rankMap[item.rank] = item;
-        }
     });
 
     const hasExactlyOneRank1 = rankCounts[1] === 1;
@@ -192,29 +182,25 @@ function renderTable(data) {
     const shouldShowRank2 = shouldShowRank1 && hasExactlyOneRank2;
     const shouldShowRank3 = shouldShowRank2 && hasExactlyOneRank3;
 
-    // Add ranks to exclusion set only if they're displayed in podium
     if (shouldShowRank1) podiumRanks.add(1);
     if (shouldShowRank2) podiumRanks.add(2);
     if (shouldShowRank3) podiumRanks.add(3);
 
-    // Filter out podium members from the data for table display
+    // Filter out podium members
     const tableData = data.filter(item => !podiumRanks.has(item.rank));
 
     // Get top 10 entries from remaining data
     const top10 = tableData.slice(0, 10);
-    
-    // Check if we need to include ties at position 10
     let displayData = [...top10];
     
     if (top10.length === 10) {
-        const tenthPlacePoints = top10[9].point || 0;
+        const tenthPlacePoints = top10[9].point;
         
-        // Find all entries after position 10 with the same points as position 10
         for (let i = 10; i < tableData.length; i++) {
-            if ((tableData[i].point || 0) === tenthPlacePoints) {
+            if (tableData[i].point === tenthPlacePoints) {
                 displayData.push(tableData[i]);
             } else {
-                break; // Stop when points change
+                break;
             }
         }
     }
@@ -224,10 +210,10 @@ function renderTable(data) {
         html += `
             <tr data-rank="${item.rank || '-'}">
                 <td class="rank-cell"><span class="rank-badge">${item.rank || '-'}</span></td>
-                <td class="name-cell"><span class="team-name">${item.key || item.user}</span></td>
+                <td class="name-cell"><span class="team-name">${item.key || "Inconnu"}</span></td>
                 <td class="points-cell col-right">
                     <span class="points-badge">
-                        <span class="pts-highlight">${item.point || 0}</span>
+                        <span class="pts-highlight">${item.point ?? 0}</span>
                         <span class="pts-label">PTS</span>
                     </span>
                 </td>
@@ -257,10 +243,8 @@ function showEmptyState(message) {
 }
 
 // --- AUTOSCROLL LOGIC ---
-
 function initializeAutoscroll(speed) {
     const rows = scrollWrapper.querySelectorAll("tbody tr");
-    
     if (rows.length <= 1) {
         if (window.parent && typeof window.parent.postMessage === "function") {
             window.parent.postMessage("stop", "*");
@@ -333,5 +317,4 @@ function initializeAutoscroll(speed) {
     animationFrameId = requestAnimationFrame(scrollStep);
 }
 
-// Start the process when the DOM is ready
 document.addEventListener('DOMContentLoaded', initLeaderboard);
