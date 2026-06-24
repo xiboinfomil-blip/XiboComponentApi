@@ -227,18 +227,29 @@ document.addEventListener('DOMContentLoaded', () => {
         if (els.timer) {
             if (statusInfo.status === 'finished') {
                 els.timer.style.display = 'none';
+                els.timer.classList.remove('tm-live-flicker');
             } else {
                 els.timer.style.display = 'block';
                 els.timer.textContent = statusInfo.timeString;
+                
+                // Add flicker effect if live
+                if (statusInfo.isLive) {
+                    els.timer.classList.add('tm-live-flicker');
+                } else {
+                    els.timer.classList.remove('tm-live-flicker');
+                }
             }
         }
     };
 
     const highlightResult = (match) => {
-        // Reset states
-        els.teamA.container.classList.remove('tm-winner', 'tm-draw');
-        els.teamB.container.classList.remove('tm-winner', 'tm-draw');
+        const centerBadge = document.getElementById('center-badge');
         
+        // Reset states
+        els.teamA.container.classList.remove('tm-winner', 'tm-draw', 'tm-loser');
+        els.teamB.container.classList.remove('tm-winner', 'tm-draw', 'tm-loser');
+        
+        if (centerBadge) centerBadge.style.display = 'none';
         if (els.teamA.badge) els.teamA.badge.style.display = 'none';
         if (els.teamB.badge) els.teamB.badge.style.display = 'none';
 
@@ -250,9 +261,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (scoreA > scoreB) {
                 // Team A wins
                 els.teamA.container.classList.add('tm-winner');
+                els.teamB.container.classList.add('tm-loser');
                 if (els.teamA.badge) {
                     els.teamA.badge.innerHTML = `
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3L19 12L5 21V3Z"/></svg>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M7 3v2H3v4c0 1.65 1.35 3 3 3h.72c.75 2.48 2.82 4.34 5.28 4.82V19h-3v2h8v-2h-3v-2.18c2.46-.48 4.53-2.34 5.28-4.82H18c1.65 0 3-1.35 3-3V5h-4V3H7zm0 7c-1.1 0-2-.9-2-2V6h2v4zm12-2c0 1.1-.9 2-2 2V6h2v4z"/>
+                        </svg>
                         <span>Vainqueur</span>
                     `;
                     els.teamA.badge.style.display = 'inline-flex';
@@ -260,9 +274,12 @@ document.addEventListener('DOMContentLoaded', () => {
             } else if (scoreB > scoreA) {
                 // Team B wins
                 els.teamB.container.classList.add('tm-winner');
+                els.teamA.container.classList.add('tm-loser');
                 if (els.teamB.badge) {
                     els.teamB.badge.innerHTML = `
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3L19 12L5 21V3Z"/></svg>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M7 3v2H3v4c0 1.65 1.35 3 3 3h.72c.75 2.48 2.82 4.34 5.28 4.82V19h-3v2h8v-2h-3v-2.18c2.46-.48 4.53-2.34 5.28-4.82H18c1.65 0 3-1.35 3-3V5h-4V3H7zm0 7c-1.1 0-2-.9-2-2V6h2v4zm12-2c0 1.1-.9 2-2 2V6h2v4z"/>
+                        </svg>
                         <span>Vainqueur</span>
                     `;
                     els.teamB.badge.style.display = 'inline-flex';
@@ -272,21 +289,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 els.teamA.container.classList.add('tm-draw');
                 els.teamB.container.classList.add('tm-draw');
                 
-                const drawBadgeHTML = `
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="5" y1="12" x2="19" y2="12"/>
-                    </svg>
-                    <span>Match Nul</span>
-                `;
-                
-                if (els.teamA.badge) {
-                    els.teamA.badge.innerHTML = drawBadgeHTML;
-                    els.teamA.badge.style.display = 'inline-flex';
-                }
-                
-                if (els.teamB.badge) {
-                    els.teamB.badge.innerHTML = drawBadgeHTML;
-                    els.teamB.badge.style.display = 'inline-flex';
+                if (centerBadge) {
+                    centerBadge.innerHTML = `
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12"/>
+                        </svg>
+                        <span>Match Nul</span>
+                    `;
+                    centerBadge.style.display = 'inline-flex';
                 }
             }
         }
