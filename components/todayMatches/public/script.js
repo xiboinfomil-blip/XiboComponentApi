@@ -5,13 +5,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let timerInterval;
     let sliderInterval;
 
-    // Cache configuration
-    const CACHE_KEY = 'today_matches_cache';
-    const CACHE_TIMESTAMP_KEY = 'today_matches_timestamp';
-    
-    // GMT+4 timezone offset in milliseconds (4 * 60 * 60 * 1000)
-    const GMT4_OFFSET = 4 * 60 * 60 * 1000;
-
     // DOM Elements
     const els = {
         card: document.getElementById('main-card'),
@@ -38,86 +31,18 @@ document.addEventListener('DOMContentLoaded', () => {
         dateDisplay: document.getElementById('match-date-display')
     };
 
-    /**
-     * Checks if the cached data is expired.
-     * Expires daily at 2:00 AM GMT+4.
-     */
-    const isCacheExpired = () => {
-        const cachedTimestamp = localStorage.getItem(CACHE_TIMESTAMP_KEY);
-        if (!cachedTimestamp) return true;
-
-        const lastFetchTime = parseInt(cachedTimestamp, 10);
-        const now = new Date();
-        
-        // Convert current time to GMT+4
-        const nowGMT4 = new Date(now.getTime() + GMT4_OFFSET);
-        
-        // Get the start of the current day in GMT+4 (midnight)
-        const startOfDayGMT4 = new Date(nowGMT4);
-        startOfDayGMT4.setUTCHours(0, 0, 0, 0);
-        
-        // Calculate the expiration time: 2:00 AM GMT+4 today
-        const expirationTimeGMT4 = new Date(startOfDayGMT4.getTime() + 2 * 60 * 60 * 1000);
-        
-        // Convert expiration time back to UTC for comparison with lastFetchTime (which is UTC timestamp)
-        const expirationTimeUTC = new Date(expirationTimeGMT4.getTime() - GMT4_OFFSET);
-        
-        // If last fetch was before today's 2 AM GMT+4, cache is expired
-        return lastFetchTime < expirationTimeUTC.getTime();
-    };
-
-    /**
-     * Saves matches to cache with current timestamp
-     */
-    const saveToCache = (data) => {
-        try {
-            localStorage.setItem(CACHE_KEY, JSON.stringify(data));
-            localStorage.setItem(CACHE_TIMESTAMP_KEY, Date.now().toString());
-        } catch (e) {
-            console.warn('Failed to save to cache:', e);
-        }
-    };
-
-    /**
-     * Retrieves matches from cache
-     */
-    const getFromCache = () => {
-        try {
-            const cachedData = localStorage.getItem(CACHE_KEY);
-            return cachedData ? JSON.parse(cachedData) : null;
-        } catch (e) {
-            console.warn('Failed to retrieve from cache:', e);
-            return null;
-        }
-    };
-
     const fetchMatches = async () => {
-        // Check cache first
-        const cachedMatches = getFromCache();
-        const cacheExpired = isCacheExpired();
-        
-        if (cachedMatches && !cacheExpired && cachedMatches.length > 0) {
-            console.log('Using cached matches');
-            matches = cachedMatches;
-            renderMatch(currentMatchIndex);
-            startTimer();
-            startSlider();
-            return;
-        }
-
-        console.log('Fetching fresh matches from API');
+        console.log('Fetching matches from API (server handles caching)');
         
         try {
             const response = await fetch('/api/todayMatches');
             if (!response.ok) throw new Error('Network response was not ok');
             
             const result = await response.json();
-            // Adjust 'data' key based on your actual API response structure
             const data = result.data || result; 
 
             if (data && data.length > 0) {
                 matches = data;
-                saveToCache(data); // Save to cache
                 renderMatch(currentMatchIndex);
                 startTimer();
                 startSlider();
@@ -126,16 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (error) {
             console.error("Failed to load matches", error);
-            // If API fails but we have cached data, use it even if expired
-            if (cachedMatches && cachedMatches.length > 0) {
-                console.log('API failed, using expired cache as fallback');
-                matches = cachedMatches;
-                renderMatch(currentMatchIndex);
-                startTimer();
-                startSlider();
-            } else {
-                showEmptyState();
-            }
+            showEmptyState();
         }
     };
 
@@ -295,6 +211,9 @@ document.addEventListener('DOMContentLoaded', () => {
                             <line x1="5" y1="12" x2="19" y2="12"/>
                         </svg>
                         <span>Match Nul</span>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12"/>
+                        </svg>
                     `;
                     centerBadge.style.display = 'inline-flex';
                 }
@@ -332,6 +251,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 els.timer.textContent = diffMs > 0 ? timeStr : `+${timeStr}`;
             }
 
+            // Refresh data when match transitions to live
             if (diffMs <= 0 && diffMs > -2000 && match.statusInfo.status !== 'live') {
                 fetchMatches(); 
             }
