@@ -413,6 +413,28 @@
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
 }
 
+/* Center Badge (for Draw) */
+.tm-center-badge {
+    display: none; /* Hidden by default */
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1.25rem;
+    border-radius: 2rem;
+    font-size: 0.875rem;
+    font-weight: 800;
+    letter-spacing: 0.8px;
+    backdrop-filter: blur(15px);
+    text-transform: uppercase;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    background: linear-gradient(135deg, rgba(148, 163, 184, 0.25), rgba(100, 116, 139, 0.25));
+    color: #e2e8f0;
+    border: 2px solid rgba(148, 163, 184, 0.5);
+    box-shadow: 
+        0 8px 24px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
 /* Winner Styles */
 .tm-winner .tm-result-badge {
     background: linear-gradient(135deg, rgba(251, 191, 36, 0.3), rgba(245, 158, 11, 0.3));
@@ -488,15 +510,6 @@
 }
 
 /* Draw Styles */
-.tm-draw .tm-result-badge {
-    background: linear-gradient(135deg, rgba(148, 163, 184, 0.25), rgba(100, 116, 139, 0.25));
-    color: #e2e8f0;
-    border: 2px solid rgba(148, 163, 184, 0.5);
-    box-shadow: 
-        0 8px 24px rgba(0, 0, 0, 0.3),
-        inset 0 1px 0 rgba(255, 255, 255, 0.2);
-}
-
 .tm-draw .tm-team-name {
     color: #94a3b8;
 }
@@ -553,6 +566,22 @@
         0 0 30px rgba(139, 92, 246, 0.3);
     text-align: center;
     letter-spacing: 1px;
+}
+
+/* Live Timer Flicker Effect */
+.tm-dynamic-time.tm-live-flicker {
+    animation: tmLiveFlicker 1.5s ease-in-out infinite;
+}
+
+@keyframes tmLiveFlicker {
+    0%, 100% { 
+        opacity: 1; 
+        text-shadow: 0 2px 15px rgba(0, 0, 0, 0.5), 0 0 30px rgba(139, 92, 246, 0.3);
+    }
+    50% { 
+        opacity: 0.5; 
+        text-shadow: 0 2px 15px rgba(0, 0, 0, 0.5), 0 0 60px rgba(239, 68, 68, 0.9);
+    }
 }
 
 /* Footer */
