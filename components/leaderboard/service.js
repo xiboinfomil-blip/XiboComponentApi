@@ -1,5 +1,5 @@
 exports.getLeaderboardData = async (useDummyData = false, retries = 3) => {
-    const apiUrl = "https://euro.omediainteractive.net/imleuro/items/pronostiques_rankings";
+    const apiUrl = "https://euro.omediainteractive.net/imleuro/items/pronostics_rankings";
     let rankingData = [];
 
     if (useDummyData) {
