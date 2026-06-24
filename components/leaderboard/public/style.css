@@ -61,6 +61,11 @@
     -webkit-font-smoothing: antialiased;
     position: relative;
     container-type: inline-size;
+    /* Flex column to manage space distribution */
+    display: flex;
+    flex-direction: column;
+    height: 90vh; /* Occupy most of viewport height */
+    max-height: 900px;
 }
 
 /* Ambient glow effect */
@@ -86,10 +91,11 @@
    ========================================= */
 .leaderboard-header {
     background: linear-gradient(180deg, rgba(15, 23, 42, 0.7) 0%, rgba(15, 23, 42, 0.4) 100%);
-    padding: clamp(16px, 4cqi, 32px) clamp(16px, 4cqi, 40px) clamp(12px, 3cqi, 24px);
+    padding: clamp(12px, 3cqi, 24px) clamp(16px, 4cqi, 40px) clamp(10px, 2.5cqi, 20px);
     text-align: center;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     position: relative;
+    flex-shrink: 0; /* Don't shrink header */
 }
 
 .leaderboard-header::after {
@@ -127,27 +133,28 @@
 }
 
 /* =========================================
-   PODIUM STYLES
+   PODIUM STYLES - COMPACT & BEAUTIFUL
    ========================================= */
 .podium-container {
-    display: none;
+    display: none; /* Toggled by JS */
     justify-content: center;
     align-items: flex-end;
-    padding: clamp(16px, 4cqi, 40px) clamp(12px, 3cqi, 32px) clamp(16px, 4cqi, 32px);
-    background: radial-gradient(ellipse at center top, rgba(99, 102, 241, 0.2) 0%, transparent 70%),
-                linear-gradient(180deg, rgba(2, 6, 23, 0.4) 0%, rgba(2, 6, 23, 0.15) 100%);
+    padding: clamp(15px, 4cqi, 30px) clamp(16px, 4cqi, 32px) clamp(10px, 2cqi, 15px);
+    background: radial-gradient(ellipse at center top, rgba(99, 102, 241, 0.1) 0%, transparent 70%);
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-    gap: clamp(6px, 1.5cqi, 16px);
+    gap: clamp(8px, 2cqi, 16px);
     position: relative;
     overflow: visible;
+    flex-shrink: 0; /* Keep podium size consistent */
 }
 
 .podium-flex {
     display: flex;
     justify-content: center;
     align-items: flex-end;
-    gap: clamp(6px, 1.5cqi, 16px);
+    gap: clamp(8px, 2cqi, 16px);
     width: 100%;
+    max-width: 600px; /* Limit width to keep it compact */
 }
 
 .podium-item {
@@ -164,7 +171,7 @@
 @keyframes slideUp {
     from { 
         opacity: 0; 
-        transform: translateY(50px) scale(0.85); 
+        transform: translateY(30px) scale(0.9); 
     }
     to { 
         opacity: 1; 
@@ -178,14 +185,15 @@
 
 /* Podium Rank Numbers */
 .podium-rank {
-    font-size: clamp(18px, 5cqi, 36px);
+    font-size: clamp(18px, 5cqi, 32px);
     font-weight: 900;
     line-height: 1;
-    margin-bottom: clamp(4px, 1cqi, 10px);
+    margin-bottom: clamp(4px, 1cqi, 8px);
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
 }
 
 .podium-item.first .podium-rank {
-    font-size: clamp(24px, 7cqi, 48px);
+    font-size: clamp(24px, 7cqi, 42px);
     background: linear-gradient(180deg, var(--gold-light) 0%, var(--gold-primary) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -194,7 +202,7 @@
 }
 
 .podium-item.second .podium-rank {
-    font-size: clamp(16px, 4.5cqi, 30px);
+    font-size: clamp(16px, 4.5cqi, 28px);
     background: linear-gradient(180deg, var(--silver-light) 0%, var(--silver-primary) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -203,7 +211,7 @@
 }
 
 .podium-item.third .podium-rank {
-    font-size: clamp(14px, 4cqi, 26px);
+    font-size: clamp(14px, 4cqi, 24px);
     background: linear-gradient(180deg, var(--bronze-light) 0%, var(--bronze-primary) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -214,39 +222,39 @@
 /* Podium Names */
 .podium-name {
     font-weight: 800;
-    font-size: clamp(10px, 2.5cqi, 16px);
-    letter-spacing: clamp(0.3px, 0.2cqi, 1.2px);
+    font-size: clamp(10px, 2.5cqi, 14px);
+    letter-spacing: clamp(0.3px, 0.2cqi, 1px);
     color: var(--text-primary);
-    margin: clamp(4px, 1cqi, 10px) 0 clamp(3px, 0.8cqi, 8px) 0;
+    margin: 0 0 clamp(2px, 0.5cqi, 4px) 0;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     width: 100%;
     text-align: center;
     text-shadow: 0 2px 12px rgba(0, 0, 0, 0.8);
-    padding: 0 clamp(2px, 1cqi, 12px);
-    line-height: 1.3;
+    padding: 0 clamp(2px, 1cqi, 8px);
+    line-height: 1.2;
 }
 
 .podium-item.first .podium-name {
-    font-size: clamp(11px, 3cqi, 19px);
-    letter-spacing: clamp(0.5px, 0.3cqi, 1.5px);
+    font-size: clamp(11px, 3cqi, 16px);
+    letter-spacing: clamp(0.5px, 0.3cqi, 1.2px);
     text-shadow: 0 2px 16px rgba(251, 191, 36, 0.4), 0 2px 12px rgba(0, 0, 0, 0.8);
 }
 
 /* Podium Points */
 .podium-points {
-    font-size: clamp(10px, 2.2cqi, 15px);
+    font-size: clamp(10px, 2.2cqi, 14px);
     font-weight: 800;
     letter-spacing: clamp(0.3px, 0.2cqi, 0.8px);
-    margin-bottom: clamp(6px, 1.5cqi, 14px);
+    margin-bottom: clamp(6px, 1.5cqi, 10px);
     white-space: nowrap;
 }
 
 .podium-item.first .podium-points {
     color: var(--gold-primary);
     filter: drop-shadow(0 0 12px rgba(251, 191, 36, 0.7));
-    font-size: clamp(11px, 3cqi, 19px);
+    font-size: clamp(11px, 3cqi, 16px);
 }
 
 .podium-item.second .podium-points {
@@ -262,22 +270,27 @@
 /* Podium Bars */
 .podium-bar {
     width: 100%;
-    border-radius: clamp(8px, 2cqi, 24px) clamp(8px, 2cqi, 24px) 0 0;
+    border-radius: clamp(8px, 2cqi, 16px) clamp(8px, 2cqi, 16px) 0 0;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    padding: clamp(8px, 2cqi, 20px) 0;
+    justify-content: flex-start; /* Align content to top so trophy sits nicely */
+    padding-top: clamp(8px, 2cqi, 16px);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     position: relative;
     box-shadow: 
         inset 0 2px 6px rgba(255, 255, 255, 0.25), 
         0 -6px 20px rgba(0, 0, 0, 0.25);
+    transition: transform 0.3s ease;
+}
+
+.podium-bar:hover {
+    transform: translateY(-2px);
 }
 
 .podium-bar.gold {
-    height: clamp(70px, 18cqi, 140px);
+    height: clamp(80px, 20cqi, 130px);
     background: linear-gradient(180deg, rgba(251, 191, 36, 0.5) 0%, rgba(217, 119, 6, 0.4) 100%);
     border: 1.5px solid rgba(251, 191, 36, 0.7);
     box-shadow: 
@@ -288,7 +301,7 @@
 }
 
 .podium-bar.silver {
-    height: clamp(50px, 13cqi, 95px);
+    height: clamp(60px, 15cqi, 90px);
     background: linear-gradient(180deg, rgba(56, 189, 248, 0.4) 0%, rgba(2, 132, 199, 0.3) 100%);
     border: 1.5px solid rgba(56, 189, 248, 0.6);
     box-shadow: 
@@ -298,7 +311,7 @@
 }
 
 .podium-bar.bronze {
-    height: clamp(38px, 10cqi, 70px);
+    height: clamp(45px, 11cqi, 70px);
     background: linear-gradient(180deg, rgba(251, 146, 60, 0.4) 0%, rgba(234, 88, 12, 0.3) 100%);
     border: 1.5px solid rgba(251, 146, 60, 0.6);
     box-shadow: 
@@ -308,33 +321,31 @@
 }
 
 /* =========================================
-   🏆 ENHANCED TROPHY (1st Place)
+   🏆 TROPHY INSIDE PODIUM BAR (1st Place Only)
    ========================================= */
 .trophy-wrapper {
-    position: absolute;
-    top: clamp(-45px, -12cqi, -65px);
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 20;
+    position: relative;
+    z-index: 5;
+    margin-bottom: clamp(4px, 1cqi, 8px);
     animation: trophyFloat 3.5s ease-in-out infinite;
-    filter: drop-shadow(0 0 20px rgba(251, 191, 36, 0.7));
+    filter: drop-shadow(0 0 15px rgba(251, 191, 36, 0.8));
 }
 
 @keyframes trophyFloat {
-    0%, 100% { transform: translateX(-50%) translateY(0); }
-    50% { transform: translateX(-50%) translateY(-10px); }
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
 }
 
 .trophy {
     position: relative;
-    width: clamp(34px, 8cqi, 52px);
-    height: clamp(40px, 9cqi, 58px);
+    width: clamp(32px, 8cqi, 48px);
+    height: clamp(38px, 9cqi, 54px);
 }
 
 /* Cup Body */
 .trophy-cup {
-    width: clamp(28px, 6.5cqi, 42px);
-    height: clamp(22px, 5cqi, 32px);
+    width: clamp(26px, 6.5cqi, 40px);
+    height: clamp(20px, 5cqi, 30px);
     background: linear-gradient(180deg, var(--gold-light) 0%, var(--gold-primary) 40%, var(--gold-dark) 100%);
     border-radius: 0 0 clamp(14px, 3cqi, 20px) clamp(14px, 3cqi, 20px);
     position: absolute;
@@ -355,7 +366,7 @@
     top: 3px;
     left: clamp(3px, 0.8cqi, 5px);
     width: clamp(6px, 1.5cqi, 10px);
-    height: clamp(14px, 3.5cqi, 22px);
+    height: clamp(12px, 3cqi, 20px);
     background: linear-gradient(180deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 100%);
     border-radius: 5px;
 }
@@ -366,7 +377,7 @@
     position: absolute;
     top: clamp(3px, 0.8cqi, 5px);
     width: clamp(8px, 2cqi, 12px);
-    height: clamp(14px, 3.5cqi, 20px);
+    height: clamp(12px, 3cqi, 18px);
     border: clamp(2.5px, 0.6cqi, 3.5px) solid var(--gold-primary);
     border-radius: 0 0 clamp(8px, 2cqi, 12px) clamp(8px, 2cqi, 12px);
     z-index: -1;
@@ -389,11 +400,11 @@
 /* Stem */
 .trophy-stem {
     position: absolute;
-    bottom: clamp(7px, 1.8cqi, 10px);
+    bottom: clamp(6px, 1.5cqi, 9px);
     left: 50%;
     transform: translateX(-50%);
     width: clamp(6px, 1.5cqi, 10px);
-    height: clamp(10px, 2.5cqi, 14px);
+    height: clamp(8px, 2cqi, 12px);
     background: linear-gradient(90deg, var(--gold-dark) 0%, var(--gold-primary) 50%, var(--gold-dark) 100%);
     border-radius: 3px;
 }
@@ -404,8 +415,8 @@
     bottom: 0;
     left: 50%;
     transform: translateX(-50%);
-    width: clamp(24px, 6cqi, 38px);
-    height: clamp(7px, 1.8cqi, 10px);
+    width: clamp(22px, 5.5cqi, 34px);
+    height: clamp(6px, 1.5cqi, 9px);
     background: linear-gradient(180deg, var(--gold-primary) 0%, var(--gold-dark) 100%);
     border-radius: 4px;
     box-shadow: 0 3px 12px rgba(0, 0, 0, 0.5);
@@ -430,7 +441,7 @@
 }
 
 /* =========================================
-   TABLE STYLES
+   TABLE STYLES - TAKES MORE SPACE
    ========================================= */
 .table-wrapper {
     width: 100%;
@@ -440,7 +451,9 @@
     scrollbar-color: rgba(99, 102, 241, 0.5) transparent;
     scroll-behavior: smooth;
     background: transparent;
-    max-height: clamp(280px, 60cqh, 620px);
+    /* Key Change: Use flex-grow or calc to take remaining space */
+    flex-grow: 1; 
+    min-height: 300px; /* Ensure minimum height for table */
 }
 
 .table-wrapper::-webkit-scrollbar {
@@ -546,8 +559,8 @@ td:last-child {
 tr:first-child td { border-top: 1px solid rgba(255, 255, 255, 0.05); }
 tr:last-child td { border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
 
-.rank-cell { width: 20%; }
-.name-cell { width: 55%; }
+.rank-cell { width: 15%; }
+.name-cell { width: 60%; }
 .points-cell { width: 25%; }
 .col-right { text-align: right; }
 
@@ -680,153 +693,43 @@ tr:hover .points-badge {
 }
 
 /* =========================================
-   CONTAINER QUERIES FOR ULTRA RESPONSIVE
-   ========================================= */
-
-/* Very small containers (< 300px) */
-@container (max-width: 300px) {
-    .leaderboard-title {
-        font-size: 14px !important;
-        letter-spacing: 0.5px !important;
-    }
-    
-    .leaderboard-subtitle {
-        font-size: 10px !important;
-    }
-    
-    .podium-name {
-        font-size: 9px !important;
-        letter-spacing: 0 !important;
-    }
-    
-    .podium-points {
-        font-size: 9px !important;
-    }
-    
-    .podium-rank {
-        font-size: 16px !important;
-    }
-    
-    .podium-item.first .podium-rank {
-        font-size: 20px !important;
-    }
-    
-    .podium-bar.gold {
-        height: 55px !important;
-    }
-    
-    .podium-bar.silver {
-        height: 40px !important;
-    }
-    
-    .podium-bar.bronze {
-        height: 30px !important;
-    }
-    
-    .trophy-wrapper {
-        top: -35px !important;
-    }
-    
-    .trophy {
-        width: 28px !important;
-        height: 32px !important;
-    }
-    
-    .trophy-cup {
-        width: 22px !important;
-        height: 18px !important;
-    }
-    
-    .rank-badge {
-        width: 24px !important;
-        height: 24px !important;
-        font-size: 10px !important;
-    }
-    
-    .team-name {
-        font-size: 11px !important;
-    }
-    
-    .pts-highlight {
-        font-size: 10px !important;
-    }
-    
-    .pts-label {
-        display: none !important;
-    }
-    
-    .points-badge {
-        padding: 3px 6px !important;
-    }
-    
-    th, td {
-        padding: 8px 10px !important;
-    }
-}
-
-/* Small containers (300px - 480px) */
-@container (min-width: 301px) and (max-width: 480px) {
-    .pts-label {
-        display: none !important;
-    }
-    
-    .points-badge {
-        padding: 4px 8px !important;
-    }
-    
-    th, td {
-        padding: 10px 12px !important;
-    }
-}
-
-/* Medium containers (480px - 768px) */
-@container (min-width: 481px) and (max-width: 768px) {
-    .trophy-wrapper {
-        top: -45px !important;
-    }
-    
-    .trophy {
-        width: 38px !important;
-        height: 44px !important;
-    }
-}
-
-/* =========================================
-   RESPONSIVE BREAKPOINTS (FALLBACK)
+   RESPONSIVE BREAKPOINTS
    ========================================= */
 
 /* Tablet & Small Desktop */
 @media (max-width: 768px) {
-    .trophy-wrapper { top: -52px; }
-    .trophy { width: 42px; height: 48px; }
-    .trophy-cup { width: 34px; height: 26px; border-radius: 0 0 17px 17px; }
-    .trophy-handle-left, .trophy-handle-right { width: 10px; height: 16px; top: 5px; }
+    .trophy { width: 40px; height: 46px; }
+    .trophy-cup { width: 32px; height: 24px; border-radius: 0 0 16px 16px; }
+    .trophy-handle-left, .trophy-handle-right { width: 10px; height: 14px; top: 4px; }
     .trophy-handle-left { left: -4px; }
     .trophy-handle-right { right: -4px; }
-    .trophy-stem { width: 8px; height: 12px; bottom: 8px; }
-    .trophy-base { width: 30px; height: 8px; }
-    .trophy-sparkle { width: 12px; height: 12px; top: -6px; right: -2px; }
+    .trophy-stem { width: 7px; height: 10px; bottom: 7px; }
+    .trophy-base { width: 26px; height: 7px; }
+    .trophy-sparkle { width: 12px; height: 12px; top: -5px; right: -2px; }
 }
 
 /* Mobile Phones */
 @media (max-width: 480px) {
     body { padding: 12px 0 !important; }
     
-    .trophy-wrapper { top: -42px; }
-    .trophy { width: 34px; height: 40px; }
-    .trophy-cup { width: 28px; height: 22px; border-radius: 0 0 14px 14px; }
-    .trophy-cup::after { width: 6px; height: 14px; left: 4px; }
-    .trophy-handle-left, .trophy-handle-right { width: 8px; height: 14px; top: 4px; border-width: 2.5px; }
+    #leaderboard-container {
+        height: 95vh; /* Use more height on mobile */
+    }
+
+    .trophy { width: 32px; height: 38px; }
+    .trophy-cup { width: 26px; height: 20px; border-radius: 0 0 13px 13px; }
+    .trophy-cup::after { width: 5px; height: 12px; left: 4px; }
+    .trophy-handle-left, .trophy-handle-right { width: 8px; height: 12px; top: 3px; border-width: 2px; }
     .trophy-handle-left { left: -3px; }
     .trophy-handle-right { right: -3px; }
-    .trophy-stem { width: 6px; height: 10px; bottom: 7px; }
-    .trophy-base { width: 24px; height: 7px; }
-    .trophy-sparkle { width: 10px; height: 10px; top: -5px; }
+    .trophy-stem { width: 5px; height: 8px; bottom: 6px; }
+    .trophy-base { width: 20px; height: 6px; }
+    .trophy-sparkle { width: 9px; height: 9px; top: -4px; }
 
     /* Compact table cells on mobile */
     td, th { 
-        padding-left: clamp(10px, 3.5vw, 16px) !important; 
-        padding-right: clamp(10px, 3.5vw, 16px) !important; 
+        padding-left: clamp(8px, 3vw, 12px) !important; 
+        padding-right: clamp(8px, 3vw, 12px) !important; 
     }
     
     /* Hide pts-label on very small screens */
@@ -835,31 +738,30 @@ tr:hover .points-badge {
 
 /* Extra Small Devices */
 @media (max-width: 360px) {
-    .podium-name { font-size: 10px !important; letter-spacing: 0 !important; }
-    .podium-points { font-size: 10px !important; }
-    .podium-rank { font-size: 18px !important; }
-    .podium-item.first .podium-rank { font-size: 24px !important; }
-    .podium-bar.gold { height: 65px !important; }
-    .podium-bar.silver { height: 48px !important; }
-    .podium-bar.bronze { height: 36px !important; }
-    .rank-badge { width: 28px !important; height: 28px !important; font-size: 11px !important; border-radius: 7px !important; }
-    .team-name { font-size: 12px !important; }
-    .pts-highlight { font-size: 11px !important; }
-    .points-badge { padding: 4px 8px !important; gap: 3px !important; }
+    .podium-name { font-size: 9px !important; letter-spacing: 0 !important; }
+    .podium-points { font-size: 9px !important; }
+    .podium-rank { font-size: 16px !important; }
+    .podium-item.first .podium-rank { font-size: 20px !important; }
+    .podium-bar.gold { height: 60px !important; }
+    .podium-bar.silver { height: 45px !important; }
+    .podium-bar.bronze { height: 35px !important; }
+    .rank-badge { width: 24px !important; height: 24px !important; font-size: 10px !important; border-radius: 6px !important; }
+    .team-name { font-size: 11px !important; }
+    .pts-highlight { font-size: 10px !important; }
+    .points-badge { padding: 3px 6px !important; gap: 2px !important; }
 }
 
 /* Landscape Mode Optimization */
 @media (max-height: 500px) and (orientation: landscape) {
-    .podium-container { padding-top: 12px !important; padding-bottom: 12px !important; }
-    .podium-bar.gold { height: 65px !important; }
-    .podium-bar.silver { height: 45px !important; }
-    .podium-bar.bronze { height: 34px !important; }
-    .trophy-wrapper { top: -34px !important; }
-    .trophy { transform: scale(0.75); }
-    .table-wrapper { max-height: 45vh !important; }
-    .leaderboard-header { padding: 12px 20px 10px !important; }
-    .leaderboard-title { font-size: 16px !important; }
-    .leaderboard-subtitle { font-size: 11px !important; }
+    .podium-container { padding-top: 8px !important; padding-bottom: 8px !important; }
+    .podium-bar.gold { height: 50px !important; }
+    .podium-bar.silver { height: 35px !important; }
+    .podium-bar.bronze { height: 25px !important; }
+    .trophy-wrapper { display: none !important; } /* Hide trophy in tight landscape */
+    .table-wrapper { flex-grow: 1 !important; }
+    .leaderboard-header { padding: 8px 20px 6px !important; }
+    .leaderboard-title { font-size: 14px !important; }
+    .leaderboard-subtitle { font-size: 10px !important; }
 }
 
 /* =========================================
@@ -888,6 +790,7 @@ tr:hover .points-badge {
         border: 1px solid #ccc !important;
         backdrop-filter: none !important;
         -webkit-backdrop-filter: none !important;
+        height: auto !important;
     }
     .ambient-glow { display: none !important; }
     .leaderboard-title { 
@@ -906,5 +809,5 @@ tr:hover .points-badge {
     .pts-highlight { color: black !important; }
     .rank-badge { background: #eee !important; color: black !important; border-color: #ccc !important; box-shadow: none !important; }
     .points-badge { background: #eee !important; border-color: #ccc !important; box-shadow: none !important; }
-    .table-wrapper { max-height: none !important; overflow: visible !important; }
+    .table-wrapper { max-height: none !important; overflow: visible !important; flex-grow: 0 !important; }
 }
