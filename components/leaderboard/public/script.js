@@ -9,7 +9,7 @@ let animationFrameId;
  */
 async function initLeaderboard() {
     try {
-        // 1. Fetch data from the API
+        // 1. Fetch data from the local API route
         const response = await fetch('/api/leaderboard');
         
         if (!response.ok) {
@@ -17,7 +17,10 @@ async function initLeaderboard() {
         }
 
         const result = await response.json();
-        const data = result.data || [];
+        
+        // CORRECTED EXTRACTION: Match backend payload layout -> result.data[0].pronostiques
+        const record = result?.data?.[0];
+        const data = record?.pronostiques || record?.ranking_json || [];
 
         // 2. Remove loading state
         const loadingRow = document.getElementById('loading-row');
@@ -104,8 +107,8 @@ function renderPodium(data) {
                 </div>
             </div>
             <div class="podium-rank">1</div>
-            <div class="podium-name">${item.key}</div>
-            <div class="podium-points">${item.point} pts</div>
+            <div class="podium-name">${item.key || item.user}</div>
+            <div class="podium-points">${item.point || 0} pts</div>
             <div class="podium-bar gold"></div>
         </div>`;
     }
@@ -125,8 +128,8 @@ function renderPodium(data) {
                     </div>
                 </div>
                 <div class="podium-rank">#2</div>
-                <div class="podium-name">${item.key}</div>
-                <div class="podium-points">${item.point} pts</div>
+                <div class="podium-name">${item.key || item.user}</div>
+                <div class="podium-points">${item.point || 0} pts</div>
                 <div class="podium-bar silver"></div>
             </div>
         `;
@@ -147,8 +150,8 @@ function renderPodium(data) {
                     </div>
                 </div>
                 <div class="podium-rank">#3</div>
-                <div class="podium-name">${item.key}</div>
-                <div class="podium-points">${item.point} pts</div>
+                <div class="podium-name">${item.key || item.user}</div>
+                <div class="podium-points">${item.point || 0} pts</div>
                 <div class="podium-bar bronze"></div>
             </div>
         `;
@@ -204,11 +207,11 @@ function renderTable(data) {
     let displayData = [...top10];
     
     if (top10.length === 10) {
-        const tenthPlacePoints = top10[9].point;
+        const tenthPlacePoints = top10[9].point || 0;
         
         // Find all entries after position 10 with the same points as position 10
         for (let i = 10; i < tableData.length; i++) {
-            if (tableData[i].point === tenthPlacePoints) {
+            if ((tableData[i].point || 0) === tenthPlacePoints) {
                 displayData.push(tableData[i]);
             } else {
                 break; // Stop when points change
@@ -219,12 +222,12 @@ function renderTable(data) {
     let html = '';
     displayData.forEach(item => {
         html += `
-            <tr data-rank="${item.rank}">
-                <td class="rank-cell"><span class="rank-badge">${item.rank}</span></td>
-                <td class="name-cell"><span class="team-name">${item.key}</span></td>
+            <tr data-rank="${item.rank || '-'}">
+                <td class="rank-cell"><span class="rank-badge">${item.rank || '-'}</span></td>
+                <td class="name-cell"><span class="team-name">${item.key || item.user}</span></td>
                 <td class="points-cell col-right">
                     <span class="points-badge">
-                        <span class="pts-highlight">${item.point}</span>
+                        <span class="pts-highlight">${item.point || 0}</span>
                         <span class="pts-label">PTS</span>
                     </span>
                 </td>
@@ -268,10 +271,7 @@ function initializeAutoscroll(speed) {
     if (scrollInterval) clearInterval(scrollInterval);
     if (animationFrameId) cancelAnimationFrame(animationFrameId);
 
-    // Fallback factor if configuration is missing
     const speedFactor = (typeof speed === 'number' && speed > 0) ? speed : 0.5;
-    
-    // REDUCED BASELINE: Changed multiplier from 60 to 15 for a slow-motion crawl
     const pixelsPerSecond = speedFactor * 15; 
 
     let currentScroll = scrollWrapper.scrollTop;
@@ -290,7 +290,6 @@ function initializeAutoscroll(speed) {
         return;
     }
 
-    // Frame-rate independent smooth scrolling step
     function scrollStep(timestamp) {
         if (!document.getElementById("scroll-wrapper")) return;
 
@@ -303,7 +302,6 @@ function initializeAutoscroll(speed) {
             return;
         }
 
-        // Calculate precise movement amount for this frame based on elapsed time
         const step = (pixelsPerSecond * deltaTime) / 1000;
 
         if (isScrollingDown) {
