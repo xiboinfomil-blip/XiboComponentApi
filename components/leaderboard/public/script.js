@@ -7,7 +7,6 @@ let animationFrameId;
  */
 async function initLeaderboard() {
     try {
-        // 1. Fetch data from the API
         const response = await fetch('/api/leaderboard');
         
         if (!response.ok) {
@@ -17,18 +16,15 @@ async function initLeaderboard() {
         const result = await response.json();
         const data = result.data || [];
 
-        // 2. Remove loading state
         const loadingRow = document.getElementById('loading-row');
         if (loadingRow) {
             loadingRow.remove();
         }
 
-        // 3. Render Data
         if (data.length > 0) {
             renderPodium(data);
             renderTable(data);
             
-            // 4. Start Autoscroll after rendering
             if (scrollWrapper) {
                 initializeAutoscroll(window.LEADERBOARD_CONFIG.scrollSpeed);
             }
@@ -49,49 +45,37 @@ function renderPodium(data) {
     const podiumSection = document.getElementById('podium-section');
     if (!podiumSection || !window.LEADERBOARD_CONFIG.showPodium) return;
 
-    // Count occurrences of each rank
+    // 1. Analyze Ranks
     const rankCounts = {};
     const rankMap = {};
     
     data.forEach(item => {
-        if (!rankCounts[item.rank]) {
-            rankCounts[item.rank] = 0;
-        }
+        if (!rankCounts[item.rank]) rankCounts[item.rank] = 0;
         rankCounts[item.rank]++;
-        
-        // Store the first occurrence of each rank
-        if (!rankMap[item.rank]) {
-            rankMap[item.rank] = item;
-        }
+        if (!rankMap[item.rank]) rankMap[item.rank] = item;
     });
 
-    // Check if each rank has exactly 1 person
-    const hasExactlyOneRank1 = rankCounts[1] === 1;
-    const hasExactlyOneRank2 = rankCounts[2] === 1;
-    const hasExactlyOneRank3 = rankCounts[3] === 1;
+    // 2. Check Uniqueness
+    const isRank1Unique = rankCounts[1] === 1;
+    const isRank2Unique = rankCounts[2] === 1;
+    const isRank3Unique = rankCounts[3] === 1;
 
-    // Determine which ranks to display based on hierarchy
-    const shouldShowRank1 = hasExactlyOneRank1;
-    const shouldShowRank2 = shouldShowRank1 && hasExactlyOneRank2;
-    const shouldShowRank3 = shouldShowRank2 && hasExactlyOneRank3;
+    const show1 = isRank1Unique;
+    const show2 = show1 && isRank2Unique;
+    const show3 = show2 && isRank3Unique;
 
-    // If nothing to show, hide the podium container
-    if (!shouldShowRank1 && !shouldShowRank2 && !shouldShowRank3) {
+    if (!show1 && !show2 && !show3) {
         podiumSection.style.display = 'none';
         return;
     }
 
-    // Show the podium container
     podiumSection.style.display = 'flex';
 
-    let html = '<div class="podium-flex">';
-    
-    // Display in order: 1, 2, 3 (only if conditions are met)
-    if (shouldShowRank1) {
-        const item = rankMap[1];
-        html += `
-        <div class="podium-item first">
-            <div class="trophy-container">
+    // Helper to create HTML for a podium spot
+    const createPodiumItem = (item, rank, positionClass, medalType) => {
+        // Trophy SVG - Only for 1st place, rendered INSIDE the bar
+        const trophyHtml = rank === 1 ? `
+            <div class="trophy-wrapper">
                 <div class="trophy">
                     <div class="trophy-cup"></div>
                     <div class="trophy-handle-left"></div>
@@ -100,102 +84,59 @@ function renderPodium(data) {
                     <div class="trophy-base"></div>
                     <div class="trophy-sparkle"></div>
                 </div>
-            </div>
-            <div class="podium-rank">1</div>
+            </div>` : '';
+
+        return `
+        <div class="podium-item ${positionClass}">
+            <div class="podium-rank">${'#' + rank}</div>
             <div class="podium-name">${item.key || "Inconnu"}</div>
             <div class="podium-points">${item.point || 0} pts</div>
-            <div class="podium-bar gold"></div>
+            <div class="podium-bar ${medalType}">
+                ${trophyHtml}
+            </div>
         </div>`;
-    }
+    };
+
+    let html = '<div class="podium-flex">';
     
-    if (shouldShowRank2) {
-        const item = rankMap[2];
-        html += `
-            <div class="podium-item second">
-                <div class="trophy-container">
-                    <div class="trophy silver-trophy">
-                        <div class="trophy-cup"></div>
-                        <div class="trophy-handle-left"></div>
-                        <div class="trophy-handle-right"></div>
-                        <div class="trophy-stem"></div>
-                        <div class="trophy-base"></div>
-                        <div class="trophy-sparkle"></div>
-                    </div>
-                </div>
-                <div class="podium-rank">#2</div>
-                <div class="podium-name">${item.key || "Inconnu"}</div>
-                <div class="podium-points">${item.point || 0} pts</div>
-                <div class="podium-bar silver"></div>
-            </div>
-        `;
-    }
-    
-    if (shouldShowRank3) {
-        const item = rankMap[3];
-        html += `
-            <div class="podium-item third">
-                <div class="trophy-container">
-                    <div class="trophy bronze-trophy">
-                        <div class="trophy-cup"></div>
-                        <div class="trophy-handle-left"></div>
-                        <div class="trophy-handle-right"></div>
-                        <div class="trophy-stem"></div>
-                        <div class="trophy-base"></div>
-                        <div class="trophy-sparkle"></div>
-                    </div>
-                </div>
-                <div class="podium-rank">#3</div>
-                <div class="podium-name">${item.key || "Inconnu"}</div>
-                <div class="podium-points">${item.point || 0} pts</div>
-                <div class="podium-bar bronze"></div>
-            </div>
-        `;
-    }
+    // ORDER: 2nd (Left) -> 1st (Center) -> 3rd (Right)
+    if (show2) html += createPodiumItem(rankMap[2], 2, 'second', 'silver');
+    if (show1) html += createPodiumItem(rankMap[1], 1, 'first', 'gold');
+    if (show3) html += createPodiumItem(rankMap[3], 3, 'third', 'bronze');
     
     html += '</div>';
     podiumSection.innerHTML = html;
 }
 
 /**
- * Renders the Table Rows (Top 10 + ties at position 10, excluding podium members)
+ * Renders the Table Rows
  */
 function renderTable(data) {
     const tableBody = document.getElementById('table-body');
     if (!tableBody) return;
 
-    // Get the ranks that are displayed in the podium
     const podiumRanks = new Set();
     const rankCounts = {};
     
     data.forEach(item => {
-        if (!rankCounts[item.rank]) {
-            rankCounts[item.rank] = 0;
-        }
+        if (!rankCounts[item.rank]) rankCounts[item.rank] = 0;
         rankCounts[item.rank]++;
     });
 
-    const hasExactlyOneRank1 = rankCounts[1] === 1;
-    const hasExactlyOneRank2 = rankCounts[2] === 1;
-    const hasExactlyOneRank3 = rankCounts[3] === 1;
+    const isRank1Unique = rankCounts[1] === 1;
+    const isRank2Unique = rankCounts[2] === 1;
+    const isRank3Unique = rankCounts[3] === 1;
 
-    const shouldShowRank1 = hasExactlyOneRank1;
-    const shouldShowRank2 = shouldShowRank1 && hasExactlyOneRank2;
-    const shouldShowRank3 = shouldShowRank2 && hasExactlyOneRank3;
+    if (isRank1Unique) podiumRanks.add(1);
+    if (isRank1Unique && isRank2Unique) podiumRanks.add(2);
+    if (isRank1Unique && isRank2Unique && isRank3Unique) podiumRanks.add(3);
 
-    if (shouldShowRank1) podiumRanks.add(1);
-    if (shouldShowRank2) podiumRanks.add(2);
-    if (shouldShowRank3) podiumRanks.add(3);
-
-    // Filter out podium members
     const tableData = data.filter(item => !podiumRanks.has(item.rank));
-
-    // Get top 10 entries from remaining data
     const top10 = tableData.slice(0, 10);
     let displayData = [...top10];
     
     if (top10.length === 10) {
         const tenthPlacePoints = top10[9].point;
-        
         for (let i = 10; i < tableData.length; i++) {
             if (tableData[i].point === tenthPlacePoints) {
                 displayData.push(tableData[i]);
@@ -224,9 +165,6 @@ function renderTable(data) {
     tableBody.innerHTML = html;
 }
 
-/**
- * Shows an empty/error state in the table
- */
 function showEmptyState(message) {
     const tableBody = document.getElementById('table-body');
     if (tableBody) {

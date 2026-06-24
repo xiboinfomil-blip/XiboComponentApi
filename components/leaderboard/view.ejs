@@ -4,12 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= title %></title>
-    <!-- Updated version to force cache refresh -->
-    <link rel="stylesheet" href="/assets/leaderboard/style.css?v=4.0.0">
+    <link rel="stylesheet" href="/assets/leaderboard/style.css?v=4.1.0">
 </head>
-<body style="background: transparent; margin: 0; padding: 2rem 1rem; display: flex; justify-content: center; align-items: center; min-height: 100vh;">
+<body style="background: transparent; margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; height: 100vh; width: 100vw; overflow: hidden;">
     
-    <div id="leaderboard-container">
+    <!-- Container now fills the flex parent -->
+    <div id="leaderboard-container" style="width: 100%; height: 100%; max-width: 100%; max-height: 100%;">
         <div class="ambient-glow"></div>
         
         <div class="leaderboard-header">
@@ -18,11 +18,10 @@
         </div>
         
         <!-- Podium Container -->
-        <!-- We keep this compact to let the table breathe -->
         <div id="podium-section" class="podium-container">
             </div>
 
-        <!-- Table Wrapper - Takes remaining space -->
+        <!-- Table Wrapper -->
         <div class="table-wrapper" id="scroll-wrapper">
             <table>
                 <thead>
@@ -52,6 +51,6 @@
             showPodium: <%= showPodium !== false ? 'true' : 'false' %>
         };
     </script>
-    <script src="/assets/leaderboard/script.js?v=4.0.0"></script>
+    <script src="/assets/leaderboard/script.js?v=4.1.0"></script>
 </body>
 </html>
