@@ -239,7 +239,99 @@ function initializeAutoscroll(speed) {
         } else {
             currentScroll -= step;
             if (currentScroll <= 0) {
+                currentScroll = 0;// --- AUTOSCROLL LOGIC ---
+function initializeAutoscroll(speed) {
+    const rows = scrollWrapper.querySelectorAll("tbody tr");
+    if (rows.length <= 1) {
+        if (window.parent && typeof window.parent.postMessage === "function") {
+            window.parent.postMessage("stop", "*");
+        }
+        return;
+    }
+
+    if (scrollInterval) clearInterval(scrollInterval);
+    if (animationFrameId) cancelAnimationFrame(animationFrameId);
+
+    // 1. ADJUSTED SPEED: 
+    // Reduced multiplier from 15 to 8 for a much slower, readable pace.
+    // If speed config is 1, it will now move 8px/sec instead of 15px/sec.
+    const speedFactor = (typeof speed === 'number' && speed > 0) ? speed : 0.5;
+    const pixelsPerSecond = speedFactor * 8; 
+
+    let currentScroll = scrollWrapper.scrollTop;
+    let isScrollingDown = true;
+    let pauseTimer = null;
+    let lastTime = null;
+    
+    const scrollHeight = scrollWrapper.scrollHeight;
+    const clientHeight = scrollWrapper.clientHeight;
+    const maxScroll = scrollHeight - clientHeight;
+    
+    if (maxScroll <= 0) {
+        if (window.parent && typeof window.parent.postMessage === "function") {
+            window.parent.postMessage("stop", "*");
+        }
+        return;
+    }
+
+    function scrollStep(timestamp) {
+        if (!document.getElementById("scroll-wrapper")) return;
+
+        if (!lastTime) lastTime = timestamp;
+        const deltaTime = timestamp - lastTime;
+        lastTime = timestamp;
+
+        // If we are currently paused at the top or bottom, keep requesting frames
+        // but do not update scrollTop until the timer clears.
+        if (pauseTimer) {
+            animationFrameId = requestAnimationFrame(scrollStep);
+            return;
+        }
+
+        const step = (pixelsPerSecond * deltaTime) / 1000;
+
+        if (isScrollingDown) {
+            currentScroll += step;
+            // Check if we hit the bottom
+            if (currentScroll >= maxScroll) {
+                currentScroll = maxScroll;
+                scrollWrapper.scrollTop = currentScroll; // Ensure exact position
+                
+                // 2. ADJUSTED PAUSE: 
+                // Increased from 2000ms (2s) to 4000ms (4s) to allow more reading time.
+                pauseTimer = setTimeout(() => {
+                    pauseTimer = null;
+                    lastTime = null; 
+                    isScrollingDown = false;
+                }, 4000); 
+            }
+        } else {
+            currentScroll -= step;
+            // Check if we hit the top
+            if (currentScroll <= 0) {
                 currentScroll = 0;
+                scrollWrapper.scrollTop = currentScroll; // Ensure exact position
+
+                // 2. ADJUSTED PAUSE: 
+                // Increased from 2000ms (2s) to 4000ms (4s) to allow more reading time.
+                pauseTimer = setTimeout(() => {
+                    pauseTimer = null;
+                    lastTime = null; 
+                    isScrollingDown = true;
+                }, 4000); 
+            }
+        }
+
+        // Only update scrollTop if we aren't paused
+        if (!pauseTimer) {
+            scrollWrapper.scrollTop = currentScroll;
+        }
+        
+        animationFrameId = requestAnimationFrame(scrollStep);
+    }
+
+    animationFrameId = requestAnimationFrame(scrollStep);
+}
                 pauseTimer = setTimeout(() => {
                     pauseTimer = null;
                     lastTime = null; 
