@@ -69,11 +69,20 @@ const getMatchStatusInfo = (matchDateStr) => {
     }
 };
 
-exports.getTodayMatches = async (useDummyData = false) => {
+/**
+ * Fetches today's matches.
+ * @param {Object} options - Configuration options
+ * @param {boolean} options.refetch - Force bypass cache and pull fresh data
+ * @param {boolean} useDummyData - Legacy fallback flag to force dummy data
+ */
+exports.getTodayMatches = async (options = {}, useDummyData = false) => {
+    // Extract refetch flag from options payload
+    const { refetch = false } = options;
     const apiUrl = "https://euro.omediainteractive.net/imleuro/items/matches";
     
     console.log("=".repeat(80));
     console.log("[getTodayMatches] Function called");
+    console.log("[getTodayMatches] refetch:", refetch);
     console.log("[getTodayMatches] useDummyData:", useDummyData);
     console.log("[getTodayMatches] Current Time:", new Date().toISOString());
 
@@ -103,18 +112,22 @@ exports.getTodayMatches = async (useDummyData = false) => {
         ];
     };
 
-    // --- STEP 1: Check KV Cache ---
+    // --- STEP 1: Check KV Cache (Bypassed if refetch is true) ---
     if (!useDummyData) {
-        try {
-            const cachedMatches = await kv.get(MATCHES_CACHE_KEY);
-            if (cachedMatches && Array.isArray(cachedMatches)) {
-                console.log("[getTodayMatches] ✅ Serving matches from Vercel KV cache");
-                // Recalculate status info dynamically because time passes even if data is cached
-                return cachedMatches.map(m => ({ ...m, statusInfo: getMatchStatusInfo(m.date) }));
+        if (refetch) {
+            console.log("[getTodayMatches] 🔄 ?refetch=true detected. Bypassing cache to fetch fresh data...");
+        } else {
+            try {
+                const cachedMatches = await kv.get(MATCHES_CACHE_KEY);
+                if (cachedMatches && Array.isArray(cachedMatches)) {
+                    console.log("[getTodayMatches] ✅ Serving matches from Vercel KV cache");
+                    // Recalculate status info dynamically because time passes even if data is cached
+                    return cachedMatches.map(m => ({ ...m, statusInfo: getMatchStatusInfo(m.date) }));
+                }
+                console.log("[getTodayMatches] ⚠️ Cache miss. Fetching from external API...");
+            } catch (cacheError) {
+                console.warn("[getTodayMatches] Failed to read from KV cache:", cacheError.message);
             }
-            console.log("[getTodayMatches] ⚠️ Cache miss. Fetching from external API...");
-        } catch (cacheError) {
-            console.warn("[getTodayMatches] Failed to read from KV cache:", cacheError.message);
         }
     }
 
@@ -176,7 +189,7 @@ exports.getTodayMatches = async (useDummyData = false) => {
             statusInfo: getMatchStatusInfo(match.date)
         }));
 
-        // --- STEP 2: Save to KV Cache ---
+        // --- STEP 2: Save / Update KV Cache ---
         if (enrichedMatches.length > 0 && !useDummyData) {
             try {
                 const msUntilExp = getMsUntilNextExpiration();
@@ -184,7 +197,7 @@ exports.getTodayMatches = async (useDummyData = false) => {
                 
                 // Store in KV with expiration
                 await kv.set(MATCHES_CACHE_KEY, enrichedMatches, { ex: secondsUntilExp });
-                console.log(`[getTodayMatches] 💾 Matches cached in KV for ${secondsUntilExp} seconds.`);
+                console.log(`[getTodayMatches] 💾 Matches updated in KV for ${secondsUntilExp} seconds.`);
             } catch (cacheWriteError) {
                 console.error("[getTodayMatches] Failed to write to KV cache:", cacheWriteError.message);
             }
