@@ -1,3 +1,4 @@
+import axios from 'axios';
 /**
  * Fetches the leaderboard / pronostics data from the external API using Axios.
  * Uses Vercel KV to cache the result until the next specific expiration hour.
