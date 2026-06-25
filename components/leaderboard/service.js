@@ -1,4 +1,26 @@
 import axios from 'axios';
+import { kv } from '@vercel/kv'; // 👈 FIX 1: Missing Vercel KV import
+
+/**
+ * Helper function to calculate seconds until the next specific expiration hour.
+ * Default is set to the top of the next hour, but you can adjust this logic 
+ * to target specific hours (e.g., midnight, every 6 hours, etc.).
+ * * @returns {number} Seconds remaining until expiration
+ */
+function getSecondsUntilNextExpiration() { // 👈 FIX 2: Missing expiration logic
+    const now = new Date();
+    
+    // Example: Expire at the top of the very next hour
+    const nextHour = new Date(now);
+    nextHour.setHours(now.getHours() + 1, 0, 0, 0);
+    
+    const differenceInMs = nextHour.getTime() - now.getTime();
+    const seconds = Math.ceil(differenceInMs / 1000);
+    
+    // Return a safety minimum of 60 seconds if something goes weird
+    return seconds > 0 ? seconds : 60; 
+}
+
 /**
  * Fetches the leaderboard / pronostics data from the external API using Axios.
  * Uses Vercel KV to cache the result until the next specific expiration hour.
