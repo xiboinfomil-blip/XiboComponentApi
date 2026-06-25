@@ -151,7 +151,7 @@ function renderTable(data) {
         html += `
             <tr data-rank="${item.rank || '-'}">
                 <td class="rank-cell"><span class="rank-badge">${item.rank || '-'}</span></td>
-                <td class="name-cell"><span class="team-name">${item.key || "Inconnu"}</span></td>
+                <td class="name-cell"><span class="team-name">${item.key.toUpperCase() || "Inconnu"}</span></td>
                 <td class="points-cell col-right">
                     <span class="points-badge">
                         <span class="pts-highlight">${item.point ?? 0}</span>
