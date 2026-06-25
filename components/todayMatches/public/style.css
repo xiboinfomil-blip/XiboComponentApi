@@ -1,707 +1,429 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap');
 
-/* Reset */
-.tm-wrapper * { 
-    margin: 0; 
-    padding: 0; 
-    box-sizing: border-box; 
-}
+/* ---------- Reset ---------- */
+.tm-wrapper * { margin:0; padding:0; box-sizing:border-box; }
 
 .tm-wrapper {
-    width: 100%; 
-    max-width: min(950px, 95vw); 
-    min-width: 320px; 
-    margin: 0 auto;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    min-height: 100vh;
-    
-    position: relative; 
-    display: flex; 
-    justify-content: center; 
-    align-items: center;
-    padding: 1.5rem;
+    width:100%;
+    max-width:min(960px, 95vw);
+    min-width:320px;
+    margin:0 auto;
+    font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    min-height:100vh;
+    display:flex; justify-content:center; align-items:center;
+    padding:1.5rem;
 }
 
-.tm-card-container { 
-    position: relative; 
-    width: 100%; 
-    min-height: 450px; 
-}
+.tm-card-container { position:relative; width:100%; min-height:480px; }
 
-/* Main Card */
+/* ---------- Main Card ---------- */
 .tm-card-worldcup {
-    position: relative; 
-    width: 100%; 
-    min-height: 450px; 
-    border-radius: 2rem; 
-    overflow: hidden;
-    background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #0f172a 100%);
-    box-shadow: 
-        0 40px 100px rgba(0, 0, 0, 0.7),
-        0 0 0 1px rgba(255, 255, 255, 0.1),
-        inset 0 1px 0 rgba(255, 255, 255, 0.15),
-        inset 0 -1px 0 rgba(0, 0, 0, 0.3);
-    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-    opacity: 1;
+    position:relative;
+    width:100%;
+    min-height:480px;
+    border-radius:2rem;
+    overflow:hidden;
+    background:linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #0f172a 100%);
+    box-shadow:
+        0 40px 100px rgba(0,0,0,.7),
+        0 0 0 1px rgba(255,255,255,.1),
+        inset 0 1px 0 rgba(255,255,255,.15);
+    transition:all .6s cubic-bezier(.4,0,.2,1);
 }
-
-.tm-card-worldcup.fade-out { 
-    opacity: 0; 
-    transform: scale(0.95);
+.tm-card-worldcup:hover {
+    transform:translateY(-8px);
+    box-shadow:0 50px 120px rgba(0,0,0,.8), 0 0 0 1px rgba(255,255,255,.15);
 }
+.tm-card-worldcup.fade-out { opacity:0; transform:scale(.96); }
 
-.tm-card-worldcup:hover { 
-    transform: translateY(-12px) scale(1.02); 
-    box-shadow: 
-        0 50px 120px rgba(0, 0, 0, 0.8),
-        0 0 0 1px rgba(255, 255, 255, 0.15),
-        inset 0 1px 0 rgba(255, 255, 255, 0.2),
-        inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+/* ---------- Background Effects ---------- */
+.tm-bg-effects { position:absolute; inset:0; overflow:hidden; z-index:1; }
+.tm-gradient-orb {
+    position:absolute; border-radius:50%;
+    filter:blur(100px); opacity:.35;
+    pointer-events:none; mix-blend-mode:screen;
 }
-
-/* Enhanced Background Effects */
-.tm-bg-effects { 
-    position: absolute; 
-    top: 0; 
-    left: 0; 
-    right: 0; 
-    bottom: 0; 
-    overflow: hidden; 
-    z-index: 1; 
+.tm-orb-1 { width:300px; height:300px; background:radial-gradient(circle,#6366f1,#8b5cf6 50%,transparent 70%); top:-100px; right:-100px; animation:orb1 18s ease-in-out infinite; }
+.tm-orb-2 { width:250px; height:250px; background:radial-gradient(circle,#ec4899,#f43f5e 50%,transparent 70%); bottom:-80px; left:-80px; animation:orb2 22s ease-in-out infinite reverse; }
+.tm-orb-3 { width:220px; height:220px; background:radial-gradient(circle,#06b6d4,#3b82f6 50%,transparent 70%); top:50%; left:50%; transform:translate(-50%,-50%); animation:orb3 25s ease-in-out infinite; }
+.tm-mesh-gradient {
+    position:absolute; inset:0;
+    background:
+        radial-gradient(circle at 20% 80%, rgba(120,119,198,.2) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(255,119,198,.2) 0%, transparent 50%);
+    animation:meshRot 40s linear infinite;
 }
-
-.tm-gradient-orb { 
-    position: absolute; 
-    border-radius: 50%; 
-    filter: blur(100px); 
-    opacity: 0.35; 
-    pointer-events: none; 
-    mix-blend-mode: screen;
-}
-
-.tm-orb-1 { 
-    width: 300px; 
-    height: 300px; 
-    background: radial-gradient(circle, #6366f1 0%, #8b5cf6 50%, transparent 70%);
-    top: -100px; 
-    right: -100px; 
-    animation: tmOrbFloat1 18s ease-in-out infinite; 
-}
-
-.tm-orb-2 { 
-    width: 250px; 
-    height: 250px; 
-    background: radial-gradient(circle, #ec4899 0%, #f43f5e 50%, transparent 70%);
-    bottom: -80px; 
-    left: -80px; 
-    animation: tmOrbFloat2 22s ease-in-out infinite reverse; 
-}
-
-.tm-orb-3 { 
-    width: 220px; 
-    height: 220px; 
-    background: radial-gradient(circle, #06b6d4 0%, #3b82f6 50%, transparent 70%);
-    top: 50%; 
-    left: 50%; 
-    transform: translate(-50%, -50%); 
-    animation: tmOrbFloat3 25s ease-in-out infinite; 
-}
-
-.tm-orb-4 {
-    width: 180px;
-    height: 180px;
-    background: radial-gradient(circle, #fbbf24 0%, #f59e0b 50%, transparent 70%);
-    top: 20%;
-    left: 10%;
-    animation: tmOrbFloat4 20s ease-in-out infinite;
-    opacity: 0.25;
-}
-
-.tm-mesh-gradient { 
-    position: absolute; 
-    top: 0; 
-    left: 0; 
-    right: 0; 
-    bottom: 0; 
-    background: 
-        radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.2) 0%, transparent 50%),
-        radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.2) 0%, transparent 50%),
-        radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.15) 0%, transparent 50%),
-        radial-gradient(circle at 60% 60%, rgba(251, 191, 36, 0.1) 0%, transparent 50%);
-    animation: tmMeshRotate 40s linear infinite; 
-}
-
 .tm-noise-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    opacity: 0.03;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-    pointer-events: none;
+    position:absolute; inset:0; opacity:.03; pointer-events:none;
+    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+@keyframes orb1 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(30px,-30px) scale(1.2)} }
+@keyframes orb2 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(-35px,35px) scale(1.15)} }
+@keyframes orb3 { 0%,100%{transform:translate(-50%,-50%) scale(1)} 50%{transform:translate(-45%,-55%) scale(1.2)} }
+@keyframes meshRot { to { transform:rotate(360deg); } }
+
+.tm-glass-overlay {
+    position:absolute; inset:0;
+    background:rgba(10,14,39,.5);
+    backdrop-filter:blur(60px) saturate(200%);
+    -webkit-backdrop-filter:blur(60px) saturate(200%);
+    z-index:2;
 }
 
-@keyframes tmOrbFloat1 { 
-    0%, 100% { transform: translate(0, 0) scale(1); } 
-    25% { transform: translate(50px, -50px) scale(1.15); }
-    50% { transform: translate(30px, -30px) scale(1.2); }
-    75% { transform: translate(-20px, -40px) scale(1.1); }
+/* ---------- Content ---------- */
+.tm-card-content {
+    position:relative; z-index:3;
+    padding:2.5rem;
+    display:flex; flex-direction:column;
+    height:100%; gap:1.5rem;
 }
 
-@keyframes tmOrbFloat2 { 
-    0%, 100% { transform: translate(0, 0) scale(1); } 
-    25% { transform: translate(-40px, 40px) scale(1.1); }
-    50% { transform: translate(-35px, 35px) scale(1.15); }
-    75% { transform: translate(-50px, 20px) scale(1.05); }
-}
-
-@keyframes tmOrbFloat3 { 
-    0%, 100% { transform: translate(-50%, -50%) scale(1); } 
-    33% { transform: translate(-45%, -55%) scale(1.2); }
-    66% { transform: translate(-55%, -45%) scale(1.15); }
-}
-
-@keyframes tmOrbFloat4 {
-    0%, 100% { transform: translate(0, 0) scale(1); }
-    50% { transform: translate(30px, 40px) scale(1.25); }
-}
-
-@keyframes tmMeshRotate { 
-    0% { transform: rotate(0deg); } 
-    100% { transform: rotate(360deg); } 
-}
-
-/* Glass Overlay */
-.tm-glass-overlay { 
-    position: absolute; 
-    top: 0; 
-    left: 0; 
-    right: 0; 
-    bottom: 0; 
-    background: rgba(10, 14, 39, 0.5);
-    backdrop-filter: blur(60px) saturate(200%); 
-    -webkit-backdrop-filter: blur(60px) saturate(200%); 
-    z-index: 2; 
-}
-
-/* Card Content */
-.tm-card-content { 
-    position: relative; 
-    z-index: 3; 
-    padding: 2.5rem; 
-    display: flex; 
-    flex-direction: column; 
-    height: 100%; 
-    gap: 1.5rem;
-}
-
-/* Header */
-.tm-card-header { 
-    display: flex; 
-    justify-content: center; 
-    align-items: center; 
-    gap: 1rem; 
-    flex-wrap: wrap; 
-}
-
-/* Status Badge */
+/* ---------- Header / Status ---------- */
+.tm-header { display:flex; justify-content:center; }
 .tm-status-badge {
-    padding: 0.75rem 1.5rem;
-    border-radius: 2rem;
-    font-weight: 800;
-    font-size: 0.875rem;
-    text-transform: uppercase;
-    letter-spacing: 1.2px;
-    display: flex;
-    align-items: center;
-    gap: 0.625rem;
-    backdrop-filter: blur(15px);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    white-space: nowrap;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    padding:.75rem 1.5rem; border-radius:2rem;
+    font-weight:800; font-size:.875rem;
+    text-transform:uppercase; letter-spacing:1.2px;
+    display:flex; align-items:center; gap:.625rem;
+    backdrop-filter:blur(15px);
+    border:1px solid rgba(255,255,255,.15);
+    white-space:nowrap;
+    box-shadow:0 8px 32px rgba(0,0,0,.3);
+}
+.tm-status-upcoming { background:linear-gradient(135deg,rgba(59,130,246,.25),rgba(99,102,241,.25)); color:#60a5fa; border-color:rgba(59,130,246,.4); }
+.tm-status-live     { background:linear-gradient(135deg,rgba(239,68,68,.3),rgba(244,63,94,.3));  color:#fca5a5; border-color:rgba(239,68,68,.5); animation:livePulse 2s infinite; }
+.tm-status-finished { background:linear-gradient(135deg,rgba(100,116,139,.25),rgba(71,85,105,.25)); color:#cbd5e1; border-color:rgba(100,116,139,.4); }
+
+.tm-live-dot {
+    width:10px; height:10px;
+    background:linear-gradient(135deg,#ef4444,#f43f5e);
+    border-radius:50%;
+    box-shadow:0 0 15px #ef4444;
+    animation:dotPulse 1.5s ease-in-out infinite;
+}
+@keyframes livePulse { 0%,100%{box-shadow:0 8px 32px rgba(239,68,68,.4)} 50%{box-shadow:0 12px 40px rgba(239,68,68,.6); transform:scale(1.02)} }
+@keyframes dotPulse  { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.3);opacity:.7} }
+
+/* ---------- Matchup ---------- */
+.tm-matchup {
+    flex:1;
+    display:grid;
+    grid-template-columns:1fr auto 1fr;
+    align-items:center;
+    gap:1.5rem;
+    margin:1rem 0;
 }
 
-.tm-status-upcoming { 
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.25), rgba(99, 102, 241, 0.25));
-    color: #60a5fa; 
-    border-color: rgba(59, 130, 246, 0.4);
-    box-shadow: 0 8px 32px rgba(59, 130, 246, 0.3);
+/* ---------- Team ---------- */
+.tm-team {
+    display:flex; flex-direction:column; align-items:center;
+    gap:.9rem;
+    transition:all .6s cubic-bezier(.4,0,.2,1);
+    position:relative;
 }
 
-.tm-status-live { 
-    background: linear-gradient(135deg, rgba(239, 68, 68, 0.3), rgba(244, 63, 94, 0.3));
-    color: #fca5a5; 
-    border-color: rgba(239, 68, 68, 0.5);
-    box-shadow: 0 8px 32px rgba(239, 68, 68, 0.4);
-    animation: tmLivePulse 2s infinite;
+/* Crown (hidden by default) */
+.tm-crown {
+    width:44px; height:44px;
+    color:#fbbf24;
+    opacity:0; transform:translateY(10px) scale(.6);
+    transition:all .6s cubic-bezier(.34,1.56,.64,1);
+    filter:drop-shadow(0 0 12px rgba(251,191,36,.6));
+    pointer-events:none;
 }
-
-.tm-status-finished { 
-    background: linear-gradient(135deg, rgba(100, 116, 139, 0.25), rgba(71, 85, 105, 0.25));
-    color: #cbd5e1; 
-    border-color: rgba(100, 116, 139, 0.4);
-}
-
-.tm-live-dot { 
-    width: 10px; 
-    height: 10px; 
-    background: linear-gradient(135deg, #ef4444, #f43f5e);
-    border-radius: 50%; 
-    box-shadow: 0 0 15px #ef4444, 0 0 25px rgba(239, 68, 68, 0.5);
-    animation: tmLiveDotPulse 1.5s ease-in-out infinite;
-}
-
-@keyframes tmLivePulse { 
-    0%, 100% { 
-        box-shadow: 0 8px 32px rgba(239, 68, 68, 0.4);
-        transform: scale(1);
-    } 
-    50% { 
-        box-shadow: 0 12px 40px rgba(239, 68, 68, 0.6);
-        transform: scale(1.02);
-    } 
-}
-
-@keyframes tmLiveDotPulse {
-    0%, 100% { 
-        transform: scale(1);
-        opacity: 1;
-    }
-    50% { 
-        transform: scale(1.3);
-        opacity: 0.7;
-    }
-}
-
-/* Matchup Container */
-.tm-matchup-container { 
-    flex: 1; 
-    display: grid; 
-    grid-template-columns: 1fr auto 1fr; 
-    align-items: center; 
-    gap: 2rem; 
-    margin: 1rem 0;
-}
-
-/* Team */
-.tm-team { 
-    display: flex; 
-    flex-direction: column; 
-    align-items: center; 
-    gap: 1rem; 
-    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); 
-    min-width: 0; 
-    position: relative;
-}
-
-.tm-team:hover { 
-    transform: scale(1.08) translateY(-5px); 
-}
+.tm-crown svg { width:100%; height:100%; }
 
 /* Flag */
-.tm-flag-wrapper { 
-    position: relative; 
-    display: flex; 
-    justify-content: center; 
+.tm-flag-wrapper { position:relative; display:flex; justify-content:center; }
+.tm-flag-container {
+    position:relative;
+    width:clamp(80px,17vw,120px);
+    height:clamp(58px,12vw,85px);
+    border-radius:1.25rem;
+    overflow:hidden;
+    background:rgba(255,255,255,.08);
+    backdrop-filter:blur(25px);
+    border:2px solid rgba(255,255,255,.18);
+    box-shadow:0 20px 50px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.25);
+    transition:all .5s cubic-bezier(.4,0,.2,1);
 }
-
-.tm-flag-container { 
-    position: relative; 
-    width: clamp(70px, 16vw, 110px); 
-    height: clamp(50px, 11vw, 75px); 
-    border-radius: 1.25rem; 
-    overflow: hidden; 
-    background: rgba(255, 255, 255, 0.1); 
-    backdrop-filter: blur(25px); 
-    border: 2px solid rgba(255, 255, 255, 0.2); 
-    box-shadow: 
-        0 20px 50px rgba(0, 0, 0, 0.5),
-        inset 0 1px 0 rgba(255, 255, 255, 0.3),
-        inset 0 -1px 0 rgba(0, 0, 0, 0.2);
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
-}
-
 .tm-flag-shine {
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-    transition: left 0.6s ease;
-    z-index: 2;
+    position:absolute; top:0; left:-100%;
+    width:100%; height:100%;
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent);
+    transition:left .6s ease; z-index:2;
+}
+.tm-team:hover .tm-flag-shine { left:100%; }
+.tm-flag-image { width:100%; height:100%; object-fit:cover; display:block; position:relative; z-index:1; }
+.tm-flag-fallback {
+    width:100%; height:100%;
+    display:flex !important; align-items:center; justify-content:center;
+    font-size:2.5rem; font-weight:900; color:#a78bfa;
+    background:linear-gradient(135deg,rgba(99,102,241,.4),rgba(168,85,247,.4));
 }
 
-.tm-team:hover .tm-flag-shine {
-    left: 100%;
+/* Team name & score */
+.tm-team-name {
+    font-family:'Space Grotesk', sans-serif;
+    font-size:clamp(1rem,2.8vw,1.3rem);
+    font-weight:700; color:#f1f5f9;
+    text-align:center; line-height:1.3;
+    text-shadow:0 2px 15px rgba(0,0,0,.5);
+    transition:all .4s ease;
+}
+.tm-team-score {
+    font-family:'Space Grotesk', sans-serif;
+    font-size:clamp(2.25rem,6vw,3.75rem);
+    font-weight:900; color:#fff; line-height:1;
+    font-variant-numeric:tabular-nums;
+    text-shadow:0 4px 20px rgba(0,0,0,.6);
+    transition:all .4s ease;
 }
 
-.tm-team:hover .tm-flag-container {
-    border-color: rgba(255, 255, 255, 0.4);
-    box-shadow: 
-        0 25px 60px rgba(0, 0, 0, 0.6),
-        0 0 40px rgba(139, 92, 246, 0.3),
-        inset 0 1px 0 rgba(255, 255, 255, 0.4);
-}
-
-.tm-flag-image { 
-    width: 100%; 
-    height: 100%; 
-    object-fit: cover; 
-    display: block; 
-    position: relative;
-    z-index: 1;
-}
-
-.tm-flag-fallback { 
-    width: 100%; 
-    height: 100%; 
-    display: flex !important; 
-    align-items: center; 
-    justify-content: center; 
-    font-size: 2.5rem; 
-    font-weight: 900; 
-    color: #a78bfa; 
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.4), rgba(168, 85, 247, 0.4));
-    position: relative;
-    z-index: 1;
-}
-
-/* Team Name */
-.tm-team-name { 
-    font-family: 'Space Grotesk', 'Inter', sans-serif;
-    font-size: clamp(1rem, 2.8vw, 1.25rem); 
-    font-weight: 700; 
-    color: #f1f5f9; 
-    text-align: center; 
-    line-height: 1.4; 
-    max-width: 100%; 
-    text-shadow: 0 2px 15px rgba(0, 0, 0, 0.5);
-    word-wrap: break-word;
-    transition: all 0.3s ease;
-}
-
-/* Team Score */
-.tm-team-score { 
-    font-family: 'Space Grotesk', 'Inter', sans-serif;
-    font-size: clamp(2rem, 6vw, 3.5rem); 
-    font-weight: 900; 
-    color: #ffffff; 
-    line-height: 1; 
-    text-shadow: 
-        0 4px 20px rgba(0, 0, 0, 0.6),
-        0 0 40px rgba(139, 92, 246, 0.3);
-    transition: all 0.3s ease;
-}
-
-/* Result Badges */
+/* Result badge (hidden by default) */
 .tm-result-badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    padding: 0.625rem 1.25rem;
-    border-radius: 2rem;
-    font-size: 0.875rem;
-    font-weight: 800;
-    letter-spacing: 0.8px;
-    backdrop-filter: blur(15px);
-    text-transform: uppercase;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    display:inline-flex; align-items:center; justify-content:center; gap:.5rem;
+    padding:.6rem 1.2rem; border-radius:2rem;
+    font-size:.8rem; font-weight:800; letter-spacing:.8px;
+    text-transform:uppercase;
+    backdrop-filter:blur(15px);
+    opacity:0; transform:translateY(8px);
+    transition:all .5s cubic-bezier(.4,0,.2,1);
+    pointer-events:none;
+    white-space:nowrap;
 }
 
-/* Center Badge (for Draw) */
-.tm-center-badge {
-    display: none; /* Hidden by default */
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    padding: 0.625rem 1.25rem;
-    border-radius: 2rem;
-    font-size: 0.875rem;
-    font-weight: 800;
-    letter-spacing: 0.8px;
-    backdrop-filter: blur(15px);
-    text-transform: uppercase;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    background: linear-gradient(135deg, rgba(148, 163, 184, 0.25), rgba(100, 116, 139, 0.25));
-    color: #e2e8f0;
-    border: 2px solid rgba(148, 163, 184, 0.5);
-    box-shadow: 
-        0 8px 24px rgba(0, 0, 0, 0.3),
-        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+/* ---------- Center ---------- */
+.tm-center {
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:1rem; flex-shrink:0; min-width:110px;
+    position:relative;
 }
-
-/* Winner Styles */
-.tm-winner .tm-result-badge {
-    background: linear-gradient(135deg, rgba(251, 191, 36, 0.3), rgba(245, 158, 11, 0.3));
-    color: #fbbf24;
-    border: 2px solid rgba(251, 191, 36, 0.6);
-    box-shadow: 
-        0 0 30px rgba(251, 191, 36, 0.4),
-        0 8px 24px rgba(0, 0, 0, 0.3),
-        inset 0 1px 0 rgba(255, 255, 255, 0.3);
-    animation: tmWinnerPulse 2.5s ease-in-out infinite;
+.tm-vs-badge {
+    width:clamp(54px,12vw,82px);
+    height:clamp(54px,12vw,82px);
+    border-radius:50%;
+    background:linear-gradient(135deg,rgba(255,255,255,.15),rgba(255,255,255,.05));
+    backdrop-filter:blur(25px);
+    display:flex; align-items:center; justify-content:center;
+    border:2px solid rgba(255,255,255,.2);
+    box-shadow:0 16px 40px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.3);
+    transition:all .5s ease;
+    position:relative;
 }
-
-@keyframes tmWinnerPulse {
-    0%, 100% { 
-        box-shadow: 
-            0 0 30px rgba(251, 191, 36, 0.4),
-            0 8px 24px rgba(0, 0, 0, 0.3);
-        transform: scale(1); 
-    }
-    50% { 
-        box-shadow: 
-            0 0 50px rgba(251, 191, 36, 0.6),
-            0 12px 32px rgba(0, 0, 0, 0.4);
-        transform: scale(1.05); 
-    }
+.tm-vs-text {
+    font-family:'Space Grotesk', sans-serif;
+    font-size:clamp(.9rem,2.5vw,1.3rem);
+    font-weight:900; color:#e2e8f0;
+    transition:opacity .3s ease;
 }
-
-.tm-winner .tm-flag-container { 
-    border-color: rgba(251, 191, 36, 0.9); 
-    box-shadow: 
-        0 0 80px rgba(251, 191, 36, 0.5),
-        0 20px 50px rgba(0, 0, 0, 0.5);
-    animation: tmWinnerGlow 3s ease-in-out infinite; 
-}
-
-@keyframes tmWinnerGlow { 
-    0%, 100% { 
-        box-shadow: 
-            0 0 80px rgba(251, 191, 36, 0.5),
-            0 20px 50px rgba(0, 0, 0, 0.5);
-    } 
-    50% { 
-        box-shadow: 
-            0 0 100px rgba(251, 191, 36, 0.7),
-            0 25px 60px rgba(0, 0, 0, 0.6);
-    } 
-}
-
-.tm-winner .tm-team-name { 
-    color: #fbbf24; 
-    font-weight: 800;
-    text-shadow: 
-        0 0 40px rgba(251, 191, 36, 0.6),
-        0 2px 15px rgba(0, 0, 0, 0.5);
-}
-
-.tm-winner .tm-team-score { 
-    color: #fbbf24; 
-    text-shadow: 
-        0 0 50px rgba(251, 191, 36, 0.7),
-        0 4px 20px rgba(0, 0, 0, 0.6);
-}
-
-/* Loser Styles */
-.tm-loser .tm-team-name {
-    color: #64748b;
-    opacity: 0.7;
-}
-
-.tm-loser .tm-team-score {
-    color: #94a3b8;
-    opacity: 0.8;
-}
-
-/* Draw Styles */
-.tm-draw .tm-team-name {
-    color: #94a3b8;
-}
-
-/* Center Display */
-.tm-center-display { 
-    display: flex; 
-    flex-direction: column; 
-    align-items: center; 
-    justify-content: center; 
-    gap: 1rem; 
-    flex-shrink: 0; 
-    min-width: 100px;
-}
-
-.tm-vs-badge { 
-    width: clamp(50px, 12vw, 80px); 
-    height: clamp(50px, 12vw, 80px); 
-    border-radius: 50%; 
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05));
-    backdrop-filter: blur(25px); 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: clamp(0.875rem, 2.5vw, 1.25rem); 
-    font-weight: 900; 
-    color: #e2e8f0; 
-    border: 2px solid rgba(255, 255, 255, 0.2); 
-    box-shadow: 
-        0 16px 40px rgba(0, 0, 0, 0.4),
-        inset 0 1px 0 rgba(255, 255, 255, 0.3),
-        inset 0 -1px 0 rgba(0, 0, 0, 0.2);
-    transition: all 0.3s ease;
-}
-
-.tm-vs-badge:hover {
-    transform: rotate(5deg) scale(1.1);
-    box-shadow: 
-        0 20px 50px rgba(0, 0, 0, 0.5),
-        0 0 30px rgba(139, 92, 246, 0.3),
-        inset 0 1px 0 rgba(255, 255, 255, 0.4);
+.tm-trophy-icon {
+    width:42%; height:42%;
+    color:#fbbf24;
+    position:absolute;
+    opacity:0; transform:scale(.5);
+    transition:all .5s cubic-bezier(.34,1.56,.64,1);
+    filter:drop-shadow(0 0 10px rgba(251,191,36,.6));
 }
 
 /* Timer */
-.tm-dynamic-time {
-    font-family: 'Space Grotesk', monospace;
-    font-variant-numeric: tabular-nums;
-    font-size: clamp(1.25rem, 3.5vw, 1.75rem);
-    font-weight: 700;
-    color: #f8fafc;
-    text-shadow: 
-        0 2px 15px rgba(0, 0, 0, 0.5),
-        0 0 30px rgba(139, 92, 246, 0.3);
-    text-align: center;
-    letter-spacing: 1px;
+.tm-timer {
+    font-family:'Space Grotesk', monospace;
+    font-variant-numeric:tabular-nums;
+    font-size:clamp(1.1rem,3vw,1.5rem);
+    font-weight:700; color:#f8fafc;
+    text-shadow:0 2px 15px rgba(0,0,0,.5);
+    text-align:center; letter-spacing:1px;
+    transition:all .3s ease;
+}
+.tm-timer.is-live { animation:liveFlicker 1.5s ease-in-out infinite; }
+@keyframes liveFlicker {
+    0%,100%{opacity:1; text-shadow:0 0 30px rgba(139,92,246,.3)}
+    50%    {opacity:.6; text-shadow:0 0 60px rgba(239,68,68,.9)}
 }
 
-/* Live Timer Flicker Effect */
-.tm-dynamic-time.tm-live-flicker {
-    animation: tmLiveFlicker 1.5s ease-in-out infinite;
+/* ---------- DRAW Ribbon (single unified banner) ---------- */
+.tm-draw-ribbon {
+    position:absolute;
+    left:50%; top:50%;
+    transform:translate(-50%,-50%);
+    width:min(640px, 92%);
+    display:flex; align-items:center; justify-content:center; gap:.75rem;
+    padding:.85rem 1.5rem;
+    background:linear-gradient(135deg, rgba(148,163,184,.18), rgba(203,213,225,.12));
+    backdrop-filter:blur(20px) saturate(180%);
+    -webkit-backdrop-filter:blur(20px) saturate(180%);
+    border:1px solid rgba(226,232,240,.35);
+    border-radius:999px;
+    box-shadow:
+        0 10px 40px rgba(0,0,0,.4),
+        inset 0 1px 0 rgba(255,255,255,.25);
+    opacity:0; transform:translate(-50%,-50%) scaleX(.7);
+    transition:all .6s cubic-bezier(.34,1.56,.64,1);
+    pointer-events:none;
+    z-index:5;
+}
+.tm-draw-line {
+    flex:1; height:1px;
+    background:linear-gradient(90deg, transparent, rgba(226,232,240,.6), transparent);
+}
+.tm-draw-text {
+    font-family:'Space Grotesk', sans-serif;
+    font-size:.85rem; font-weight:800;
+    letter-spacing:3px;
+    color:#e2e8f0;
+    text-shadow:0 0 20px rgba(226,232,240,.4);
+    white-space:nowrap;
+    padding:0 .5rem;
 }
 
-@keyframes tmLiveFlicker {
-    0%, 100% { 
-        opacity: 1; 
-        text-shadow: 0 2px 15px rgba(0, 0, 0, 0.5), 0 0 30px rgba(139, 92, 246, 0.3);
-    }
-    50% { 
-        opacity: 0.5; 
-        text-shadow: 0 2px 15px rgba(0, 0, 0, 0.5), 0 0 60px rgba(239, 68, 68, 0.9);
-    }
+/* ---------- Footer ---------- */
+.tm-footer { display:flex; justify-content:center; padding-top:1rem; margin-top:auto; }
+.tm-date {
+    display:inline-flex; align-items:center; gap:.625rem;
+    padding:.7rem 1.2rem;
+    background:linear-gradient(135deg,rgba(59,130,246,.18),rgba(99,102,246,.18));
+    backdrop-filter:blur(15px);
+    border-radius:1rem; color:#93c5fd;
+    font-size:.85rem; font-weight:700; letter-spacing:1px;
+    text-transform:uppercase;
+    border:1px solid rgba(59,130,246,.3);
+    box-shadow:0 8px 24px rgba(59,130,246,.2);
 }
 
-/* Footer */
-.tm-card-footer { 
-    display: flex; 
-    justify-content: center; 
-    padding-top: 1.5rem; 
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    margin-top: auto;
+/* ============================================================
+   STATE: WINNER
+   ============================================================ */
+
+/* Winner team — elevated, glowing, golden */
+.tm-card-worldcup.is-winner .tm-team.is-winner {
+    transform:translateY(-14px) scale(1.05);
+    z-index:4;
+}
+.tm-card-worldcup.is-winner .tm-team.is-winner .tm-crown {
+    opacity:1; transform:translateY(0) scale(1);
+    animation:crownFloat 3s ease-in-out infinite;
+}
+@keyframes crownFloat {
+    0%,100% { transform:translateY(0) scale(1); filter:drop-shadow(0 0 12px rgba(251,191,36,.6)); }
+    50%     { transform:translateY(-6px) scale(1.05); filter:drop-shadow(0 0 22px rgba(251,191,36,.9)); }
 }
 
-.tm-match-date { 
-    display: inline-flex; 
-    align-items: center; 
-    gap: 0.625rem; 
-    padding: 0.75rem 1.25rem; 
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(99, 102, 246, 0.2));
-    backdrop-filter: blur(15px); 
-    border-radius: 1rem; 
-    color: #93c5fd; 
-    font-size: 0.875rem; 
-    font-weight: 700; 
-    letter-spacing: 1px; 
-    text-transform: uppercase; 
-    border: 1px solid rgba(59, 130, 246, 0.3);
-    box-shadow: 
-        0 8px 24px rgba(59, 130, 246, 0.2),
-        inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    transition: all 0.3s ease;
+.tm-card-worldcup.is-winner .tm-team.is-winner .tm-flag-container {
+    border-color:rgba(251,191,36,.85);
+    box-shadow:
+        0 0 0 3px rgba(251,191,36,.2),
+        0 0 60px rgba(251,191,36,.45),
+        0 25px 60px rgba(0,0,0,.5);
+    animation:winnerGlow 3s ease-in-out infinite;
+}
+@keyframes winnerGlow {
+    0%,100% { box-shadow:0 0 0 3px rgba(251,191,36,.2), 0 0 60px rgba(251,191,36,.45), 0 25px 60px rgba(0,0,0,.5); }
+    50%     { box-shadow:0 0 0 5px rgba(251,191,36,.3), 0 0 90px rgba(251,191,36,.7),  0 30px 70px rgba(0,0,0,.6); }
 }
 
-.tm-match-date:hover {
-    transform: translateY(-2px);
-    box-shadow: 
-        0 12px 32px rgba(59, 130, 246, 0.3),
-        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+.tm-card-worldcup.is-winner .tm-team.is-winner .tm-team-name {
+    color:#fde68a;
+    text-shadow:0 0 30px rgba(251,191,36,.5), 0 2px 15px rgba(0,0,0,.5);
+}
+.tm-card-worldcup.is-winner .tm-team.is-winner .tm-team-score {
+    color:#fbbf24;
+    font-size:clamp(2.75rem,7vw,4.5rem);
+    text-shadow:0 0 40px rgba(251,191,36,.7), 0 4px 20px rgba(0,0,0,.6);
+}
+.tm-card-worldcup.is-winner .tm-team.is-winner .tm-result-badge {
+    opacity:1; transform:translateY(0);
+    background:linear-gradient(135deg, rgba(251,191,36,.35), rgba(245,158,11,.3));
+    color:#fde68a;
+    border:1.5px solid rgba(251,191,36,.7);
+    box-shadow:0 0 30px rgba(251,191,36,.4), 0 8px 24px rgba(0,0,0,.3);
+    animation:badgePulse 2.5s ease-in-out infinite;
+}
+@keyframes badgePulse {
+    0%,100% { box-shadow:0 0 30px rgba(251,191,36,.4), 0 8px 24px rgba(0,0,0,.3); transform:translateY(0) scale(1); }
+    50%     { box-shadow:0 0 50px rgba(251,191,36,.7), 0 12px 32px rgba(0,0,0,.4); transform:translateY(0) scale(1.04); }
 }
 
-/* Empty State */
-.tm-empty-state { 
-    text-align: center; 
-    padding: 4rem 2rem; 
-    background: rgba(15, 23, 42, 0.7);
-    backdrop-filter: blur(60px); 
-    border-radius: 2rem; 
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 
-        0 30px 80px rgba(0, 0, 0, 0.6),
-        inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    width: 100%; 
+/* VS Badge in Winner State - KEPT VISIBLE */
+.tm-card-worldcup.is-winner .tm-vs-badge {
+    border-color:rgba(255,255,255,.2); /* Reset to normal border */
+    box-shadow:0 16px 40px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.3);
+    opacity: 1;
+    transform: scale(1);
+}
+/* Hide trophy icon if you want to keep VS text, or show both. 
+   Here we keep VS text visible and hide trophy to avoid overlap/clutter */
+.tm-card-worldcup.is-winner .tm-trophy-icon {
+    opacity: 0;
+    transform: scale(0.5);
+}
+.tm-card-worldcup.is-winner .tm-vs-text {
+    opacity: 1;
+    transform: scale(1);
 }
 
-.tm-empty-icon { 
-    margin-bottom: 2rem; 
-    color: #64748b; 
-    opacity: 0.5; 
+/* Loser team — dimmed, recessed */
+.tm-card-worldcup.is-winner .tm-team.is-loser {
+    transform:translateY(10px) scale(.94);
+    opacity:.55;
+    filter:saturate(.3) brightness(.85);
+}
+.tm-card-worldcup.is-winner .tm-team.is-loser .tm-team-name { color:#94a3b8; }
+.tm-card-worldcup.is-winner .tm-team.is-loser .tm-team-score { color:#cbd5e1; font-size:clamp(2rem,5.5vw,3.25rem); }
+
+/* Hide draw ribbon when there's a winner */
+.tm-card-worldcup.is-winner .tm-draw-ribbon { opacity:0; transform:translate(-50%,-50%) scaleX(.5); }
+
+/* ============================================================
+   STATE: DRAW
+   ============================================================ */
+.tm-card-worldcup.is-draw .tm-draw-ribbon {
+    opacity:1; transform:translate(-50%,-50%) scaleX(1);
+}
+.tm-card-worldcup.is-draw .tm-team {
+    filter:none; opacity:1; transform:none;
+}
+.tm-card-worldcup.is-draw .tm-team .tm-team-name { color:#e2e8f0; }
+.tm-card-worldcup.is-draw .tm-team .tm-team-score {
+    color:#f1f5f9;
+    text-shadow:0 0 25px rgba(226,232,240,.3), 0 4px 20px rgba(0,0,0,.6);
 }
 
-.tm-empty-state h3 { 
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 1.5rem; 
-    font-weight: 800; 
-    color: #f1f5f9; 
-    margin-bottom: 0.75rem; 
+/* VS Badge in Draw State - KEPT VISIBLE */
+.tm-card-worldcup.is-draw .tm-vs-badge {
+    opacity: 1;
+    transform: scale(1);
 }
 
-.tm-empty-state p { 
-    font-size: 1rem; 
-    color: #94a3b8; 
-    font-weight: 500; 
-    line-height: 1.6;
+/* ============================================================
+   STATE: EMPTY
+   ============================================================ */
+.tm-empty-state {
+    text-align:center; padding:4rem 2rem;
+    background:rgba(15,23,42,.7); backdrop-filter:blur(60px);
+    border-radius:2rem; border:1px solid rgba(255,255,255,.1);
+    box-shadow:0 30px 80px rgba(0,0,0,.6);
+    width:100%;
 }
+.tm-empty-icon { margin-bottom:2rem; color:#64748b; opacity:.5; }
+.tm-empty-state h3 { font-family:'Space Grotesk',sans-serif; font-size:1.5rem; font-weight:800; color:#f1f5f9; margin-bottom:.75rem; }
+.tm-empty-state p  { font-size:1rem; color:#94a3b8; font-weight:500; line-height:1.6; }
 
-/* Mobile Adjustments */
-@media (max-width: 600px) {
-    .tm-wrapper { 
-        padding: 0.75rem; 
-    }
-    
-    .tm-card-worldcup { 
-        min-height: 400px; 
-        border-radius: 1.5rem; 
-    }
-    
-    .tm-card-content { 
-        padding: 1.5rem;
-        gap: 1.25rem;
-    }
-    
-    .tm-card-header { 
-        margin-bottom: 0.5rem; 
-    }
-    
-    .tm-matchup-container {
-        gap: 1rem;
-        margin: 0.5rem 0;
-    }
-    
-    .tm-team { 
-        gap: 0.75rem; 
-    }
-    
-    .tm-center-display {
-        min-width: 70px;
-        gap: 0.75rem;
-    }
-    
-    .tm-status-badge {
-        padding: 0.625rem 1.125rem;
-        font-size: 0.75rem;
-    }
-    
+/* ---------- Mobile ---------- */
+@media (max-width:600px) {
+    .tm-wrapper { padding:.75rem; }
+    .tm-card-worldcup { min-height:440px; border-radius:1.5rem; }
+    .tm-card-content { padding:1.5rem; gap:1.25rem; }
+    .tm-matchup { gap:.75rem; }
+    .tm-team { gap:.6rem; }
+    .tm-center { min-width:70px; gap:.6rem; }
+    .tm-status-badge { padding:.6rem 1rem; font-size:.75rem; }
+    .tm-crown { width:32px; height:32px; }
+    .tm-draw-ribbon { padding:.65rem 1rem; }
+    .tm-draw-text { font-size:.7rem; letter-spacing:2px; }
 }
-
-@media (max-width: 400px) {
-    .tm-team-name {
-        font-size: 0.9375rem;
-    }
-    
-    .tm-team-score {
-        font-size: 1.75rem;
-    }
+@media (max-width:400px) {
+    .tm-team-name { font-size:.9rem; }
+    .tm-team-score { font-size:1.75rem; }
+    .tm-card-worldcup.is-winner .tm-team.is-winner .tm-team-score { font-size:2.25rem; }
 }
