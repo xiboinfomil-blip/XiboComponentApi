@@ -111,25 +111,25 @@ html, body {
 }
 
 .leaderboard-title {
-    font-size: clamp(14px, 3.5cqi, 24px);
+    font-size: clamp(20px, 5cqi, 36px); /* Augmenté (anciennement 14px -> 24px) [cite: 20] */
     font-weight: 900;
-    letter-spacing: clamp(1px, 0.8cqi, 4px);
-    text-transform: uppercase;
-    margin: 0 0 clamp(2px, 0.5cqi, 4px) 0;
-    background: linear-gradient(180deg, #ffffff 0%, #e2e8f0 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    text-shadow: 0 0 40px rgba(255, 255, 255, 0.2);
-    line-height: 1.2;
+    letter-spacing: clamp(1px, 0.8cqi, 4px); [cite: 20]
+    text-transform: uppercase; [cite: 20]
+    margin: 0 0 clamp(2px, 0.5cqi, 4px) 0; [cite: 21]
+    background: linear-gradient(180deg, #ffffff 0%, #e2e8f0 100%); [cite: 21]
+    -webkit-background-clip: text; [cite: 21]
+    -webkit-text-fill-color: transparent; [cite: 21]
+    background-clip: text; [cite: 21]
+    text-shadow: 0 0 40px rgba(255, 255, 255, 0.2); [cite: 22]
+    line-height: 1.2; [cite: 22]
 }
 
 .leaderboard-subtitle {
-    font-size: clamp(10px, 2cqi, 13px);
-    color: var(--text-secondary);
-    font-weight: 500;
-    letter-spacing: clamp(0.5px, 0.3cqi, 1px);
-    opacity: 0.8;
+    font-size: clamp(14px, 2.5cqi, 20px); /* Augmenté (anciennement 10px -> 13px) [cite: 22] */
+    color: var(--text-secondary); [cite: 23]
+    font-weight: 500; [cite: 23]
+    letter-spacing: clamp(0.5px, 0.3cqi, 1px); [cite: 23]
+    opacity: 0.8; [cite: 23]
 }
 
 /* =========================================
@@ -185,17 +185,17 @@ html, body {
 
 /* Podium Rank Numbers */
 .podium-rank {
-    font-size: clamp(14px, 3.5cqi, 24px);
-    font-weight: 900;
-    line-height: 1;
+    font-size: clamp(20px, 4.5cqi, 32px); /* Augmenté [cite: 35] */
+    font-weight: 900; [cite: 35]
+    line-height: 1; [cite: 35]
     margin-bottom: clamp(2px, 0.5cqi, 4px);
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
     z-index: 5;
-    order: 2; /* Rank below trophy */
+    order: 2; 
 }
 
 .podium-item.first .podium-rank {
-    font-size: clamp(18px, 5cqi, 32px);
+    font-size: clamp(28px, 6.5cqi, 42px);
     background: linear-gradient(180deg, var(--gold-light) 0%, var(--gold-primary) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -224,7 +224,7 @@ html, body {
 /* Podium Names */
 .podium-name {
     font-weight: 700;
-    font-size: clamp(9px, 2cqi, 12px);
+    font-size: clamp(13px, 2.5cqi, 18px);
     letter-spacing: clamp(0.2px, 0.1cqi, 0.5px);
     color: var(--text-primary);
     margin: 0 0 clamp(1px, 0.3cqi, 2px) 0;
@@ -241,13 +241,13 @@ html, body {
 }
 
 .podium-item.first .podium-name {
-    font-size: clamp(10px, 2.5cqi, 14px);
+    font-size: clamp(16px, 3.5cqi, 24px);
     text-shadow: 0 2px 16px rgba(251, 191, 36, 0.4), 0 2px 12px rgba(0, 0, 0, 0.8);
 }
 
 /* Podium Points */
 .podium-points {
-    font-size: clamp(9px, 1.8cqi, 12px);
+    font-size: clamp(12px, 2.2cqi, 16px);
     font-weight: 700;
     letter-spacing: clamp(0.2px, 0.1cqi, 0.5px);
     margin-bottom: clamp(4px, 1cqi, 8px);
@@ -259,7 +259,7 @@ html, body {
 .podium-item.first .podium-points {
     color: var(--gold-primary);
     filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.7));
-    font-size: clamp(10px, 2.5cqi, 14px);
+    font-size: clamp(15px, 3cqi, 22px);
 }
 
 .podium-item.second .podium-points {
@@ -464,7 +464,7 @@ table {
     width: 100%;
     border-collapse: separate;
     text-align: left;
-    font-size: clamp(11px, 2.2cqi, 15px);
+    font-size: clamp(15px, 3cqi, 22px);
     display: flex;
     flex-direction: column;
 }
@@ -535,7 +535,7 @@ th {
     color: var(--text-secondary);
     font-weight: 700;
     text-transform: uppercase;
-    font-size: clamp(8px, 1.5cqi, 11px);
+    font-size: clamp(12px, 2cqi, 16px);
     letter-spacing: clamp(0.5px, 0.3cqi, 1.8px);
     border-bottom: 2px solid rgba(255, 255, 255, 0.1);
 }
@@ -563,11 +563,11 @@ tr:last-child td { border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: clamp(24px, 5cqi, 36px);
+    width: clamp(32px, 6cqi, 46px);
     height: clamp(24px, 5cqi, 36px);
     border-radius: clamp(6px, 1.5cqi, 12px);
     font-weight: 800;
-    font-size: clamp(10px, 2cqi, 14px);
+    font-size: clamp(13px, 2.5cqi, 18px);
     color: var(--text-secondary);
     background: rgba(255, 255, 255, 0.08);
     border: 1.5px solid rgba(255, 255, 255, 0.1);
@@ -598,7 +598,7 @@ tr[data-rank="3"] .rank-badge {
 .team-name {
     font-weight: 700;
     color: var(--text-primary);
-    font-size: clamp(11px, 2.5cqi, 16px);
+    font-size: clamp(15px, 3.2cqi, 24px);
     letter-spacing: clamp(0.2px, 0.1cqi, 0.5px);
     word-break: break-word;
     hyphens: auto;
@@ -635,14 +635,14 @@ tr:hover .points-badge {
 .pts-highlight {
     font-weight: 900;
     color: var(--text-primary);
-    font-size: clamp(11px, 2.2cqi, 15px);
+    font-size: clamp(14px, 3cqi, 22px);
     line-height: 1;
 }
 
 .pts-label {
     font-weight: 600;
     color: var(--text-secondary);
-    font-size: clamp(7px, 1.4cqi, 10px);
+    font-size: clamp(9px, 1.8cqi, 13px);
     letter-spacing: clamp(0.3px, 0.2cqi, 0.8px);
     text-transform: uppercase;
 }
@@ -724,7 +724,7 @@ tr:hover .points-badge {
 }
 
 @media (max-width: 360px) {
-    .podium-name { font-size: 8px !important; letter-spacing: 0 !important; }
+    .podium-name { font-size: 10px !important; letter-spacing: 0 !important; }
     .podium-points { font-size: 8px !important; }
     .podium-rank { font-size: 12px !important; }
     .podium-item.first .podium-rank { font-size: 16px !important; }
