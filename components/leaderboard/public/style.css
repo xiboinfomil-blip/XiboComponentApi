@@ -452,17 +452,16 @@ html, body {
    ========================================= */
 .table-wrapper {
     width: 100%;
-    overflow: hidden; /* Strict overflow restriction */
+    overflow-y: auto;
+    overflow-x: hidden;
     background: transparent;
-    flex-grow: 1; /* Automatically consumes remaining parent height */
+    flex-grow: 1;
     min-height: 0; 
     display: flex;
     flex-direction: column;
 }
-
 table {
     width: 100%;
-    height: 100%; /* Force full distribution inside wrapper */
     border-collapse: separate;
     text-align: left;
     font-size: clamp(11px, 2.2cqi, 15px);
@@ -472,7 +471,7 @@ table {
 
 thead { 
     position: sticky; 
-    top: 0; 
+    top: 0;
     z-index: 100;
     background: var(--primary-bg);
     flex-shrink: 0;
@@ -485,22 +484,23 @@ thead tr, tbody tr {
 }
 
 tbody {
-    flex-grow: 1;
     display: flex;
     flex-direction: column;
-    justify-content: space-between; /* Evenly spaces rows to eliminate dead zones */
     min-height: 0;
 }
 
 tbody tr {
-    flex-grow: 1; /* Stretch individual lines evenly */
-    min-height: 0;
+    flex-shrink: 0;
+    min-height: clamp(40px, 6vh, 60px);
     background: rgba(255, 255, 255, 0.04);
     border-radius: clamp(8px, 2cqi, 18px);
     position: relative;
     z-index: 1;
     transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-    margin-bottom: clamp(2px, 0.4cqi, 5px);
+    margin-bottom: clamp(4px, 0.6cqi, 8px);
+    display: flex;
+    width: 100%;
+    align-items: center;
 }
 
 tbody tr:last-child {
