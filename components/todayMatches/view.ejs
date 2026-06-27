@@ -90,11 +90,7 @@
     </div>
 </div>
 
-<script>
-    window.TODAY_MATCHES_CONFIG = {
-        speed: <%= typeof speed !== 'undefined' ? speed : 3000 %>,
-        refetch: <%= typeof refetch !== 'undefined' ? refetch : false %>
-            dummy: <%= typeof dummy !== 'undefined' ? dummy : false %>
-    };
-</script>
+
+    <!-- 1. Load GLOBAL Config Helper -->
+    <script src="/assets/global/helpers/configHelper.js?v=1.0.0"></script>
 <script src="/assets/todayMatches/script.js?v=4.0.0"></script>

@@ -1,3 +1,6 @@
+// Import or ensure getConfig is available (if using modules, use import { getConfig } from './configHelper.js';)
+// If using standard script tags, ensure configHelper.js is loaded before this script.
+
 const scrollWrapper = document.getElementById("scroll-wrapper");
 let scrollInterval;
 let animationFrameId;
@@ -7,7 +10,21 @@ let animationFrameId;
  */
 async function initLeaderboard() {
     try {
-        const response = await fetch('/api/leaderboard');
+        // 1. Get Config from URL
+        const config = getConfig();
+
+        // Append refetch=true to the API call if the config flag is enabled
+        const params = new URLSearchParams();
+if (config.refetch) {
+    params.append('refetch', 'true');
+}
+if (config.dummy) {
+    params.append('dummy', 'true');
+}
+
+const queryString = params.toString();
+const apiUrl = queryString ? `/api/leaderboard?${queryString}` : '/api/leaderboard';
+const response = await fetch(apiUrl);
         
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -26,8 +43,16 @@ async function initLeaderboard() {
             renderTable(data);
             
             if (scrollWrapper) {
-                initializeAutoscroll(window.LEADERBOARD_CONFIG.scrollSpeed);
+                // 2. Use config.speed instead of window.LEADERBOARD_CONFIG
+                initializeAutoscroll(config.speed);
             }
+
+            // Optional: Handle refetch logic if needed
+            if (config.refetch) {
+                console.log("Refetch enabled via URL param");
+                // Add your refetch interval logic here if desired
+            }
+
         } else {
             showEmptyState("Aucune donnée disponible");
         }
@@ -43,7 +68,7 @@ async function initLeaderboard() {
  */
 function renderPodium(data) {
     const podiumSection = document.getElementById('podium-section');
-    if (!podiumSection || !window.LEADERBOARD_CONFIG.showPodium) return;
+    if (!podiumSection) return;
 
     // 1. Analyze Ranks
     const rankCounts = {};
@@ -193,68 +218,7 @@ function initializeAutoscroll(speed) {
     if (scrollInterval) clearInterval(scrollInterval);
     if (animationFrameId) cancelAnimationFrame(animationFrameId);
 
-    const speedFactor = (typeof speed === 'number' && speed > 0) ? speed : 0.5;
-    const pixelsPerSecond = speedFactor * 15; 
-
-    let currentScroll = scrollWrapper.scrollTop;
-    let isScrollingDown = true;
-    let pauseTimer = null;
-    let lastTime = null;
-    
-    const scrollHeight = scrollWrapper.scrollHeight;
-    const clientHeight = scrollWrapper.clientHeight;
-    const maxScroll = scrollHeight - clientHeight;
-    
-    if (maxScroll <= 0) {
-        if (window.parent && typeof window.parent.postMessage === "function") {
-            window.parent.postMessage("stop", "*");
-        }
-        return;
-    }
-
-    function scrollStep(timestamp) {
-        if (!document.getElementById("scroll-wrapper")) return;
-
-        if (!lastTime) lastTime = timestamp;
-        const deltaTime = timestamp - lastTime;
-        lastTime = timestamp;
-
-        if (pauseTimer) {
-            animationFrameId = requestAnimationFrame(scrollStep);
-            return;
-        }
-
-        const step = (pixelsPerSecond * deltaTime) / 1000;
-
-        if (isScrollingDown) {
-            currentScroll += step;
-            if (currentScroll >= maxScroll) {
-                currentScroll = maxScroll;
-                pauseTimer = setTimeout(() => {
-                    pauseTimer = null;
-                    lastTime = null; 
-                    isScrollingDown = false;
-                }, 2000); 
-            }
-        } else {
-            currentScroll -= step;
-            if (currentScroll <= 0) {
-                currentScroll = 0;// --- AUTOSCROLL LOGIC ---
-function initializeAutoscroll(speed) {
-    const rows = scrollWrapper.querySelectorAll("tbody tr");
-    if (rows.length <= 1) {
-        if (window.parent && typeof window.parent.postMessage === "function") {
-            window.parent.postMessage("stop", "*");
-        }
-        return;
-    }
-
-    if (scrollInterval) clearInterval(scrollInterval);
-    if (animationFrameId) cancelAnimationFrame(animationFrameId);
-
-    // 1. ADJUSTED SPEED: 
-    // Reduced multiplier from 15 to 8 for a much slower, readable pace.
-    // If speed config is 1, it will now move 8px/sec instead of 15px/sec.
+    // Use the speed passed from config
     const speedFactor = (typeof speed === 'number' && speed > 0) ? speed : 0.5;
     const pixelsPerSecond = speedFactor * 8; 
 
@@ -281,8 +245,6 @@ function initializeAutoscroll(speed) {
         const deltaTime = timestamp - lastTime;
         lastTime = timestamp;
 
-        // If we are currently paused at the top or bottom, keep requesting frames
-        // but do not update scrollTop until the timer clears.
         if (pauseTimer) {
             animationFrameId = requestAnimationFrame(scrollStep);
             return;
@@ -292,13 +254,10 @@ function initializeAutoscroll(speed) {
 
         if (isScrollingDown) {
             currentScroll += step;
-            // Check if we hit the bottom
             if (currentScroll >= maxScroll) {
                 currentScroll = maxScroll;
-                scrollWrapper.scrollTop = currentScroll; // Ensure exact position
+                scrollWrapper.scrollTop = currentScroll; 
                 
-                // 2. ADJUSTED PAUSE: 
-                // Increased from 2000ms (2s) to 4000ms (4s) to allow more reading time.
                 pauseTimer = setTimeout(() => {
                     pauseTimer = null;
                     lastTime = null; 
@@ -307,13 +266,10 @@ function initializeAutoscroll(speed) {
             }
         } else {
             currentScroll -= step;
-            // Check if we hit the top
             if (currentScroll <= 0) {
                 currentScroll = 0;
-                scrollWrapper.scrollTop = currentScroll; // Ensure exact position
+                scrollWrapper.scrollTop = currentScroll;
 
-                // 2. ADJUSTED PAUSE: 
-                // Increased from 2000ms (2s) to 4000ms (4s) to allow more reading time.
                 pauseTimer = setTimeout(() => {
                     pauseTimer = null;
                     lastTime = null; 
@@ -322,25 +278,10 @@ function initializeAutoscroll(speed) {
             }
         }
 
-        // Only update scrollTop if we aren't paused
         if (!pauseTimer) {
             scrollWrapper.scrollTop = currentScroll;
         }
         
-        animationFrameId = requestAnimationFrame(scrollStep);
-    }
-
-    animationFrameId = requestAnimationFrame(scrollStep);
-}
-                pauseTimer = setTimeout(() => {
-                    pauseTimer = null;
-                    lastTime = null; 
-                    isScrollingDown = true;
-                }, 2000);
-            }
-        }
-
-        scrollWrapper.scrollTop = currentScroll;
         animationFrameId = requestAnimationFrame(scrollStep);
     }
 

@@ -15,13 +15,26 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '../public')));
 
 // ==========================================
+// 🌍 GLOBAL HELPERS STATIC ROUTE (BULLETPROOF)
+// ==========================================
+// Automatically find the 'global' folder whether server.js is in root or /api
+let globalPath = path.join(__dirname, 'global');
+if (!fs.existsSync(globalPath)) {
+  globalPath = path.join(__dirname, '../global');
+}
+
+// DEBUG: Check these logs in your terminal when you start the server!
+console.log('🌍 Serving global helpers from:', globalPath);
+console.log('📂 Folder exists?', fs.existsSync(globalPath));
+console.log('📄 configHelper.js exists?', fs.existsSync(path.join(globalPath, 'helpers', 'configHelper.js')));
+
+app.use('/assets/global', express.static(globalPath));
+
+// ==========================================
 // NEW: ALLOW IFRAME EMBEDDING (Universal Fix for Xibo)
 // ==========================================
 app.use((req, res, next) => {
-  // Remove X-Frame-Options completely so Xibo can frame the components
   res.removeHeader('X-Frame-Options');
-  
-  // Overrides standard Content-Security-Policy to allow framing anywhere
   res.setHeader("Content-Security-Policy", "frame-ancestors *;");
   next();
 });
@@ -78,7 +91,7 @@ if (fs.existsSync(componentsDir)) {
               title: component.charAt(0).toUpperCase() + component.slice(1),
               speed: Number(req.query.speed) || 3000,
               refetch: req.query.refetch === 'true',
-              dummy: req.query.dummy === 'true', // Changed to default to true
+              dummy: req.query.dummy === 'true',
             };
             res.render(viewPath, locals);
           });

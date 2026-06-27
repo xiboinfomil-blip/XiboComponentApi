@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const config = window.TODAY_MATCHES_CONFIG || { sliderSpeed: 8000 };
+    // Use getConfig() to retrieve URL parameters
+    const config = getConfig(); 
     let matches = [];
     let currentMatchIndex = 0;
     let timerInterval, sliderInterval;
@@ -36,17 +37,40 @@ document.addEventListener('DOMContentLoaded', () => {
     /* ---------- Fetch ---------- */
     const fetchMatches = async () => {
         try {
-            const response = await fetch('/api/todayMatches');
-            if (!response.ok) throw new Error('Network response was not ok');
-            const result = await response.json();
-            const data = result.data || result;
+            const params = new URLSearchParams();
+            if (config.refetch) {
+                params.append('refetch', 'true');
+            }
+            if (config.dummy) {
+                params.append('dummy', 'true');
+            }
 
-            if (data && data.length > 0) {
+            const queryString = params.toString();
+            const apiUrl = queryString ? `/api/todayMatches?${queryString}` : '/api/todayMatches';
+            
+            console.log('Fetching from:', apiUrl);
+            
+            const response = await fetch(apiUrl);
+            
+            if (!response.ok) throw new Error(`Network response was not ok: ${response.status}`);
+            
+            const result = await response.json();
+            console.log('API Response:', result);
+            
+            // API returns enriched matches with statusInfo already attached
+            const data = result.data || result;
+            console.log('Data extracted:', data);
+
+            if (data && Array.isArray(data) && data.length > 0) {
                 matches = data;
+                console.log(`Loaded ${matches.length} matches`);
+                console.log('First match:', matches[0]);
+                
                 renderMatch(currentMatchIndex);
                 startTimer();
                 startSlider();
             } else {
+                console.warn('No matches found or invalid data format');
                 showEmptyState();
             }
         } catch (error) {
@@ -76,25 +100,55 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /* ---------- Render ---------- */
     const renderMatch = (index) => {
-        if (!matches.length || !els.card) return;
+        console.log(`Rendering match at index ${index}`);
+        
+        if (!matches.length || !els.card) {
+            console.warn('Cannot render: no matches or card element');
+            return;
+        }
+        
         const match = matches[index];
+        console.log('Match data:', match);
 
-        // Text
-        els.teamA.name.textContent = match.team_a;
-        els.teamB.name.textContent = match.team_b;
-        els.teamA.score.textContent = match.fulltime_a !== null ? match.fulltime_a : '-';
-        els.teamB.score.textContent = match.fulltime_b !== null ? match.fulltime_b : '-';
+        if (!match) {
+            console.warn('Match is undefined/null at index', index);
+            return;
+        }
+
+        // Text - use safe defaults
+        const teamAName = match.team_a || 'Équipe A';
+        const teamBName = match.team_b || 'Équipe B';
+        
+        console.log('Teams:', teamAName, 'vs', teamBName);
+        
+        if (els.teamA.name) els.teamA.name.textContent = teamAName;
+        if (els.teamB.name) els.teamB.name.textContent = teamBName;
+        
+        if (els.teamA.score) {
+            els.teamA.score.textContent = (match.fulltime_a !== null && match.fulltime_a !== undefined) ? match.fulltime_a : '-';
+        }
+        if (els.teamB.score) {
+            els.teamB.score.textContent = (match.fulltime_b !== null && match.fulltime_b !== undefined) ? match.fulltime_b : '-';
+        }
 
         // Flags
         setFlag(els.teamA, match.team_a_flag || flagUrl(match.team_a), match.team_a);
         setFlag(els.teamB, match.team_b_flag || flagUrl(match.team_b), match.team_b);
 
         // Date
-        if (els.dateDisplay) {
+        if (els.dateDisplay && match.date) {
             try {
                 const d = new Date(match.date.replace(' ', 'T') + '+04:00');
-                els.dateDisplay.textContent = d.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long' });
-            } catch { els.dateDisplay.textContent = match.date; }
+                if (!isNaN(d.getTime())) {
+                    els.dateDisplay.textContent = d.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long' });
+                } else {
+                    els.dateDisplay.textContent = match.date;
+                }
+            } catch { 
+                els.dateDisplay.textContent = match.date; 
+            }
+        } else if (els.dateDisplay) {
+            els.dateDisplay.textContent = '';
         }
 
         // Ensure VS badge is always visible
@@ -102,103 +156,141 @@ document.addEventListener('DOMContentLoaded', () => {
             els.vsBadge.style.display = 'flex'; 
         }
 
-        // Status - Pass match object to check scores
-        applyStatus(match.statusInfo, match);
+        // Use statusInfo from API (already calculated server-side)
+        const statusInfo = match.statusInfo || {};
+        console.log('Status info from API:', statusInfo);
+        
+        // Status
+        applyStatus(statusInfo, match);
 
         // Winner / Draw highlight
         applyResult(match);
+        
+        console.log('Render complete');
     };
 
     const setFlag = (teamObj, url, fallbackText) => {
-        if (!teamObj.flag || !teamObj.fallback) return;
+        if (!teamObj || !teamObj.flag || !teamObj.fallback) {
+            console.warn('setFlag: Missing teamObj elements');
+            return;
+        }
+        
         teamObj.flag.style.display = 'none';
         teamObj.fallback.style.display = 'flex';
         teamObj.fallback.textContent = fallbackText ? fallbackText.charAt(0).toUpperCase() : '?';
+        
         if (url) {
+            console.log('Loading flag from:', url);
             teamObj.flag.src = url;
-            teamObj.flag.onload  = () => { teamObj.flag.style.display = 'block'; teamObj.fallback.style.display = 'none'; };
-            teamObj.flag.onerror = () => { teamObj.flag.style.display = 'none';  teamObj.fallback.style.display = 'flex'; };
+            teamObj.flag.onload = () => { 
+                console.log('Flag loaded successfully');
+                teamObj.flag.style.display = 'block'; 
+                teamObj.fallback.style.display = 'none'; 
+            };
+            teamObj.flag.onerror = () => { 
+                console.warn('Flag failed to load:', url);
+                teamObj.flag.style.display = 'none';  
+                teamObj.fallback.style.display = 'flex'; 
+            };
         }
     };
 
     /* ---------- Status ---------- */
     const applyStatus = (info, match) => {
-        // Determine if finished based on score presence
-        const hasScores = match.fulltime_a !== null && match.fulltime_b !== null;
-        
-        let displayStatus = info.status;
-        let displayLabel = info.label;
-        let isLive = info.isLive;
-
-        if (hasScores) {
-            displayStatus = 'finished';
-            isLive = false;
-            
-            // Format start time (e.g., "20:45")
-            try {
-                const d = new Date(match.date.replace(' ', 'T') + '+04:00');
-                const timeString = d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-                displayLabel = `Terminé • ${timeString}`;
-            } catch (e) {
-                displayLabel = 'Terminé';
-            }
+        if (!info) {
+            console.warn('applyStatus: No status info provided');
+            return;
         }
 
-        els.statusBadge.className = `tm-status-badge tm-status-${displayStatus}`;
-        els.statusLabel.textContent = displayLabel;
-        els.liveDot.style.display = isLive ? 'block' : 'none';
+        const displayStatus = info.status || 'upcoming';
+        const displayLabel = info.label || 'À venir';
+        const isLive = info.isLive || false;
+        const timeString = info.timeString || '';
+
+        console.log('Applying status:', { displayStatus, displayLabel, isLive, timeString });
+
+        if (els.statusBadge) {
+            els.statusBadge.className = `tm-status-badge tm-status-${displayStatus}`;
+        }
+        if (els.statusLabel) {
+            els.statusLabel.textContent = displayLabel;
+        }
+        if (els.liveDot) {
+            els.liveDot.style.display = isLive ? 'block' : 'none';
+        }
 
         // Handle Timer Display
-        if (displayStatus === 'finished') {
-            // Clear timer text so it doesn't duplicate the time shown in status label
-            els.timer.textContent = ''; 
-            els.timer.classList.remove('is-live');
-        } else {
-            els.timer.style.display = 'block';
-            els.timer.textContent = info.timeString;
-            els.timer.classList.toggle('is-live', isLive);
+        if (els.timer) {
+            if (displayStatus === 'finished') {
+                els.timer.textContent = ''; 
+                els.timer.classList.remove('is-live');
+                els.timer.style.display = 'none';
+            } else {
+                els.timer.style.display = 'block';
+                els.timer.textContent = timeString;
+                els.timer.classList.toggle('is-live', isLive);
+            }
         }
     };
 
     /* ---------- Result (Winner / Draw) ---------- */
     const applyResult = (match) => {
+        if (!match || !els.card) return;
+
         const card = els.card;
 
         // Reset everything
         card.classList.remove('is-winner', 'is-draw');
-        els.teamA.container.classList.remove('is-winner', 'is-loser');
-        els.teamB.container.classList.remove('is-winner', 'is-loser');
-        els.teamA.badge.style.opacity = '0';
-        els.teamB.badge.style.opacity = '0';
-        els.teamA.badge.innerHTML = '';
-        els.teamB.badge.innerHTML = '';
+        
+        if (els.teamA.container) els.teamA.container.classList.remove('is-winner', 'is-loser');
+        if (els.teamB.container) els.teamB.container.classList.remove('is-winner', 'is-loser');
+        
+        if (els.teamA.badge) {
+            els.teamA.badge.style.opacity = '0';
+            els.teamA.badge.innerHTML = '';
+        }
+        if (els.teamB.badge) {
+            els.teamB.badge.style.opacity = '0';
+            els.teamB.badge.innerHTML = '';
+        }
 
-        // Check if match has scores (which means it's finished per your API)
+        // Check if match has scores
         const a = match.fulltime_a;
         const b = match.fulltime_b;
 
-        if (a === null || b === null) return; // No scores = not finished
+        if (a === null || a === undefined || b === null || b === undefined) {
+            console.log('Match not finished yet (no scores)');
+            return;
+        }
 
-        const sa = parseInt(a), sb = parseInt(b);
+        const sa = parseInt(a);
+        const sb = parseInt(b);
+
+        console.log(`Score: ${sa} - ${sb}`);
 
         if (sa === sb) {
-            // DRAW — single unified ribbon, both teams equal
+            // DRAW
             card.classList.add('is-draw');
+            console.log('Match is a draw');
         } else {
             // WINNER
             card.classList.add('is-winner');
             const winner = sa > sb ? els.teamA : els.teamB;
-            const loser  = sa > sb ? els.teamB : els.teamA;
+            const loser = sa > sb ? els.teamB : els.teamA;
 
-            winner.container.classList.add('is-winner');
-            loser.container.classList.add('is-loser');
+            if (winner.container) winner.container.classList.add('is-winner');
+            if (loser.container) loser.container.classList.add('is-loser');
 
-            winner.badge.innerHTML = `
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M7 3v2H3v4c0 1.65 1.35 3 3 3h.72c.75 2.48 2.82 4.34 5.28 4.82V19h-3v2h8v-2h-3v-2.18c2.46-.48 4.53-2.34 5.28-4.82H18c1.65 0 3-1.35 3-3V5h-4V3H7zm0 7c-1.1 0-2-.9-2-2V6h2v4zm12-2c0 1.1-.9 2-2 2V6h2v4z"/>
-                </svg>
-                <span>Vainqueur</span>`;
-            winner.badge.style.opacity = '1';
+            if (winner.badge) {
+                winner.badge.innerHTML = `
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M7 3v2H3v4c0 1.65 1.35 3 3 3h.72c.75 2.48 2.82 4.34 5.28 4.82V19h-3v2h8v-2h-3v-2.18c2.46-.48 4.53-2.34 5.28-4.82H18c1.65 0 3-1.35 3-3V5h-4V3H7zm0 7c-1.1 0-2-.9-2-2V6h2v4zm12-2c0 1.1-.9 2-2 2V6h2v4z"/>
+                    </svg>
+                    <span>Vainqueur</span>`;
+                winner.badge.style.opacity = '1';
+            }
+            
+            console.log(`Winner: ${sa > sb ? match.team_a : match.team_b}`);
         }
     };
 
@@ -210,31 +302,37 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!matches.length) return;
             const match = matches[currentMatchIndex];
             
-            // If scores exist, it's finished. Clear timer and stop logic.
-            if (match.fulltime_a !== null && match.fulltime_b !== null) {
-                els.timer.textContent = '';
+            if (!match) return;
+
+            // If scores exist, it's finished
+            if (match.fulltime_a !== null && match.fulltime_a !== undefined && 
+                match.fulltime_b !== null && match.fulltime_b !== undefined) {
+                if (els.timer) els.timer.textContent = '';
                 return; 
             }
 
-            // Live/Upcoming Logic
-            const now = new Date();
-            const mDate = new Date(match.date.replace(' ', 'T') + '+04:00');
-            const diff = mDate.getTime() - now.getTime();
-            const abs = Math.abs(diff);
+            // Use statusInfo from API for live/upcoming
+            if (match.statusInfo) {
+                if (els.timer) {
+                    if (match.statusInfo.status === 'finished') {
+                        els.timer.textContent = '';
+                    } else {
+                        els.timer.textContent = match.statusInfo.timeString || '';
+                        els.timer.classList.toggle('is-live', match.statusInfo.isLive || false);
+                    }
+                }
+            }
 
-            const h = Math.floor(abs / 3.6e6) % 24;
-            const m = Math.floor(abs / 6e4) % 60;
-            const s = Math.floor(abs / 1000) % 60;
-
-            let str = '';
-            if (h > 0) str += `${h}h `;
-            str += `${String(m).padStart(2,'0')}m ${String(s).padStart(2,'0')}s`;
-
-            els.timer.textContent = diff > 0 ? str : `+${str}`;
-
-            // Refresh data if match time has passed and no scores yet
-            if (diff <= 0 && diff > -2000) {
-                fetchMatches();
+            // Refresh data if match time has passed and refetch is enabled
+            if (config.refetch && match.statusInfo && match.statusInfo.status !== 'upcoming') {
+                const now = new Date();
+                const mDate = new Date(match.date.replace(' ', 'T') + '+04:00');
+                const diff = mDate.getTime() - now.getTime();
+                
+                if (diff <= 0 && diff > -2000) {
+                    console.log('Triggering refetch...');
+                    fetchMatches();
+                }
             }
         }, 1000);
     };
@@ -242,23 +340,33 @@ document.addEventListener('DOMContentLoaded', () => {
     /* ---------- Slider ---------- */
     const startSlider = () => {
         if (sliderInterval) clearInterval(sliderInterval);
-        if (matches.length <= 1) return;
+        if (matches.length <= 1) {
+            console.log('Only one match or no matches, slider disabled');
+            return;
+        }
+        
+        const sliderIntervalTime = (config.speed || 5) * 1000;
+        console.log(`Slider interval: ${sliderIntervalTime}ms`);
+
         sliderInterval = setInterval(() => {
             currentMatchIndex = (currentMatchIndex + 1) % matches.length;
-            els.card.classList.add('fade-out');
-            setTimeout(() => {
-                renderMatch(currentMatchIndex);
-                els.card.classList.remove('fade-out');
-            }, 400);
-        }, config.sliderSpeed);
+            console.log(`Sliding to match index ${currentMatchIndex}`);
+            
+            if (els.card) {
+                els.card.classList.add('fade-out');
+                setTimeout(() => {
+                    renderMatch(currentMatchIndex);
+                    els.card.classList.remove('fade-out');
+                }, 400);
+            }
+        }, sliderIntervalTime);
     };
 
     /* ---------- Helpers ---------- */
-const flagUrl = (name) => {
-    // Returns path to local flag image: assets/flags/Country.png
-    if (!name) return null;
-    return `assets/flags/${name.replace(/ /g, '_')}.png`;
-};
+    const flagUrl = (name) => {
+        if (!name) return null;
+        return `assets/flags/${name.replace(/ /g, '_')}.png`;
+    };
 
     fetchMatches();
 });
