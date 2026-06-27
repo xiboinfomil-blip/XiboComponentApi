@@ -15,12 +15,6 @@
     align-items: center;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     overflow: hidden; 
-    
-    &::-webkit-scrollbar {
-        display: none;
-    }
-    -ms-overflow-style: none;  
-    scrollbar-width: none;  
 }
 
 .tm-card-container { 
@@ -48,6 +42,7 @@
     display: flex;
     flex-direction: column;
 }
+
 .tm-card-worldcup:hover {
     box-shadow: 0 50px 120px rgba(0,0,0,.8), 0 0 0 1px rgba(255,255,255,.15);
 }
@@ -91,21 +86,25 @@
 /* ---------- Content Core (Expanded Internal Spacing) ---------- */
 .tm-card-content {
     position:relative; z-index:3;
-    padding: clamp(1.5rem, 4%, 2.75rem) clamp(1.25rem, 5%, 3.5rem); 
+    /* Increased padding scaling for larger screens */
+    padding: clamp(1.5rem, 5vh, 4rem) clamp(1.5rem, 6vw, 5rem); 
     display:flex; 
     flex-direction:column;
     height:100%; 
     width:100%;
     justify-content: space-between;
-    gap: 1rem;
+    gap: 2rem; /* Increased gap */
     overflow: hidden;
 }
 
 /* ---------- Header / Status ---------- */
 .tm-header { display:flex; justify-content:center; flex-shrink: 0; }
 .tm-status-badge {
-    padding:.6rem 1.25rem; border-radius:2rem;
-    font-weight:800; font-size:clamp(0.75rem, 1.8vw, 0.9rem);
+    padding: clamp(0.6rem, 1.5vh, 1rem) clamp(1.25rem, 3vw, 2rem); 
+    border-radius:2rem;
+    font-weight:800; 
+    /* Increased font size scaling */
+    font-size: clamp(0.85rem, 2.5vw, 1.25rem);
     text-transform:uppercase; letter-spacing:1.2px;
     display:flex; align-items:center; gap:.5rem;
     backdrop-filter:blur(15px);
@@ -118,7 +117,8 @@
 .tm-status-finished { background:linear-gradient(135deg,rgba(100,116,139,.25),rgba(71,85,105,.25)); color:#cbd5e1; border-color:rgba(100,116,139,.4); }
 
 .tm-live-dot {
-    width:10px; height:10px;
+    width: clamp(8px, 1.5vw, 12px); 
+    height: clamp(8px, 1.5vw, 12px);
     background:linear-gradient(135deg,#ef4444,#f43f5e);
     border-radius:50%;
     box-shadow:0 0 15px #ef4444;
@@ -129,11 +129,12 @@
 
 /* ---------- Matchup ---------- */
 .tm-matchup {
-    flex: 1;
+    flex: 1; /* Takes up all available vertical space */
     display: grid;
     grid-template-columns: 1fr auto 1fr;
     align-items: center;
-    gap: clamp(0.5rem, 3vw, 2.5rem);
+    /* Increased gap scaling */
+    gap: clamp(1rem, 5vw, 4rem);
     min-height: 0; 
     width: 100%;
 }
@@ -141,7 +142,7 @@
 /* ---------- Team ---------- */
 .tm-team {
     display:flex; flex-direction:column; align-items:center;
-    gap:.5rem;
+    gap: clamp(0.5rem, 1.5vh, 1.5rem); /* Increased gap */
     transition:all .6s cubic-bezier(.4,0,.2,1);
     position:relative;
     min-width: 0; 
@@ -149,8 +150,9 @@
 
 /* Crown */
 .tm-crown {
-    width:clamp(22px, 3.5vw, 36px); 
-    height:clamp(22px, 3.5vw, 36px);
+    /* Increased crown size scaling */
+    width: clamp(24px, 5vw, 48px); 
+    height: clamp(24px, 5vw, 48px);
     color:#fbbf24;
     opacity:0; transform:translateY(5px) scale(.6);
     transition:all .6s cubic-bezier(.34,1.56,.64,1);
@@ -163,8 +165,9 @@
 .tm-flag-wrapper { position:relative; display:flex; justify-content:center; width: 100%; }
 .tm-flag-container {
     position:relative;
-    width:clamp(60px, 15vw, 130px);
-    height:clamp(42px, 10.5vw, 90px);
+    /* Increased flag size scaling */
+    width: clamp(70px, 18vw, 160px);
+    height: clamp(50px, 13vw, 110px);
     border-radius:0.85rem;
     overflow:hidden;
     background:rgba(255,255,255,.08);
@@ -184,14 +187,15 @@
 .tm-flag-fallback {
     width:100%; height:100%;
     display:flex !important; align-items:center; justify-content:center;
-    font-size:clamp(1.2rem, 2.5vw, 1.8rem); font-weight:900; color:#a78bfa;
+    font-size:clamp(1.5rem, 4vw, 2.5rem); font-weight:900; color:#a78bfa;
     background:linear-gradient(135deg,rgba(99,102,241,.4),rgba(168,85,247,.4));
 }
 
 /* Team name & score (Upscaled Font Sizes) */
 .tm-team-name {
     font-family:'Space Grotesk', sans-serif;
-    font-size:clamp(0.85rem, 2vw, 1.35rem);
+    /* Increased font size scaling */
+    font-size: clamp(1rem, 3.5vw, 2rem);
     font-weight:700; color:#f1f5f9;
     text-align:center; line-height:1.2;
     text-shadow:0 2px 15px rgba(0,0,0,.5);
@@ -202,7 +206,8 @@
 }
 .tm-team-score {
     font-family:'Space Grotesk', sans-serif;
-    font-size:clamp(2rem, 5.5vw, 4.25rem);
+    /* Significantly increased score size scaling */
+    font-size: clamp(2.5rem, 8vw, 6rem);
     font-weight:900; color:#fff; line-height:1;
     font-variant-numeric:tabular-nums;
     text-shadow:0 4px 20px rgba(0,0,0,.6);
@@ -224,12 +229,15 @@
 /* ---------- Center Layout Elements ---------- */
 .tm-center {
     display:flex; flex-direction:column; align-items:center; justify-content:center;
-    gap:.75rem; flex-shrink:0; min-width:80px;
+    gap: clamp(1rem, 2vh, 2rem); /* Increased gap */
+    flex-shrink:0; 
+    min-width: clamp(80px, 15vw, 150px); /* Increased min-width */
     position:relative;
 }
 .tm-vs-badge {
-    width:clamp(44px, 8.5vw, 76px);
-    height:clamp(44px, 8.5vw, 76px);
+    /* Increased VS badge size scaling */
+    width: clamp(50px, 10vw, 90px);
+    height: clamp(50px, 10vw, 90px);
     border-radius:50%;
     background:linear-gradient(135deg,rgba(255,255,255,.15),rgba(255,255,255,.05));
     backdrop-filter:blur(25px);
@@ -240,7 +248,8 @@
 }
 .tm-vs-text {
     font-family:'Space Grotesk', sans-serif;
-    font-size:clamp(.75rem, 2vw, 1.15rem);
+    /* Increased VS text size */
+    font-size: clamp(0.9rem, 2.5vw, 1.5rem);
     font-weight:900; color:#e2e8f0;
 }
 .tm-trophy-icon {
@@ -252,7 +261,8 @@
 .tm-timer {
     font-family:'Space Grotesk', monospace;
     font-variant-numeric:tabular-nums;
-    font-size:clamp(0.95rem, 2.2vw, 1.4rem);
+    /* Increased timer size */
+    font-size: clamp(1.1rem, 3vw, 1.8rem);
     font-weight:700; color:#f8fafc;
     text-shadow:0 2px 15px rgba(0,0,0,.5);
     text-align:center; letter-spacing:1px;
@@ -290,11 +300,13 @@
 .tm-footer { display:flex; justify-content:center; flex-shrink: 0; }
 .tm-date {
     display:inline-flex; align-items:center; gap:.5rem;
-    padding:.5rem 1.1rem;
+    padding: clamp(0.5rem, 1.2vh, 0.8rem) clamp(1.1rem, 2.5vw, 1.5rem);
     background:linear-gradient(135deg,rgba(59,130,246,.18),rgba(99,102,246,.18));
     backdrop-filter:blur(15px);
     border-radius:.6rem; color:#93c5fd;
-    font-size:clamp(0.7rem, 1.5vw, 0.85rem); font-weight:700; letter-spacing:1px;
+    /* Increased date font size */
+    font-size: clamp(0.8rem, 2vw, 1.1rem); 
+    font-weight:700; letter-spacing:1px;
     text-transform:uppercase;
     border:1px solid rgba(59,130,246,.3);
 }
@@ -325,7 +337,8 @@
 .tm-card-worldcup.is-winner .tm-team.is-winner .tm-team-name { color:#fde68a; }
 .tm-card-worldcup.is-winner .tm-team.is-winner .tm-team-score {
     color:#fbbf24;
-    font-size:clamp(2.25rem, 6.5vw, 4.75rem);
+    /* Increased winner score size */
+    font-size: clamp(3rem, 9vw, 7rem);
 }
 .tm-card-worldcup.is-winner .tm-team.is-winner .tm-result-badge {
     opacity:1; transform:translateY(0);
@@ -338,7 +351,11 @@
     opacity:.55; filter:saturate(.3) brightness(.85);
 }
 .tm-card-worldcup.is-winner .tm-team.is-loser .tm-team-name { color:#94a3b8; }
-.tm-card-worldcup.is-winner .tm-team.is-loser .tm-team-score { color:#cbd5e1; font-size:clamp(1.5rem,5.5vw,3.25rem); }
+.tm-card-worldcup.is-winner .tm-team.is-loser .tm-team-score { 
+    color:#cbd5e1; 
+    /* Increased loser score size */
+    font-size: clamp(2rem, 7vw, 5rem); 
+}
 .tm-card-worldcup.is-winner .tm-draw-ribbon { opacity:0; transform:translate(-50%,-50%) scaleX(.5); }
 
 /* DRAW STATE */
@@ -363,6 +380,6 @@
 /* ---------- Cleaned Breakpoints for ultra compressed views ---------- */
 @media (max-width: 480px) {
     .tm-card-worldcup { border-radius: 1.5rem; }
-    .tm-matchup { gap: 0.35rem; }
+    .tm-matchup { gap: 0.5rem; }
     .tm-team-name { max-width: 95px; }
 }

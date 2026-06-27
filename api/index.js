@@ -2,55 +2,6 @@ require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
-const swaggerUi = require('swagger-ui-express');
-const swaggerDocument = require('../config/swagger.js');
-
-let swaggerSetupMiddleware = null;
-
-// ==========================================
-// SWAGGER INITIALIZATION (Universal Fix)
-// ==========================================
-if (swaggerDocument && typeof swaggerDocument.then === 'function') {
-  swaggerDocument
-    .then(doc => {
-      swaggerSetupMiddleware = swaggerUi.setup(doc, {
-        customCssUrl: 'https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.10.3/swagger-ui.css',
-        customJs: [
-          'https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.10.3/swagger-ui-bundle.js',
-          'https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.10.3/swagger-ui-standalone-preset.js'
-        ],
-        customfavIcon: 'https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.10.3/favicon-32x32.png',
-        swaggerOptions: {
-          persistAuthorization: true,
-          displayRequestDuration: true,
-          filter: true,
-          showExtensions: true,
-          showCommonExtensions: true
-        }
-      });
-      console.log('✓ Swagger document loaded successfully (Async)');
-    })
-    .catch(err => {
-      console.error('❌ Failed to load Swagger document:', err);
-    });
-} else {
-  swaggerSetupMiddleware = swaggerUi.setup(swaggerDocument, {
-    customCssUrl: 'https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.10.3/swagger-ui.css',
-    customJs: [
-      'https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.10.3/swagger-ui-bundle.js',
-      'https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.10.3/swagger-ui-standalone-preset.js'
-    ],
-    customfavIcon: 'https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.10.3/favicon-32x32.png',
-    swaggerOptions: {
-      persistAuthorization: true,
-      displayRequestDuration: true,
-      filter: true,
-      showExtensions: true,
-      showCommonExtensions: true
-    }
-  });
-  console.log('✓ Swagger document loaded successfully (Sync)');
-}
 
 const app = express();
 
@@ -125,9 +76,9 @@ if (fs.existsSync(componentsDir)) {
             const locals = {
               componentName: component,
               title: component.charAt(0).toUpperCase() + component.slice(1),
-              scrollSpeed: Number(req.query.scrollSpeed) || 3000,
-              showPodium: req.query.showPodium !== 'false', 
-              sliderSpeed: Number(req.query.sliderSpeed) || 8000,
+              speed: Number(req.query.speed) || 3000,
+              refetch: req.query.refetch === 'true',
+              dummy: req.query.dummy === 'true', // Changed to default to true
             };
             res.render(viewPath, locals);
           });
@@ -154,30 +105,9 @@ if (fs.existsSync(componentsDir)) {
   console.warn('⚠️ Components directory not found at:', componentsDir);
 }
 
-// Global Routes
-const globalRoutesPath = path.join(__dirname, '../routes/global/router.js');
-if (fs.existsSync(globalRoutesPath)) {
-  const globalRouter = require(globalRoutesPath);
-  if (typeof globalRouter === 'function' || (globalRouter && typeof globalRouter.handle === 'function')) {
-    app.use('/api', globalRouter);
-    console.log('✓ Loaded global routes');
-  } else {
-    console.error(`Invalid export from ${globalRoutesPath}. Expected express.Router, got:`, typeof globalRouter);
-  }
-}
-
 // ==========================================
-// 4. ROUTES & SWAGGER
+// 4. BASIC ROUTES
 // ==========================================
-app.use('/swagger', (req, res, next) => {
-  if (swaggerSetupMiddleware) {
-    swaggerSetupMiddleware(req, res, next);
-  } else {
-    res.status(503).send('Swagger is still initializing...');
-  }
-});
-console.log('✓ Swagger docs will be available at /swagger');
-
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/index.html'));
 });
@@ -224,6 +154,5 @@ if (require.main === module) {
   const PORT = process.env.PORT || 3000;
   app.listen(PORT, () => {
     console.log(`\n🚀 Server running on http://localhost:${PORT}`);
-    console.log(`API Docs: http://localhost:${PORT}/swagger\n`);
   });
 }

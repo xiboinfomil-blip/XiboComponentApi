@@ -4,7 +4,9 @@ const todayMatchesService = require('./service');
 exports.getData = async (req, res, next) => {
     try {
         const useDummyData = req.query.dummy === 'true';
-        const data = await todayMatchesService.getTodayMatches(useDummyData);
+        const forceRefetch = req.query.refetch === 'true';
+        
+        const data = await todayMatchesService.getTodayMatches(useDummyData, forceRefetch);
         
         res.json({
             status: 'success',

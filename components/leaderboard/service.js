@@ -1,13 +1,14 @@
-import axios from 'axios';
-import { kv } from '@vercel/kv'; // 👈 FIX 1: Missing Vercel KV import
+const axios = require('axios');
+const { kv } = require('@vercel/kv');
 
 /**
  * Helper function to calculate seconds until the next specific expiration hour.
  * Default is set to the top of the next hour, but you can adjust this logic 
  * to target specific hours (e.g., midnight, every 6 hours, etc.).
- * * @returns {number} Seconds remaining until expiration
+ * 
+ * @returns {number} Seconds remaining until expiration
  */
-function getSecondsUntilNextExpiration() { // 👈 FIX 2: Missing expiration logic
+function getSecondsUntilNextExpiration() {
     const now = new Date();
     
     // Example: Expire at the top of the very next hour
@@ -24,14 +25,12 @@ function getSecondsUntilNextExpiration() { // 👈 FIX 2: Missing expiration log
 /**
  * Fetches the leaderboard / pronostics data from the external API using Axios.
  * Uses Vercel KV to cache the result until the next specific expiration hour.
- * * @param {Object} options - Configuration options
- * @param {boolean} options.refetch - Force bypass cache and pull fresh data
- * @param {boolean} useDummyData - Legacy fallback flag to force dummy data
+ * 
+ * @param {boolean} useDummyData - Force dummy data
+ * @param {boolean} forceRefetch - Force bypass cache and pull fresh data
  * @param {number} retries - Number of retry attempts on API failure
  */
-exports.getLeaderboardData = async (options = {}, useDummyData = false, retries = 3) => {
-    // Extract refetch flag from options object
-    const { refetch = false } = options;
+module.exports.getLeaderboardData = async (useDummyData = false, forceRefetch = false, retries = 3) => {
     const apiUrl = "https://euro.omediainteractive.net/imleuro/items/pronostics_rankings";
     let rankingData = [];
 
@@ -51,7 +50,7 @@ exports.getLeaderboardData = async (options = {}, useDummyData = false, retries 
     const cacheKey = 'leaderboard_rankings_v1';
 
     // --- STEP 1: Check Cache (Skip if refetch=true) ---
-    if (refetch) {
+    if (forceRefetch) {
         console.log("🔄 ?refetch=true detected. Bypassing cache to fetch fresh data...");
     } else {
         try {

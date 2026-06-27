@@ -92,7 +92,9 @@
 
 <script>
     window.TODAY_MATCHES_CONFIG = {
-        sliderSpeed: <%= typeof sliderSpeed !== 'undefined' ? sliderSpeed : 8000 %>
+        speed: <%= typeof speed !== 'undefined' ? speed : 3000 %>,
+        refetch: <%= typeof refetch !== 'undefined' ? refetch : false %>
+            dummy: <%= typeof dummy !== 'undefined' ? dummy : false %>
     };
 </script>
 <script src="/assets/todayMatches/script.js?v=4.0.0"></script>

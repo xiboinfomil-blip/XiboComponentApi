@@ -47,8 +47,9 @@
 
     <script>
         window.LEADERBOARD_CONFIG = {
-            scrollSpeed: <%= typeof scrollSpeed !== 'undefined' ? scrollSpeed : 3000 %>,
-            showPodium: <%= showPodium !== false ? 'true' : 'false' %>
+            speed: <%= typeof speed !== 'undefined' ? speed : 3000 %>,
+            refetch: <%= typeof refetch !== 'undefined' ? refetch : false %>,
+            dummy: <%= typeof dummy !== 'undefined' ? dummy : false %>
         };
     </script>
     <script src="/assets/leaderboard/script.js?v=4.1.0"></script>

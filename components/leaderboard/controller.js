@@ -4,9 +4,13 @@ exports.getData = async (req, res, next) => {
     try {
         // Allow forcing dummy data via query param: /api/leaderboard?dummy=true
         const useDummyData = req.query.dummy === 'true';
-        const data = await leaderboardService.getLeaderboardData(useDummyData);
         
-        console.log(`Fetched ${data.length} leaderboard items (dummy: ${useDummyData})`);
+        // Allow forcing refetch via query param: /api/leaderboard?refetch=true
+        const forceRefetch = req.query.refetch === 'true';
+        
+        const data = await leaderboardService.getLeaderboardData(useDummyData, forceRefetch);
+        
+        console.log(`Fetched ${data.length} leaderboard items (dummy: ${useDummyData}, refetch: ${forceRefetch})`);
         
         res.json({
             status: 'success',

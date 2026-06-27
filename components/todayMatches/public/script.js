@@ -254,20 +254,11 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     /* ---------- Helpers ---------- */
-    const flagUrl = (name) => {
-        const map = {
-            'Canada':'ca','Mexico':'mx','United States':'us','Australia':'au','Iran':'ir','Iraq':'iq',
-            'Japan':'jp','Jordan':'jo','Qatar':'qa','Saudi Arabia':'sa','South Korea':'kr','Uzbekistan':'uz',
-            'Algeria':'dz','Cabo Verde':'cv','Cameroon':'cm','DR Congo':'cd','Egypt':'eg','Ghana':'gh',
-            'Ivory Coast':'ci','Morocco':'ma','Senegal':'sn','South Africa':'za','Tunisia':'tn',
-            'Costa Rica':'cr','Curaçao':'cw','Haiti':'ht','Panama':'pa','Argentina':'ar','Brazil':'br',
-            'Colombia':'co','Ecuador':'ec','Paraguay':'py','Uruguay':'uy','New Zealand':'nz',
-            'Austria':'at','Belgium':'be','Bosnia and Herzegovina':'ba','Croatia':'hr','Czechia':'cz',
-            'England':'gb-eng','France':'fr','Germany':'de','Italy':'it','Netherlands':'nl','Norway':'no',
-            'Portugal':'pt','Scotland':'gb-sct','Spain':'es','Sweden':'se','Switzerland':'ch','Turkey':'tr'
-        };
-        return `https://flagcdn.com/w160/${map[name] || 'unknown'}.png`;
-    };
+const flagUrl = (name) => {
+    // Returns path to local flag image: assets/flags/Country.png
+    if (!name) return null;
+    return `assets/flags/${name.replace(/ /g, '_')}.png`;
+};
 
     fetchMatches();
 });

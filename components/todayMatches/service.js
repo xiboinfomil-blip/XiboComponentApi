@@ -71,18 +71,15 @@ const getMatchStatusInfo = (matchDateStr) => {
 
 /**
  * Fetches today's matches.
- * @param {Object} options - Configuration options
- * @param {boolean} options.refetch - Force bypass cache and pull fresh data
- * @param {boolean} useDummyData - Legacy fallback flag to force dummy data
+ * @param {boolean} useDummyData - Force dummy data
+ * @param {boolean} forceRefetch - Force bypass cache and pull fresh data
  */
-exports.getTodayMatches = async (options = {}, useDummyData = false) => {
-    // Extract refetch flag from options payload
-    const { refetch = false } = options;
+module.exports.getTodayMatches = async (useDummyData = false, forceRefetch = false) => {
     const apiUrl = "https://euro.omediainteractive.net/imleuro/items/matches";
     
     console.log("=".repeat(80));
     console.log("[getTodayMatches] Function called");
-    console.log("[getTodayMatches] refetch:", refetch);
+    console.log("[getTodayMatches] forceRefetch:", forceRefetch);
     console.log("[getTodayMatches] useDummyData:", useDummyData);
     console.log("[getTodayMatches] Current Time:", new Date().toISOString());
 
@@ -114,7 +111,7 @@ exports.getTodayMatches = async (options = {}, useDummyData = false) => {
 
     // --- STEP 1: Check KV Cache (Bypassed if refetch is true) ---
     if (!useDummyData) {
-        if (refetch) {
+        if (forceRefetch) {
             console.log("[getTodayMatches] 🔄 ?refetch=true detected. Bypassing cache to fetch fresh data...");
         } else {
             try {
