@@ -1,0 +1,22 @@
+.tm-header { display:flex; justify-content:center; flex-shrink: 0; }
+.tm-status-badge {
+    padding: clamp(0.6rem, 1.5vh, 1rem) clamp(1.25rem, 3vw, 2rem); 
+    border-radius:2rem; font-weight:800; 
+    font-size: clamp(0.85rem, 2.5vw, 1.25rem);
+    text-transform:uppercase; letter-spacing:1.2px;
+    display:flex; align-items:center; gap:.5rem;
+    backdrop-filter:blur(15px); border:1px solid rgba(255,255,255,.15);
+    white-space:nowrap; box-shadow:0 8px 32px rgba(0,0,0,.3);
+}
+.tm-status-upcoming { background:linear-gradient(135deg,rgba(59,130,246,.25),rgba(99,102,241,.25)); color:#60a5fa; border-color:rgba(59,130,246,.4); }
+.tm-status-live     { background:linear-gradient(135deg,rgba(239,68,68,.3),rgba(244,63,94,.3));  color:#fca5a5; border-color:rgba(239,68,68,.5); animation:livePulse 2s infinite; }
+.tm-status-finished { background:linear-gradient(135deg,rgba(100,116,139,.25),rgba(71,85,105,.25)); color:#cbd5e1; border-color:rgba(100,116,139,.4); }
+
+.tm-live-dot {
+    width: clamp(8px, 1.5vw, 12px); height: clamp(8px, 1.5vw, 12px);
+    background:linear-gradient(135deg,#ef4444,#f43f5e);
+    border-radius:50%; box-shadow:0 0 15px #ef4444;
+    animation:dotPulse 1.5s ease-in-out infinite;
+}
+@keyframes livePulse { 0%,100%{box-shadow:0 8px 32px rgba(239,68,68,.4)} 50%{box-shadow:0 12px 40px rgba(239,68,68,.6); transform:scale(1.02)} }
+@keyframes dotPulse  { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.3);opacity:.7} }

@@ -6,32 +6,23 @@ const fs = require('fs');
 const app = express();
 
 // ==========================================
-// 1. CORE BODY PARSERS (Limits Removed)
+// 1. CORE BODY PARSERS
 // ==========================================
 app.use(express.json()); 
 app.use(express.urlencoded({ extended: true }));
-
-// Serve static files from public directory
 app.use(express.static(path.join(__dirname, '../public')));
 
 // ==========================================
-// 🌍 GLOBAL HELPERS STATIC ROUTE (BULLETPROOF)
+// 🌍 GLOBAL HELPERS STATIC ROUTE
 // ==========================================
-// Automatically find the 'global' folder whether server.js is in root or /api
 let globalPath = path.join(__dirname, 'global');
 if (!fs.existsSync(globalPath)) {
   globalPath = path.join(__dirname, '../global');
 }
-
-// DEBUG: Check these logs in your terminal when you start the server!
-console.log('🌍 Serving global helpers from:', globalPath);
-console.log('📂 Folder exists?', fs.existsSync(globalPath));
-console.log('📄 configHelper.js exists?', fs.existsSync(path.join(globalPath, 'helpers', 'configHelper.js')));
-
 app.use('/assets/global', express.static(globalPath));
 
 // ==========================================
-// NEW: ALLOW IFRAME EMBEDDING (Universal Fix for Xibo)
+// SECURITY & HEADERS
 // ==========================================
 app.use((req, res, next) => {
   res.removeHeader('X-Frame-Options');
@@ -39,14 +30,16 @@ app.use((req, res, next) => {
   next();
 });
 
-// ==========================================
-// 2. CLIENT-SIDE CACHING HEADERS
-// ==========================================
+// Block direct access to .ejs files (Security Best Practice)
+app.use('/assets/', (req, res, next) => {
+  if (req.path.endsWith('.ejs')) {
+    return res.status(403).send('Forbidden');
+  }
+  next();
+});
+
 app.use('/api/', (req, res, next) => {
-  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
-  res.setHeader('Pragma', 'no-cache');
-  res.setHeader('Expires', '0');
-  res.setHeader('Surrogate-Control', 'no-store');
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
   next();
 });
 
@@ -55,20 +48,28 @@ app.use('/assets/', (req, res, next) => {
   next();
 });
 
-app.use((req, res, next) => {
-  if (req.method === 'GET' && req.accepts('html') && !res.getHeader('Cache-Control')) {
-    res.setHeader('Cache-Control', 'public, max-age=3600');
-  }
-  next();
-});
-
 // ==========================================
-// 3. DYNAMIC COMPONENT LOADING (WITH QUERY OVERRIDES)
+// 3. EJS CONFIGURATION
 // ==========================================
 app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, '../components'));
 
 const componentsDir = path.join(__dirname, '../components');
+const viewsDirs = [componentsDir];
+
+const sharedViewsPath = path.join(__dirname, '../views');
+if (fs.existsSync(sharedViewsPath)) {
+  viewsDirs.push(sharedViewsPath);
+}
+
+app.set('views', viewsDirs);
+
+if (process.env.NODE_ENV === 'production') {
+  app.enable('view cache');
+}
+
+// ==========================================
+// 4. DYNAMIC COMPONENT LOADING
+// ==========================================
 if (fs.existsSync(componentsDir)) {
   const components = fs.readdirSync(componentsDir);
 
@@ -77,12 +78,9 @@ if (fs.existsSync(componentsDir)) {
     
     if (fs.statSync(componentPath).isDirectory()) {
       try {
-        const publicPath = path.join(componentPath, 'public');
-        if (fs.existsSync(publicPath)) {
-          app.use(`/assets/${component}`, express.static(publicPath));
-          console.log(`✓ Loaded assets: /assets/${component}`);
-        }
-
+        // ✅ SERVE ENTIRE COMPONENT FOLDER (Includes partials' CSS/JS)
+        app.use(`/assets/${component}`, express.static(componentPath));
+        
         const viewPath = path.join(componentPath, 'view.ejs');
         if (fs.existsSync(viewPath)) {
           app.get(`/${component}`, (req, res) => {
@@ -95,14 +93,12 @@ if (fs.existsSync(componentsDir)) {
             };
             res.render(viewPath, locals);
           });
-          console.log(`✓ Loaded view: /${component}`);
         }
 
         const routerPath = path.join(componentPath, 'router.js');
         if (fs.existsSync(routerPath)) {
           const router = require(routerPath);
           app.use(`/api/${component}`, router);
-          console.log(`✓ Loaded router: /api/${component}`);
         }
         
         const controllerPath = path.join(componentPath, 'controller.js');
@@ -114,58 +110,32 @@ if (fs.existsSync(componentsDir)) {
       }
     }
   });
-} else {
-  console.warn('⚠️ Components directory not found at:', componentsDir);
 }
 
 // ==========================================
-// 4. BASIC ROUTES
+// 5. BASIC ROUTES & ERROR HANDLING
 // ==========================================
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../public/index.html'));
-});
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, '../public/index.html')));
 
 app.get('/health', (req, res) => {
-  res.json({ 
-    status: 'OK', 
-    timestamp: new Date().toISOString(),
-    components: fs.existsSync(componentsDir) 
-      ? fs.readdirSync(componentsDir).filter(c => 
-          fs.statSync(path.join(componentsDir, c)).isDirectory()
-        )
-      : []
-  });
+  res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
-// ==========================================
-// 5. ERROR HANDLING & 404
-// ==========================================
-app.all('*', (req, res, next) => {
-  res.status(404).json({ 
-    status: 'fail', 
-    message: `Can't find ${req.originalUrl} on this server!` 
-  });
+app.all('*', (req, res) => {
+  res.status(404).json({ status: 'fail', message: `Not Found: ${req.originalUrl}` });
 });
 
 app.use((err, req, res, next) => {
   err.statusCode = err.statusCode || 500;
-  err.status = err.status || 'error';
-  console.error('❌ Server Error:', err);
   res.status(err.statusCode).json({
-    status: err.status,
-    message: process.env.NODE_ENV === 'development' ? err.message : 'Internal Server Error',
-    stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+    status: 'error',
+    message: process.env.NODE_ENV === 'development' ? err.message : 'Internal Server Error'
   });
 });
 
-// ==========================================
-// 6. EXPORT & LOCAL SERVER
-// ==========================================
 module.exports = app;
 
 if (require.main === module) {
   const PORT = process.env.PORT || 3000;
-  app.listen(PORT, () => {
-    console.log(`\n🚀 Server running on http://localhost:${PORT}`);
-  });
+  app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
 }

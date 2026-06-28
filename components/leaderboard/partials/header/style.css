@@ -1,0 +1,35 @@
+.leaderboard-header {
+    background: linear-gradient(180deg, rgba(15, 23, 42, 0.7) 0%, rgba(15, 23, 42, 0.4) 100%);
+    padding: clamp(8px, 2cqi, 16px) clamp(16px, 4cqi, 40px) clamp(6px, 1.5cqi, 12px);
+    text-align: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    position: relative;
+    flex-shrink: 0;
+}
+
+.leaderboard-header::after {
+    content: '';
+    position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+    width: min(120px, 30%); height: 2px;
+    background: linear-gradient(90deg, transparent, #6366f1, transparent);
+}
+
+.leaderboard-title {
+    font-size: clamp(20px, 5cqi, 36px);
+    font-weight: 900;
+    letter-spacing: clamp(1px, 0.8cqi, 4px);
+    text-transform: uppercase;
+    margin: 0 0 clamp(2px, 0.5cqi, 4px) 0;
+    background: linear-gradient(180deg, #ffffff 0%, #e2e8f0 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 0 40px rgba(255, 255, 255, 0.2);
+}
+
+.leaderboard-subtitle {
+    font-size: clamp(14px, 2.5cqi, 20px);
+    color: #cbd5e1;
+    font-weight: 500;
+    opacity: 0.8;
+}

@@ -1,0 +1,68 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap');
+
+.tm-wrapper * { margin:0; padding:0; box-sizing:border-box; }
+.tm-wrapper {
+    width: 100%; height: 100%;
+    display: flex; justify-content: center; align-items: center;
+    font-family: 'Inter', sans-serif; overflow: hidden; 
+}
+.tm-card-container { position: relative; width: 100%; height: 100%; display: flex; overflow: hidden; }
+
+/* ---------- Main Card ---------- */
+.tm-card-worldcup {
+    position: relative; width: 100%; height: 100%; flex: 1;
+    border-radius: 2rem; overflow: hidden;
+    background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #0f172a 100%);
+    box-shadow: 0 40px 100px rgba(0,0,0,.7), 0 0 0 1px rgba(255,255,255,.1), inset 0 1px 0 rgba(255,255,255,.15);
+    transition: all .6s cubic-bezier(.4,0,.2,1);
+    display: flex; flex-direction: column;
+}
+.tm-card-worldcup.fade-out { opacity:0; transform:scale(.96); }
+
+/* ---------- Background Effects ---------- */
+.tm-bg-effects { position:absolute; inset:0; overflow:hidden; z-index:1; pointer-events: none;}
+.tm-gradient-orb {
+    position:absolute; border-radius:50%; filter:blur(100px); opacity:.35;
+    pointer-events:none; mix-blend-mode:screen;
+}
+.tm-orb-1 { width:350px; height:350px; background:radial-gradient(circle,#6366f1,#8b5cf6 50%,transparent 70%); top:-100px; right:-100px; animation:orb1 18s ease-in-out infinite; }
+.tm-orb-2 { width:300px; height:300px; background:radial-gradient(circle,#ec4899,#f43f5e 50%,transparent 70%); bottom:-80px; left:-80px; animation:orb2 22s ease-in-out infinite reverse; }
+.tm-orb-3 { width:260px; height:260px; background:radial-gradient(circle,#06b6d4,#3b82f6 50%,transparent 70%); top:50%; left:50%; transform:translate(-50%,-50%); animation:orb3 25s ease-in-out infinite; }
+.tm-mesh-gradient {
+    position:absolute; inset:0;
+    background: radial-gradient(circle at 20% 80%, rgba(120,119,198,.2) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255,119,198,.2) 0%, transparent 50%);
+    animation:meshRot 40s linear infinite;
+}
+.tm-noise-overlay {
+    position:absolute; inset:0; opacity:.03; pointer-events:none;
+    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+@keyframes orb1 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(30px,-30px) scale(1.2)} }
+@keyframes orb2 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(-35px,35px) scale(1.15)} }
+@keyframes orb3 { 0%,100%{transform:translate(-50%,-50%) scale(1)} 50%{transform:translate(-45%,-55%) scale(1.2)} }
+@keyframes meshRot { to { transform:rotate(360deg); } }
+
+.tm-glass-overlay {
+    position:absolute; inset:0; background:rgba(10,14,39,.5);
+    backdrop-filter:blur(60px) saturate(200%); -webkit-backdrop-filter:blur(60px) saturate(200%);
+    z-index:2; pointer-events: none;
+}
+
+/* ---------- Content Core ---------- */
+.tm-card-content {
+    position:relative; z-index:3;
+    padding: clamp(1.5rem, 5vh, 4rem) clamp(1.5rem, 6vw, 5rem); 
+    display:flex; flex-direction:column; height:100%; width:100%;
+    justify-content: space-between; gap: 2rem; overflow: hidden;
+}
+
+/* Empty State */
+.tm-empty-state {
+    text-align:center; padding:2rem; background:rgba(15,23,42,.7); backdrop-filter:blur(60px);
+    border-radius:2rem; border:1px solid rgba(255,255,255,.1);
+    width:100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center;
+}
+.tm-empty-icon { margin-bottom:0.75rem; color:#64748b; opacity:.5; }
+.tm-empty-state h3 { font-family:'Space Grotesk',sans-serif; font-size:clamp(1.15rem, 3vw, 1.6rem); font-weight:800; color:#f1f5f9; margin-bottom:.35rem; }
+.tm-empty-state p  { font-size:clamp(0.85rem, 2vw, 1.1rem); color:#94a3b8; font-weight:500; line-height:1.4; }

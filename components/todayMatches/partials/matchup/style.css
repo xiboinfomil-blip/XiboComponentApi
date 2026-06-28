@@ -1,0 +1,123 @@
+/* ---------- Matchup Grid ---------- */
+.tm-matchup {
+    flex: 1; display: grid; grid-template-columns: 1fr auto 1fr;
+    align-items: center; gap: clamp(1rem, 5vw, 4rem);
+    min-height: 0; width: 100%;
+}
+
+/* ---------- Team ---------- */
+.tm-team {
+    display:flex; flex-direction:column; align-items:center;
+    gap: clamp(0.5rem, 1.5vh, 1.5rem);
+    transition:all .6s cubic-bezier(.4,0,.2,1); position:relative; min-width: 0; 
+}
+
+/* Crown */
+.tm-crown {
+    width: clamp(24px, 5vw, 48px); height: clamp(24px, 5vw, 48px);
+    color:#fbbf24; opacity:0; transform:translateY(5px) scale(.6);
+    transition:all .6s cubic-bezier(.34,1.56,.64,1);
+    filter:drop-shadow(0 0 12px rgba(251,191,36,.6)); pointer-events:none;
+}
+.tm-crown svg { width:100%; height:100%; display: block; }
+
+/* Flag */
+.tm-flag-wrapper { position:relative; display:flex; justify-content:center; width: 100%; }
+.tm-flag-container {
+    position:relative; width: clamp(70px, 18vw, 160px); height: clamp(50px, 13vw, 110px);
+    border-radius:0.85rem; overflow:hidden; background:rgba(255,255,255,.08);
+    backdrop-filter:blur(25px); border:2.5px solid rgba(255,255,255,.2);
+    box-shadow:0 16px 36px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.25);
+    transition:all .5s cubic-bezier(.4,0,.2,1);
+}
+.tm-flag-shine {
+    position:absolute; top:0; left:-100%; width:100%; height:100%;
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent);
+    transition:left .6s ease; z-index:2;
+}
+.tm-team:hover .tm-flag-shine { left:100%; }
+.tm-flag-image { width:100%; height:100%; object-fit:cover; display:block; position:relative; z-index:1; }
+.tm-flag-fallback {
+    width:100%; height:100%; display:flex !important; align-items:center; justify-content:center;
+    font-size:clamp(1.5rem, 4vw, 2.5rem); font-weight:900; color:#a78bfa;
+    background:linear-gradient(135deg,rgba(99,102,241,.4),rgba(168,85,247,.4));
+}
+
+/* Text & Score */
+.tm-team-name {
+    font-family:'Space Grotesk', sans-serif; font-size: clamp(1rem, 3.5vw, 2rem);
+    font-weight:700; color:#f1f5f9; text-align:center; line-height:1.2;
+    text-shadow:0 2px 15px rgba(0,0,0,.5); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 100%;
+}
+.tm-team-score {
+    font-family:'Space Grotesk', sans-serif; font-size: clamp(2.5rem, 8vw, 6rem);
+    font-weight:900; color:#fff; line-height:1; font-variant-numeric:tabular-nums;
+    text-shadow:0 4px 20px rgba(0,0,0,.6);
+}
+
+/* Result Badge */
+.tm-result-badge {
+    display:inline-flex; align-items:center; justify-content:center;
+    padding:.35rem .9rem; border-radius:2rem; font-size:.7rem; font-weight:800; letter-spacing:.8px;
+    text-transform:uppercase; backdrop-filter:blur(15px);
+    opacity:0; transform:translateY(4px); transition:all .5s cubic-bezier(.4,0,.2,1); pointer-events:none; white-space:nowrap;
+}
+
+/* ---------- Center Elements ---------- */
+.tm-center {
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap: clamp(1rem, 2vh, 2rem); flex-shrink:0; min-width: clamp(80px, 15vw, 150px); position:relative;
+}
+.tm-vs-badge {
+    width: clamp(50px, 10vw, 90px); height: clamp(50px, 10vw, 90px);
+    border-radius:50%; background:linear-gradient(135deg,rgba(255,255,255,.15),rgba(255,255,255,.05));
+    backdrop-filter:blur(25px); display:flex; align-items:center; justify-content:center;
+    border:2.5px solid rgba(255,255,255,.25);
+    box-shadow:0 12px 30px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.3); position:relative;
+}
+.tm-vs-text { font-family:'Space Grotesk', sans-serif; font-size: clamp(0.9rem, 2.5vw, 1.5rem); font-weight:900; color:#e2e8f0; }
+.tm-trophy-icon { width:45%; height:45%; color:#fbbf24; position:absolute; opacity:0; transform:scale(.5); filter:drop-shadow(0 0 10px rgba(251,191,36,.6)); }
+
+/* Timer */
+.tm-timer {
+    font-family:'Space Grotesk', monospace; font-variant-numeric:tabular-nums;
+    font-size: clamp(1.1rem, 3vw, 1.8rem); font-weight:700; color:#f8fafc;
+    text-shadow:0 2px 15px rgba(0,0,0,.5); text-align:center; letter-spacing:1px;
+}
+.tm-timer.is-live { animation:liveFlicker 1.5s ease-in-out infinite; }
+@keyframes liveFlicker { 0%,100%{opacity:1; text-shadow:0 0 30px rgba(139,92,246,.3)} 50%{opacity:.6; text-shadow:0 0 60px rgba(239,68,68,.9)} }
+
+/* Draw Ribbon */
+.tm-draw-ribbon {
+    position:absolute; left:50%; top:50%; width: 130%;
+    display:flex; align-items:center; justify-content:center; gap:.35rem;
+    padding:.5rem 1rem; background:linear-gradient(135deg, rgba(148,163,184,.18), rgba(203,213,225,.12));
+    backdrop-filter:blur(20px) saturate(180%); -webkit-backdrop-filter:blur(20px) saturate(180%);
+    border:1px solid rgba(226,232,240,.35); border-radius:999px;
+    opacity:0; transform:translate(-50%,-50%) scaleX(.7);
+    transition:all .6s cubic-bezier(.34,1.56,.64,1); z-index:5;
+}
+.tm-draw-line { flex:1; height:1px; background:linear-gradient(90deg, transparent, rgba(226,232,240,.6), transparent); }
+.tm-draw-text { font-family:'Space Grotesk', sans-serif; font-size:clamp(0.65rem, 1.4vw, 0.85rem); font-weight:800; letter-spacing:1.5px; color:#e2e8f0; text-shadow:0 0 20px rgba(226,232,240,.4); white-space:nowrap; }
+
+/* ---------- State Adjustments ---------- */
+.tm-card-worldcup.is-winner .tm-team.is-winner { transform:translateY(-3px) scale(1.02); z-index:4; }
+.tm-card-worldcup.is-winner .tm-team.is-winner .tm-crown { opacity:1; transform:translateY(0) scale(1); animation:crownFloat 3s ease-in-out infinite; }
+@keyframes crownFloat { 0%,100% { transform:translateY(0) scale(1); } 50% { transform:translateY(-2px) scale(1.03); } }
+
+.tm-card-worldcup.is-winner .tm-team.is-winner .tm-flag-container { border-color:rgba(251,191,36,.85); animation:winnerGlow 3s ease-in-out infinite; }
+@keyframes winnerGlow { 0%,100% { box-shadow:0 0 0 2px rgba(251,191,36,.2), 0 0 30px rgba(251,191,36,.35); } 50% { box-shadow:0 0 0 3px rgba(251,191,36,.3), 0 0 45px rgba(251,191,36,.55); } }
+
+.tm-card-worldcup.is-winner .tm-team.is-winner .tm-team-name { color:#fde68a; }
+.tm-card-worldcup.is-winner .tm-team.is-winner .tm-team-score { color:#fbbf24; font-size: clamp(3rem, 9vw, 7rem); }
+.tm-card-worldcup.is-winner .tm-team.is-winner .tm-result-badge { opacity:1; transform:translateY(0); background:linear-gradient(135deg, rgba(251,191,36,.35), rgba(245,158,11,.3)); color:#fde68a; border:1.5px solid rgba(251,191,36,.7); }
+
+.tm-card-worldcup.is-winner .tm-team.is-loser { transform:translateY(2px) scale(.97); opacity:.55; filter:saturate(.3) brightness(.85); }
+.tm-card-worldcup.is-winner .tm-team.is-loser .tm-team-name { color:#94a3b8; }
+.tm-card-worldcup.is-winner .tm-team.is-loser .tm-team-score { color:#cbd5e1; font-size: clamp(2rem, 7vw, 5rem); }
+.tm-card-worldcup.is-winner .tm-draw-ribbon { opacity:0; transform:translate(-50%,-50%) scaleX(.5); }
+
+.tm-card-worldcup.is-draw .tm-draw-ribbon { opacity:1; transform:translate(-50%,-50%) scaleX(1); }
+.tm-card-worldcup.is-draw .tm-team { filter:none; opacity:1; transform:none; }
+.tm-card-worldcup.is-draw .tm-team .tm-team-name { color:#e2e8f0; }
+.tm-card-worldcup.is-draw .tm-team .tm-team-score { color:#f1f5f9; }
