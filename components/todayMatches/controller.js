@@ -3,10 +3,8 @@ const todayMatchesService = require('./service');
 
 exports.getData = async (req, res, next) => {
     try {
-        const useDummyData = req.query.dummy === 'true';
-        const forceRefetch = req.query.refetch === 'true';
-        
-        const data = await todayMatchesService.getTodayMatches(useDummyData, forceRefetch);
+        // Pass the whole config object or specific flags to the service
+        const data = await todayMatchesService.getTodayMatches(req.appConfig);
         
         res.json({
             status: 'success',
@@ -14,7 +12,6 @@ exports.getData = async (req, res, next) => {
             data: data
         });
     } catch (error) {
-        console.error("Controller Error:", error);
         next(error);
     }
 };

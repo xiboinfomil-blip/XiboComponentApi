@@ -1,15 +1,11 @@
-const axios = require('axios');
 const { kv } = require('@vercel/kv');
+const { fetchWithCircuitBreaker, circuitBreaker } = require('../../helpers/fetchWithCircuitBreaker');
 
 const LEADERBOARD_CACHE_KEY = 'leaderboard_rankings_v1';
 const LEADERBOARD_STALE_CACHE_KEY = 'leaderboard_rankings_stale_v1';
 
 /**
  * Helper function to calculate seconds until the next specific expiration hour.
- * Default is set to the top of the next hour, but you can adjust this logic 
- * to target specific hours (e.g., midnight, every 6 hours, etc.).
- * 
- * @returns {number} Seconds remaining until expiration
  */
 function getSecondsUntilNextExpiration() {
     const now = new Date();
@@ -26,97 +22,17 @@ function getSecondsUntilNextExpiration() {
 }
 
 /**
- * Circuit Breaker to prevent repeated API calls when service is down
- */
-const circuitBreaker = {
-    failures: 0,
-    lastFailureTime: null,
-    threshold: 3,
-    resetTimeout: 60000, // 1 minute
-    
-    isOpen() {
-        if (this.failures >= this.threshold) {
-            const timeSinceLastFailure = Date.now() - this.lastFailureTime;
-            if (timeSinceLastFailure < this.resetTimeout) {
-                console.log(`[CircuitBreaker] 🚫 Circuit OPEN (${this.failures} failures in last ${this.resetTimeout/1000}s)`);
-                return true; // Circuit is open, don't call API
-            } else {
-                // Reset after timeout
-                console.log('[CircuitBreaker] 🔄 Circuit resetting...');
-                this.failures = 0;
-                this.lastFailureTime = null;
-                return false;
-            }
-        }
-        return false;
-    },
-    
-    recordSuccess() {
-        if (this.failures > 0) {
-            console.log(`[CircuitBreaker] ✅ Success recorded. Resetting failure count from ${this.failures}`);
-        }
-        this.failures = 0;
-        this.lastFailureTime = null;
-    },
-    
-    recordFailure() {
-        this.failures++;
-        this.lastFailureTime = Date.now();
-        console.log(`[CircuitBreaker] ❌ Failure recorded. Count: ${this.failures}/${this.threshold}`);
-    }
-};
-
-/**
- * Fetches data with exponential backoff retry logic using Axios
- * @param {string} url - The URL to fetch
- * @param {object} options - Axios options
- * @param {number} maxRetries - Maximum number of retry attempts
- * @returns {Promise<object>} - Axios response data
- */
-const fetchWithRetry = async (url, options = {}, maxRetries = 3) => {
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
-        try {
-            console.log(`[fetchWithRetry] Attempt ${attempt}/${maxRetries} for ${url}`);
-            
-            const response = await axios.get(url, {
-                ...options,
-                timeout: 30000
-            });
-
-            console.log(`[fetchWithRetry] ✅ Success on attempt ${attempt}`);
-            return response.data;
-
-        } catch (error) {
-            let errorMessage = error.message;
-            if (error.response) {
-                errorMessage = `HTTP ${error.response.status}: ${JSON.stringify(error.response.data)}`;
-            }
-            
-            console.warn(`[fetchWithRetry] ⚠️ Attempt ${attempt} failed:`, errorMessage);
-            
-            // If this was the last attempt, rethrow the error
-            if (attempt === maxRetries) {
-                console.error(`[fetchWithRetry] ❌ All ${maxRetries} attempts failed`);
-                throw error;
-            }
-            
-            // Exponential backoff: wait 2^attempt seconds (2s, 4s, 8s...)
-            // Cap the wait time to prevent RangeError
-            const waitTime = Math.min(Math.pow(2, attempt) * 1000, 30000);
-            console.log(`[fetchWithRetry] ⏳ Waiting ${waitTime}ms before next retry...`);
-            await new Promise(resolve => setTimeout(resolve, waitTime));
-        }
-    }
-};
-
-/**
  * Fetches the leaderboard / pronostics data from the external API using Axios.
- * Uses Vercel KV to cache the result until the next specific expiration hour.
+ * Uses Vercel KV to cache the result.
  * 
- * @param {boolean} useDummyData - Force dummy data
- * @param {boolean} forceRefetch - Force bypass cache and pull fresh data
+ * @param {object} config - Centralized request configuration
+ * @param {boolean} config.useDummyData - Force dummy data
+ * @param {boolean} config.forceRefetch - Force bypass cache and pull fresh data
  */
-module.exports.getLeaderboardData = async (useDummyData = false, forceRefetch = false) => {
+module.exports.getLeaderboardData = async (config = {}) => {
+    // Destructure with defaults for safety
+    const { useDummyData = false, forceRefetch = false } = config;
+
     const apiUrl = "https://euro.omediainteractive.net/imleuro/items/pronostics_rankings";
     let rankingData = [];
 
@@ -151,23 +67,14 @@ module.exports.getLeaderboardData = async (useDummyData = false, forceRefetch = 
 
     // --- STEP 2: Fetch from External API ---
     try {
-        // Check circuit breaker before making API call
-        if (circuitBreaker.isOpen()) {
-            console.log("[getLeaderboardData] ⚡ Circuit breaker is OPEN. Skipping API call.");
-            throw new Error('Circuit breaker open - API temporarily unavailable');
-        }
-
-        console.log("[getLeaderboardData] 🔄 Fetching leaderboard with retry logic...");
+        console.log("[getLeaderboardData] 🔄 Fetching leaderboard with circuit breaker and retry logic...");
         
-        const payload = await fetchWithRetry(apiUrl, {
+        const payload = await fetchWithCircuitBreaker(apiUrl, {
             headers: {
                 'Accept': 'application/json',
                 'User-Agent': 'Node.js Axios'
             }
         }, 3); // 3 retries with exponential backoff
-
-        // Record success in circuit breaker
-        circuitBreaker.recordSuccess();
 
         const rawRows = payload?.data || [];
         
@@ -223,11 +130,6 @@ module.exports.getLeaderboardData = async (useDummyData = false, forceRefetch = 
         console.error("[getLeaderboardData] Message:", error.message);
         console.error("[getLeaderboardData] Stack:", error.stack);
         console.error("=".repeat(80));
-        
-        // Record failure in circuit breaker (only for API errors, not dummy data)
-        if (error.message !== 'Circuit breaker open - API temporarily unavailable') {
-            circuitBreaker.recordFailure();
-        }
         
         // Fallback: Try to return cached data if API fails
         try {

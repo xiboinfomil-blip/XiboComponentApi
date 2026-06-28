@@ -3,6 +3,12 @@ const express = require('express');
 const path = require('path');
 const fs = require('fs');
 
+// 1. Import your custom middleware
+const requestConfig = require('../middleware/requestConfig'); 
+
+// Import the shared circuit breaker to expose its status via API
+const { circuitBreaker } = require('../helpers/fetchWithCircuitBreaker'); 
+
 const app = express();
 
 // ==========================================
@@ -11,6 +17,13 @@ const app = express();
 app.use(express.json()); 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '../public')));
+
+// ==========================================
+// 2. APPLY GLOBAL MIDDLEWARE
+// ==========================================
+
+// ✅ Apply requestConfig here so it runs on EVERY request before reaching routers
+app.use(requestConfig);
 
 // ==========================================
 // 🌍 GLOBAL HELPERS STATIC ROUTE
@@ -118,7 +131,21 @@ if (fs.existsSync(componentsDir)) {
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, '../public/index.html')));
 
 app.get('/health', (req, res) => {
-  res.json({ status: 'OK', timestamp: new Date().toISOString() });
+  res.json({ 
+    status: 'OK', 
+    timestamp: new Date().toISOString(),
+    circuitBreaker: {
+      isOpen: circuitBreaker.isOpen(),
+      failures: circuitBreaker.failures
+    }
+  });
+});
+
+// 🔧 DEBUG: Manual Circuit Breaker Reset Endpoint
+app.post('/admin/reset-circuit-breaker', (req, res) => {
+  circuitBreaker.failures = 0;
+  circuitBreaker.lastFailureTime = null;
+  res.json({ message: 'Circuit breaker reset successfully' });
 });
 
 app.all('*', (req, res) => {

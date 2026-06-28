@@ -1,4 +1,5 @@
 const { kv } = require('@vercel/kv');
+const { fetchWithCircuitBreaker, circuitBreaker } = require('../../helpers/fetchWithCircuitBreaker');
 
 const MATCHES_CACHE_KEY = 'today_matches_v1';
 const STALE_CACHE_KEY = 'today_matches_stale_v1';
@@ -71,104 +72,15 @@ const getMatchStatusInfo = (matchDateStr) => {
 };
 
 /**
- * Circuit Breaker to prevent repeated API calls when service is down
- */
-const circuitBreaker = {
-    failures: 0,
-    lastFailureTime: null,
-    threshold: 3,
-    resetTimeout: 60000, // 1 minute
-    
-    isOpen() {
-        if (this.failures >= this.threshold) {
-            const timeSinceLastFailure = Date.now() - this.lastFailureTime;
-            if (timeSinceLastFailure < this.resetTimeout) {
-                console.log(`[CircuitBreaker] 🚫 Circuit OPEN (${this.failures} failures in last ${this.resetTimeout/1000}s)`);
-                return true; // Circuit is open, don't call API
-            } else {
-                // Reset after timeout
-                console.log('[CircuitBreaker] 🔄 Circuit resetting...');
-                this.failures = 0;
-                this.lastFailureTime = null;
-                return false;
-            }
-        }
-        return false;
-    },
-    
-    recordSuccess() {
-        if (this.failures > 0) {
-            console.log(`[CircuitBreaker] ✅ Success recorded. Resetting failure count from ${this.failures}`);
-        }
-        this.failures = 0;
-        this.lastFailureTime = null;
-    },
-    
-    recordFailure() {
-        this.failures++;
-        this.lastFailureTime = Date.now();
-        console.log(`[CircuitBreaker] ❌ Failure recorded. Count: ${this.failures}/${this.threshold}`);
-    }
-};
-
-/**
- * Fetches data with exponential backoff retry logic
- * @param {string} url - The URL to fetch
- * @param {object} options - Fetch options
- * @param {number} maxRetries - Maximum number of retry attempts
- * @returns {Promise<object>} - Parsed JSON response
- */
-const fetchWithRetry = async (url, options = {}, maxRetries = 3) => {
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
-        try {
-            console.log(`[fetchWithRetry] Attempt ${attempt}/${maxRetries} for ${url}`);
-            
-            const controller = new AbortController();
-            const timeoutMs = 10000;
-            
-            const timeoutId = setTimeout(() => {
-                console.log(`[fetchWithRetry] ⏰ Timeout on attempt ${attempt}`);
-                controller.abort();
-            }, timeoutMs);
-
-            const response = await fetch(url, { 
-                ...options,
-                signal: controller.signal
-            });
-            
-            clearTimeout(timeoutId);
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const data = await response.json();
-            console.log(`[fetchWithRetry] ✅ Success on attempt ${attempt}`);
-            return data;
-
-        } catch (error) {
-            console.warn(`[fetchWithRetry] ⚠️ Attempt ${attempt} failed:`, error.message);
-            
-            // If this was the last attempt, rethrow the error
-            if (attempt === maxRetries) {
-                console.error(`[fetchWithRetry] ❌ All ${maxRetries} attempts failed`);
-                throw error;
-            }
-            
-            // Exponential backoff: wait 2^attempt seconds (2s, 4s, 8s...)
-            const waitTime = Math.pow(2, attempt) * 1000;
-            console.log(`[fetchWithRetry] ⏳ Waiting ${waitTime}ms before next retry...`);
-            await new Promise(resolve => setTimeout(resolve, waitTime));
-        }
-    }
-};
-
-/**
  * Fetches today's matches.
- * @param {boolean} useDummyData - Force dummy data
- * @param {boolean} forceRefetch - Force bypass cache and pull fresh data
+ * @param {object} config - Centralized request configuration
+ * @param {boolean} config.useDummyData - Force dummy data
+ * @param {boolean} config.forceRefetch - Force bypass cache and pull fresh data
  */
-module.exports.getTodayMatches = async (useDummyData = false, forceRefetch = false) => {
+module.exports.getTodayMatches = async (config = {}) => {
+    // Destructure with defaults to ensure backward compatibility if called without config
+    const { useDummyData = false, forceRefetch = false } = config;
+    
     const apiUrl = "https://euro.omediainteractive.net/imleuro/items/matches";
     
     console.log("=".repeat(80));
@@ -229,23 +141,14 @@ module.exports.getTodayMatches = async (useDummyData = false, forceRefetch = fal
             console.log("[getTodayMatches] Using dummy data");
             matchesData = getDummyMatches();
         } else {
-            // Check circuit breaker before making API call
-            if (circuitBreaker.isOpen()) {
-                console.log("[getTodayMatches] ⚡ Circuit breaker is OPEN. Skipping API call.");
-                throw new Error('Circuit breaker open - API temporarily unavailable');
-            }
-
-            console.log("[getTodayMatches] 🔄 Fetching new matches from API with retry logic...");
+            console.log("[getTodayMatches] 🔄 Fetching new matches from API with circuit breaker and retry logic...");
             
-            const payload = await fetchWithRetry(apiUrl, {
+            const payload = await fetchWithCircuitBreaker(apiUrl, {
                 headers: { 
                     'User-Agent': 'Express-App/1.0', 
                     'Accept': 'application/json' 
                 }
             }, 3); // 3 retries with exponential backoff
-
-            // Record success in circuit breaker
-            circuitBreaker.recordSuccess();
 
             const rawMatches = payload?.data || [];
             const todayStr = new Date().toISOString().split('T')[0];
@@ -293,11 +196,6 @@ module.exports.getTodayMatches = async (useDummyData = false, forceRefetch = fal
         console.error("[getTodayMatches] Message:", error.message);
         console.error("[getTodayMatches] Stack:", error.stack);
         console.error("=".repeat(80));
-        
-        // Record failure in circuit breaker (only for API errors, not dummy data)
-        if (!useDummyData && error.message !== 'Circuit breaker open - API temporarily unavailable') {
-            circuitBreaker.recordFailure();
-        }
         
         // Fallback: Try to return cached data if API fails
         if (!useDummyData) {

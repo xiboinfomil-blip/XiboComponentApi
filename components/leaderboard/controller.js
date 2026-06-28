@@ -2,15 +2,11 @@ const leaderboardService = require('./service');
 
 exports.getData = async (req, res, next) => {
     try {
-        // Allow forcing dummy data via query param: /api/leaderboard?dummy=true
-        const useDummyData = req.query.dummy === 'true';
+        console.log("[Controller] Fetching leaderboard data with config:", req.appConfig);
+        // Pass the entire config object from the middleware
+        const data = await leaderboardService.getLeaderboardData(req.appConfig);
         
-        // Allow forcing refetch via query param: /api/leaderboard?refetch=true
-        const forceRefetch = req.query.refetch === 'true';
-        
-        const data = await leaderboardService.getLeaderboardData(useDummyData, forceRefetch);
-        
-        console.log(`Fetched ${data.length} leaderboard items (dummy: ${useDummyData}, refetch: ${forceRefetch})`);
+        console.log(`Fetched ${data.length} leaderboard items`);
         
         res.json({
             status: 'success',
@@ -18,6 +14,7 @@ exports.getData = async (req, res, next) => {
             data: data
         });
     } catch (error) {
+        console.error("[Controller] Error fetching leaderboard:", error);
         next(error);
     }
 };

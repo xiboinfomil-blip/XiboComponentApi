@@ -1,35 +1,78 @@
-.leaderboard-header {
-    background: linear-gradient(180deg, rgba(15, 23, 42, 0.7) 0%, rgba(15, 23, 42, 0.4) 100%);
-    padding: clamp(8px, 2cqi, 16px) clamp(16px, 4cqi, 40px) clamp(6px, 1.5cqi, 12px);
-    text-align: center;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+/* CORE CONTAINER */
+.wc26-header {
+    /* Deep FIFA Navy - not pure black, rich and broadcast-ready */
+    background: linear-gradient(180deg, #0B132B 0%, #070C1A 100%);
     position: relative;
+    padding: clamp(12px, 2.5cqi, 18px) clamp(20px, 4cqi, 32px);
+    overflow: hidden;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+/* AMBIENT GLOW - Only top center, very subtle */
+.wc26-glow {
+    position: absolute;
+    top: -60%; left: 50%;
+    transform: translateX(-50%);
+    width: 70%; height: 180%;
+    background: radial-gradient(circle, rgba(198, 165, 88, 0.06) 0%, transparent 65%);
+    pointer-events: none;
+}
+
+/* CONTENT WRAPPER */
+.wc26-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    position: relative;
+    z-index: 2;
+}
+
+/* TITLE LOCKUP - Logo sits inline with text */
+.title-lockup {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(8px, 1.5cqi, 14px);
+    line-height: 1;
+}
+
+.wc26-logo-inline {
+    height: clamp(18px, 3.5cqi, 28px);
+    width: auto;
     flex-shrink: 0;
 }
 
-.leaderboard-header::after {
-    content: '';
-    position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
-    width: min(120px, 30%); height: 2px;
-    background: linear-gradient(90deg, transparent, #6366f1, transparent);
-}
-
-.leaderboard-title {
-    font-size: clamp(20px, 5cqi, 36px);
-    font-weight: 900;
-    letter-spacing: clamp(1px, 0.8cqi, 4px);
+.wc26-title {
+    font-family: 'Montserrat', system-ui, sans-serif;
+    font-size: clamp(15px, 3.2cqi, 22px);
+    font-weight: 800;
+    letter-spacing: 0.8px;
     text-transform: uppercase;
-    margin: 0 0 clamp(2px, 0.5cqi, 4px) 0;
-    background: linear-gradient(180deg, #ffffff 0%, #e2e8f0 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    text-shadow: 0 0 40px rgba(255, 255, 255, 0.2);
+    margin: 0;
+    color: #FFFFFF;
+    white-space: nowrap;
 }
 
-.leaderboard-subtitle {
-    font-size: clamp(14px, 2.5cqi, 20px);
-    color: #cbd5e1;
-    font-weight: 500;
-    opacity: 0.8;
+/* SUBTITLE - Muted gold, smaller, elegant */
+.wc26-subtitle {
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: clamp(9px, 1.6cqi, 12px);
+    color: #C6A558; /* FIFA Gold */
+    font-weight: 600;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    margin: 0;
+    opacity: 0.85;
+}
+
+/* ACCENT LINE - Thin gold, centered */
+.wc26-accent {
+    position: absolute;
+    bottom: 0; left: 50%;
+    transform: translateX(-50%);
+    width: min(60px, 15%);
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #C6A558, transparent);
+    opacity: 0.6;
 }
