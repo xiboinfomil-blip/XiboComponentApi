@@ -101,7 +101,8 @@ const fetchWithRetry = async (url, options = {}, maxRetries = 3) => {
             }
             
             // Exponential backoff: wait 2^attempt seconds (2s, 4s, 8s...)
-            const waitTime = Math.pow(2, attempt) * 1000;
+            // Cap the wait time to prevent RangeError
+            const waitTime = Math.min(Math.pow(2, attempt) * 1000, 30000);
             console.log(`[fetchWithRetry] ⏳ Waiting ${waitTime}ms before next retry...`);
             await new Promise(resolve => setTimeout(resolve, waitTime));
         }
