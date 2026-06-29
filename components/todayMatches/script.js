@@ -62,53 +62,63 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /* ---------- Data Normalization ---------- */
     const normalizeMatchData = (apiMatch) => {
-        if (!apiMatch) return null;
+    if (!apiMatch) return null;
 
-        // Parse the date string "2026-06-11 23:00:00"
-        const matchDate = new Date(apiMatch.date.replace(' ', 'T') + '+04:00'); 
-        
-        const isFinished = apiMatch.current_status === 'finished';
-        let statusKey = 'upcoming';
-        let isLive = false;
-        let timeString = '';
-        let label = '';
+    // Parse the date string "2026-06-11 23:00:00"
+    const matchDate = new Date(apiMatch.date.replace(' ', 'T') + '+04:00'); 
+    
+    const isFinished = apiMatch.current_status === 'finished';
+    
+    // Check for live/progress statuses from API
+    const liveStatuses = ['inprogress', 'playing', '1st_half', '2nd_half', 'halftime', 'extra_time', 'penalty'];
+    const isApiLive = liveStatuses.includes(apiMatch.current_status?.toLowerCase());
+    
+    let statusKey = 'upcoming';
+    let isLive = false;
+    let timeString = '';
+    let label = '';
 
-        // Format time as HH:mm
-        const timeOptions = { hour: '2-digit', minute: '2-digit' };
-        const formattedTime = !isNaN(matchDate.getTime()) 
-            ? matchDate.toLocaleTimeString('fr-FR', timeOptions) 
-            : apiMatch.date.split(' ')[1]?.substring(0, 5);
+    // Format time as HH:mm
+    const timeOptions = { hour: '2-digit', minute: '2-digit' };
+    const formattedTime = !isNaN(matchDate.getTime()) 
+        ? matchDate.toLocaleTimeString('fr-FR', timeOptions) 
+        : apiMatch.date.split(' ')[1]?.substring(0, 5);
 
-        if (isFinished) {
-            statusKey = 'finished';
-            label = 'Match terminé';
-            timeString = formattedTime; // Display start time for finished matches
+    if (isFinished) {
+        statusKey = 'finished';
+        label = 'Match terminé';
+        timeString = formattedTime; // Display start time for finished matches
+    } else if (isApiLive) {
+        // Match is currently in progress according to API
+        statusKey = 'live';
+        isLive = true;
+        label = 'Live';
+        timeString = 'LIVE'; 
+    } else {
+        // Fallback: Check if currently live based on time
+        const now = new Date();
+        if (now > matchDate) {
+            statusKey = 'live';
+            isLive = true;
+            label = 'Live';
+            timeString = 'LIVE'; 
         } else {
-            // Check if currently live (simple logic: now is after start time)
-            const now = new Date();
-            if (now > matchDate) {
-                statusKey = 'live';
-                isLive = true;
-                label = 'Live';
-                // For live, you might want to show elapsed minutes, but you requested "Live"
-                timeString = 'LIVE'; 
-            } else {
-                statusKey = 'upcoming';
-                label = 'À venir';
-                timeString = formattedTime; // Display start time for upcoming matches
-            }
+            statusKey = 'upcoming';
+            label = 'À venir';
+            timeString = formattedTime; // Display start time for upcoming matches
         }
+    }
 
-        return {
-            ...apiMatch,
-            statusInfo: {
-                status: statusKey,
-                isLive: isLive,
-                timeString: timeString,
-                label: label
-            }
-        };
+    return {
+        ...apiMatch,
+        statusInfo: {
+            status: statusKey,
+            isLive: isLive,
+            timeString: timeString,
+            label: label
+        }
     };
+};
 
     /* ---------- Fetch ---------- */
     const fetchMatches = async () => {
