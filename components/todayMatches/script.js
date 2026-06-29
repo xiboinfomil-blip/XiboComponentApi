@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Update Date in Footer
         if (els.dateDisplay && match.date) {
             try {
-                const d = new Date(match.date.replace(' ', 'T') + '+04:00');
+                const d = new Date(match.date.replace(' ', 'T'));
                 if (!isNaN(d.getTime())) {
                     els.dateDisplay.textContent = d.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long' });
                 } else { els.dateDisplay.textContent = match.date; }
