@@ -50,7 +50,7 @@ const getMatchStatusInfo = (matchDateStr) => {
     if (diffMs > 0) {
         return {
             status: 'upcoming',
-            label: 'Commence dans',
+            label: 'À venir',
             timeString: formatDuration(diffMs),
             isLive: false
         };

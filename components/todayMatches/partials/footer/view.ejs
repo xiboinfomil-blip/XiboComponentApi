@@ -1,18 +1,25 @@
 <footer class="tm-footer">
     <div class="tm-date-pill">
-        <!-- Animated Calendar Icon -->
-        <svg class="tm-date-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+        <!-- Animated Calendar Icon with FIFA-style design -->
+        <svg class="tm-date-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="17" rx="2" ry="2"/>
             <line x1="16" y1="2" x2="16" y2="6"/>
             <line x1="8" y1="2" x2="8" y2="6"/>
             <line x1="3" y1="10" x2="21" y2="10"/>
-            <!-- Subtle highlight line for depth -->
-            <path d="M8 2v4M16 2v4" stroke-opacity="0.5"/>
+            <!-- Calendar dots for days -->
+            <circle cx="8" cy="15" r="0.5" fill="currentColor"/>
+            <circle cx="12" cy="15" r="0.5" fill="currentColor"/>
+            <circle cx="16" cy="15" r="0.5" fill="currentColor"/>
         </svg>
         
-        <span id="match-date-display" class="tm-date-text">Lundi, 22 Juin 2026</span>
+        <!-- Date Label -->
+        <span class="tm-date-label"></span>
         
-        <!-- Decorative broadcast accent line -->
-        <div class="tm-date-accent"></div>
+        <!-- Populated by JS -->
+        <span id="match-date-display" class="tm-date-text"></span>
+        
+        <!-- Decorative elements -->
+        <div class="tm-date-divider"></div>
+        <div class="tm-date-glow"></div>
     </div>
 </footer>

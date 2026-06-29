@@ -1,5 +1,5 @@
 /* =========================================
-   FIFA CINEMATIC MATCHUP SYSTEM
+   FIFA CINEMATIC MATCHUP SYSTEM - CATCHY EDITION
    ========================================= */
 
 /* --- Grid Architecture --- */
@@ -12,6 +12,7 @@
     min-height: 0;
     width: 100%;
     padding: 0 clamp(1rem, 3vw, 2rem);
+    font-family: 'Space Grotesk', sans-serif;
 }
 
 /* --- Team Column --- */
@@ -20,9 +21,45 @@
     flex-direction: column;
     align-items: center;
     gap: clamp(0.75rem, 2vh, 1.5rem);
-    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     min-width: 0;
+    opacity: 0; /* Hidden initially for animation */
+}
+
+/* Team A entrance + Ambient Float */
+.tm-team-a {
+    animation: 
+        teamSlideInLeft 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
+        teamFloatA 8s ease-in-out infinite 1s; /* Starts after entrance */
+}
+
+@keyframes teamSlideInLeft {
+    0% { opacity: 0; transform: translateX(-50px); }
+    60% { transform: translateX(5px); }
+    100% { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes teamFloatA {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+}
+
+/* Team B entrance + Ambient Float (Reverse Phase) */
+.tm-team-b {
+    animation: 
+        teamSlideInRight 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
+        teamFloatB 8s ease-in-out infinite 1.2s;
+}
+
+@keyframes teamSlideInRight {
+    0% { opacity: 0; transform: translateX(50px); }
+    60% { transform: translateX(-5px); }
+    100% { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes teamFloatB {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
 }
 
 /* Crown (Winner Indicator) */
@@ -45,6 +82,7 @@
     justify-content: center; 
     width: 100%; 
 }
+
 .tm-flag-container {
     position: relative;
     width: clamp(80px, 20vw, 180px);
@@ -54,25 +92,44 @@
     background: rgba(255, 255, 255, 0.06);
     backdrop-filter: blur(30px) saturate(180%);
     -webkit-backdrop-filter: blur(30px) saturate(180%);
-    border: 2px solid rgba(255, 255, 255, 0.15);
-    box-shadow: 
-        0 20px 40px rgba(0, 0, 0, 0.5),
-        inset 0 1px 0 rgba(255, 255, 255, 0.2);
-    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 2px solid white;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    
+    /* Entrance + Border Pulse Animation */
+    animation: 
+        flagPopIn 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
+        borderPulse 4s ease-in-out infinite 1s;
+    opacity: 0;
+    transform: scale(0.8);
 }
+
+@keyframes flagPopIn {
+    0% { opacity: 0; transform: scale(0.8) rotateY(-15deg); }
+    60% { transform: scale(1.05) rotateY(5deg); }
+    100% { opacity: 1; transform: scale(1) rotateY(0); }
+}
+
+@keyframes borderPulse {
+    0%, 100% { border-color: rgba(255, 255, 255, 0.15); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5); }
+    50% { border-color: rgba(255, 255, 255, 0.4); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), 0 0 25px rgba(255,255,255,0.15); }
+}
+
+/* Continuous Shimmer Effect */
 .tm-flag-shine {
     position: absolute;
     top: 0; left: -100%;
     width: 100%; height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
-    transition: left 0.7s ease;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
     z-index: 2;
+    animation: shineLoop 5s ease-in-out infinite;
+    animation-delay: 1.5s;
 }
-.tm-team:hover .tm-flag-shine { left: 100%; }
-.tm-team:hover .tm-flag-container {
-    transform: translateY(-4px);
-    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255,255,255,0.3);
-    border-color: rgba(255, 255, 255, 0.3);
+
+@keyframes shineLoop {
+    0% { left: -100%; opacity: 0; }
+    20% { opacity: 1; }
+    80% { opacity: 1; }
+    100% { left: 200%; opacity: 0; }
 }
 
 .tm-flag-image { 
@@ -82,6 +139,7 @@
     position: relative; 
     z-index: 1; 
 }
+
 .tm-flag-fallback {
     width: 100%; height: 100%;
     display: flex !important;
@@ -90,7 +148,6 @@
     font-weight: 900;
     color: #a78bfa;
     background: linear-gradient(135deg, rgba(99,102,241,0.4), rgba(168,85,247,0.4));
-    text-shadow: 0 2px 10px rgba(0,0,0,0.3);
 }
 
 /* Team Info Grouping */
@@ -103,7 +160,6 @@
 }
 
 .tm-team-name {
-    font-family: 'Space Grotesk', sans-serif;
     font-size: clamp(1.1rem, 3.5vw, 2.2rem);
     font-weight: 700;
     color: #f1f5f9;
@@ -114,20 +170,43 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     width: 100%;
-    letter-spacing: 0.5px;
+    
+    animation: nameSlideIn 0.6s ease forwards;
+    animation-delay: 0.6s;
+    opacity: 0;
+    transform: translateY(15px);
+}
+
+@keyframes nameSlideIn {
+    0% { opacity: 0; transform: translateY(15px); }
+    100% { opacity: 1; transform: translateY(0); }
 }
 
 .tm-team-score {
-    font-family: 'Space Grotesk', sans-serif;
     font-size: clamp(3rem, 10vw, 7rem);
     font-weight: 900;
     color: #fff;
     line-height: 0.9;
     font-variant-numeric: tabular-nums;
-    text-shadow: 
-        0 4px 30px rgba(0, 0, 0, 0.7),
-        0 0 60px rgba(255, 255, 255, 0.1);
+    text-shadow: 0 4px 30px rgba(0, 0, 0, 0.7);
     letter-spacing: -2px;
+    
+    animation: scorePopIn 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
+               scoreGlow 4s ease-in-out infinite;
+    animation-delay: 0.7s, 1s;
+    opacity: 0;
+    transform: scale(0.5);
+}
+
+@keyframes scorePopIn {
+    0% { opacity: 0; transform: scale(0.5); }
+    60% { transform: scale(1.1); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes scoreGlow {
+    0%, 100% { text-shadow: 0 4px 30px rgba(0, 0, 0, 0.7), 0 0 60px rgba(255, 255, 255, 0.1); }
+    50% { text-shadow: 0 4px 30px rgba(0, 0, 0, 0.7), 0 0 90px rgba(255, 255, 255, 0.3); }
 }
 
 /* Result Badge */
@@ -147,7 +226,6 @@
     transform: translateY(6px);
     transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     pointer-events: none;
-    white-space: nowrap;
 }
 
 /* --- Center Hub --- */
@@ -160,6 +238,15 @@
     flex-shrink: 0;
     min-width: clamp(90px, 18vw, 160px);
     position: relative;
+    
+    animation: centerFadeIn 0.6s ease forwards;
+    animation-delay: 0.5s;
+    opacity: 0;
+}
+
+@keyframes centerFadeIn {
+    0% { opacity: 0; transform: scale(0.9); }
+    100% { opacity: 1; transform: scale(1); }
 }
 
 /* VS Badge - 3D Floating Element */
@@ -174,20 +261,82 @@
     align-items: center;
     justify-content: center;
     border: 2px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 
-        0 15px 40px rgba(0, 0, 0, 0.5),
-        inset 0 1px 0 rgba(255, 255, 255, 0.25),
-        inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
     position: relative;
-    transition: all 0.4s ease;
+    
+    /* Entrance + Heartbeat Glow + Float */
+    animation: 
+        vsBadgeEntrance 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
+        vsFloat 6s ease-in-out infinite 1s;
+    opacity: 0;
+    transform: scale(0) rotate(-180deg);
 }
+
+/* The Heartbeat Glow Pseudo-element */
+.tm-vs-badge::after {
+    content: '';
+    position: absolute;
+    inset: -8px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.3), transparent 70%);
+    z-index: -1;
+    opacity: 0;
+    animation: heartbeatGlow 3s ease-in-out infinite;
+}
+
+@keyframes heartbeatGlow {
+    0%, 100% { opacity: 0.3; transform: scale(1); }
+    50% { opacity: 0.7; transform: scale(1.2); }
+}
+
+@keyframes vsBadgeEntrance {
+    0% { opacity: 0; transform: scale(0) rotate(-180deg); }
+    60% { transform: scale(1.2) rotate(10deg); }
+    100% { opacity: 1; transform: scale(1) rotate(0deg); }
+}
+
+@keyframes vsFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+}
+
+/* Energy Lines - Continuous Flow */
+.tm-vs-energy-left,
+.tm-vs-energy-right {
+    position: absolute;
+    width: 40%;
+    height: 2px;
+    top: 50%;
+    opacity: 0;
+}
+
+.tm-vs-energy-left {
+    left: -20px;
+    background: linear-gradient(90deg, transparent, #3b82f6);
+    animation: energyFlow 2s linear infinite;
+    animation-delay: 1s;
+}
+
+.tm-vs-energy-right {
+    right: -20px;
+    background: linear-gradient(270deg, transparent, #ef4444);
+    animation: energyFlow 2s linear infinite;
+    animation-delay: 1s;
+}
+
+@keyframes energyFlow {
+    0% { opacity: 0; transform: translateX(-10px); }
+    50% { opacity: 0.8; }
+    100% { opacity: 0; transform: translateX(10px); }
+}
+
 .tm-vs-text { 
-    font-family: 'Space Grotesk', sans-serif; 
     font-size: clamp(1rem, 3vw, 1.8rem); 
     font-weight: 900; 
     color: #e2e8f0;
     text-shadow: 0 2px 10px rgba(0,0,0,0.4);
 }
+
 .tm-trophy-icon { 
     width: 50%; height: 50%; 
     color: #fbbf24; 
@@ -200,7 +349,6 @@
 
 /* Timer */
 .tm-timer {
-    font-family: 'Space Grotesk', monospace;
     font-variant-numeric: tabular-nums;
     font-size: clamp(1.2rem, 3.5vw, 2rem);
     font-weight: 700;
@@ -208,14 +356,15 @@
     text-shadow: 0 2px 20px rgba(0, 0, 0, 0.6);
     text-align: center;
     letter-spacing: 2px;
+    
+    animation: timerFadeIn 0.5s ease forwards;
+    animation-delay: 0.9s;
+    opacity: 0;
 }
-.tm-timer.is-live { 
-    animation: liveFlicker 1.5s ease-in-out infinite; 
-    color: #fca5a5;
-}
-@keyframes liveFlicker { 
-    0%, 100% { opacity: 1; text-shadow: 0 0 30px rgba(239, 68, 68, 0.4); } 
-    50% { opacity: 0.7; text-shadow: 0 0 60px rgba(239, 68, 68, 0.8); } 
+
+@keyframes timerFadeIn {
+    0% { opacity: 0; transform: translateY(-10px); }
+    100% { opacity: 1; transform: translateY(0); }
 }
 
 /* Draw Ribbon */
@@ -230,7 +379,6 @@
     padding: 0.6rem 1.2rem;
     background: linear-gradient(135deg, rgba(148,163,184,0.2), rgba(203,213,225,0.1));
     backdrop-filter: blur(25px) saturate(180%);
-    -webkit-backdrop-filter: blur(25px) saturate(180%);
     border: 1px solid rgba(226, 232, 240, 0.3);
     border-radius: 999px;
     opacity: 0;
@@ -238,31 +386,39 @@
     transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
     z-index: 5;
 }
+
 .tm-draw-line { 
     flex: 1; 
     height: 1px; 
     background: linear-gradient(90deg, transparent, rgba(226,232,240,0.5), transparent); 
 }
+
 .tm-draw-text { 
-    font-family: 'Space Grotesk', sans-serif; 
     font-size: clamp(0.7rem, 1.5vw, 0.9rem); 
     font-weight: 800; 
     letter-spacing: 2px; 
     color: #e2e8f0; 
-    text-shadow: 0 0 20px rgba(226, 232, 240, 0.5); 
     white-space: nowrap; 
 }
 
-/* --- State Adjustments --- */
+/* --- State Adjustments (Winner/Loser/Draw) --- */
 .tm-card-worldcup.is-winner .tm-team.is-winner { 
     transform: translateY(-5px) scale(1.03); 
     z-index: 4; 
+    animation: winnerFloat 4s ease-in-out infinite; /* Override float for winner */
 }
+
+@keyframes winnerFloat {
+    0%, 100% { transform: translateY(-5px) scale(1.03); }
+    50% { transform: translateY(-10px) scale(1.03); }
+}
+
 .tm-card-worldcup.is-winner .tm-team.is-winner .tm-crown { 
     opacity: 1; 
     transform: translateY(0) scale(1); 
     animation: crownFloat 3s ease-in-out infinite; 
 }
+
 @keyframes crownFloat { 
     0%, 100% { transform: translateY(0) scale(1); } 
     50% { transform: translateY(-3px) scale(1.05); } 
@@ -272,6 +428,7 @@
     border-color: rgba(251, 191, 36, 0.8); 
     animation: winnerGlow 3s ease-in-out infinite; 
 }
+
 @keyframes winnerGlow { 
     0%, 100% { box-shadow: 0 0 0 2px rgba(251,191,36,0.2), 0 0 40px rgba(251,191,36,0.3); } 
     50% { box-shadow: 0 0 0 3px rgba(251,191,36,0.4), 0 0 60px rgba(251,191,36,0.5); } 
@@ -280,46 +437,31 @@
 .tm-card-worldcup.is-winner .tm-team.is-winner .tm-team-name { color: #fde68a; }
 .tm-card-worldcup.is-winner .tm-team.is-winner .tm-team-score { 
     color: #fbbf24; 
-    font-size: clamp(3.5rem, 12vw, 8rem); 
     text-shadow: 0 0 40px rgba(251, 191, 36, 0.4);
-}
-.tm-card-worldcup.is-winner .tm-team.is-winner .tm-result-badge { 
-    opacity: 1; 
-    transform: translateY(0); 
-    background: linear-gradient(135deg, rgba(251,191,36,0.3), rgba(245,158,11,0.2)); 
-    color: #fde68a; 
-    border: 1.5px solid rgba(251, 191, 36, 0.6); 
 }
 
 .tm-card-worldcup.is-winner .tm-team.is-loser { 
     transform: translateY(3px) scale(0.96); 
     opacity: 0.5; 
     filter: saturate(0.2) brightness(0.8); 
-}
-.tm-card-worldcup.is-winner .tm-team.is-loser .tm-team-name { color: #94a3b8; }
-.tm-card-worldcup.is-winner .tm-team.is-loser .tm-team-score { 
-    color: #cbd5e1; 
-    font-size: clamp(2.5rem, 8vw, 6rem); 
-}
-.tm-card-worldcup.is-winner .tm-draw-ribbon { 
-    opacity: 0; 
-    transform: translate(-50%, -50%) scaleX(0.5); 
+    animation: none; /* Stop floating for loser */
 }
 
-.tm-card-worldcup.is-draw .tm-draw-ribbon { 
-    opacity: 1; 
-    transform: translate(-50%, -50%) scaleX(1); 
-}
-.tm-card-worldcup.is-draw .tm-team { filter: none; opacity: 1; transform: none; }
-.tm-card-worldcup.is-draw .tm-team .tm-team-name { color: #e2e8f0; }
-.tm-card-worldcup.is-draw .tm-team .tm-team-score { color: #f1f5f9; }
+.tm-card-worldcup.is-winner .tm-draw-ribbon { opacity: 0; }
+.tm-card-worldcup.is-draw .tm-draw-ribbon { opacity: 1; transform: translate(-50%, -50%) scaleX(1); }
 
 /* Mobile Optimization */
 @media (max-width: 640px) {
     .tm-matchup { gap: clamp(0.75rem, 3vw, 1.5rem); }
-    .tm-team-score { letter-spacing: -1px; }
-    .tm-vs-badge { 
-        width: clamp(45px, 10vw, 60px); 
-        height: clamp(45px, 10vw, 60px); 
+    .tm-vs-badge { width: clamp(45px, 10vw, 60px); height: clamp(45px, 10vw, 60px); }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+    .tm-team, .tm-flag-container, .tm-team-name, .tm-team-score, 
+    .tm-center, .tm-vs-badge, .tm-vs-badge::after, .tm-flag-shine, .tm-timer {
+        animation: none !important;
+        opacity: 1;
+        transform: none;
     }
 }

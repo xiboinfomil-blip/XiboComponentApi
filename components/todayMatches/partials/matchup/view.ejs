@@ -8,7 +8,8 @@
         <div class="tm-flag-wrapper">
             <div class="tm-flag-container">
                 <div class="tm-flag-shine"></div>
-                <img id="flag-a" src="" alt="" class="tm-flag-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+                <!-- Replace src with actual flag URLs -->
+                <img id="flag-a" src="https://placehold.co/180x120/1e293b/FFF?text=Flag+A" alt="Team A Flag" class="tm-flag-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
                 <div class="tm-flag-fallback" style="display:none">A</div>
             </div>
         </div>
@@ -18,25 +19,34 @@
             <div class="tm-result-badge" id="badge-a"></div>
         </div>
         
-        <div class="tm-team-score" id="score-a">-</div>
+        <div class="tm-team-score" id="score-a">2</div>
     </div>
 
     <!-- CENTER HUB -->
     <div class="tm-center">
+        <!-- Battle VS Badge -->
         <div class="tm-vs-badge" id="vs-badge">
+            <div class="tm-vs-clash-bg"></div>
+            <div class="tm-vs-energy-left"></div>
+            <div class="tm-vs-energy-right"></div>
+            
             <span class="tm-vs-text">VS</span>
-            <svg class="tm-trophy-icon" viewBox="0 0 24 24" fill="currentColor" style="display:none">
+            
+            <!-- Trophy Icon -->
+            <svg class="tm-trophy-icon" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M7 3v2H3v4c0 1.65 1.35 3 3 3h.72c.75 2.48 2.82 4.34 5.28 4.82V19h-3v2h8v-2h-3v-2.18c2.46-.48 4.53-2.34 5.28-4.82H18c1.65 0 3-1.35 3-3V5h-4V3H7zm0 7c-1.1 0-2-.9-2-2V6h2v4zm12-2c0 1.1-.9 2-2 2V6h2v4z"/>
             </svg>
         </div>
         
+        <!-- Draw Ribbon -->
         <div class="tm-draw-ribbon" id="draw-ribbon">
             <span class="tm-draw-line"></span>
             <span class="tm-draw-text">MATCH NUL</span>
             <span class="tm-draw-line"></span>
         </div>
         
-        <div id="match-timer" class="tm-timer">--:--</div>
+        <!-- Timer -->
+        <div id="match-timer" class="tm-timer">78:42</div>
     </div>
 
     <!-- TEAM B -->
@@ -48,7 +58,8 @@
         <div class="tm-flag-wrapper">
             <div class="tm-flag-container">
                 <div class="tm-flag-shine"></div>
-                <img id="flag-b" src="" alt="" class="tm-flag-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+                <!-- Replace src with actual flag URLs -->
+                <img id="flag-b" src="https://placehold.co/180x120/1e293b/FFF?text=Flag+B" alt="Team B Flag" class="tm-flag-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
                 <div class="tm-flag-fallback" style="display:none">B</div>
             </div>
         </div>
@@ -58,6 +69,6 @@
             <div class="tm-result-badge" id="badge-b"></div>
         </div>
         
-        <div class="tm-team-score" id="score-b">-</div>
+        <div class="tm-team-score" id="score-b">1</div>
     </div>
 </section>
