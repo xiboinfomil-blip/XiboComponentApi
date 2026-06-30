@@ -1,36 +1,36 @@
 /* =========================================
-   FIFA WORLD CUP 2026 STATUS BADGE - ENHANCED
+   FIFA WORLD CUP 2026 STATUS BADGE - ULTRA ENHANCED & FULLY RESPONSIVE
    ========================================= */
 
-.tm-header { 
+.tm-header-header { 
     display: flex; 
     justify-content: center; 
     align-items: center;
-    padding: 2rem 0;
+    padding: clamp(1rem, 3vh, 2rem) 0;
     flex-shrink: 0;
 }
 
 /* --- Base Badge Architecture --- */
-.tm-status-badge {
+.tm-status-badge-header {
     position: relative;
-    padding: clamp(0.9rem, 2.5vh, 1.4rem) clamp(2.5rem, 5vw, 3.5rem);
+    padding: clamp(0.7rem, 2vh, 1.4rem) clamp(1.5rem, 4vw, 3.5rem);
     border-radius: 999px;
     font-weight: 900;
-    font-size: clamp(1rem, 3vw, 1.5rem);
-    letter-spacing: 3px;
+    font-size: clamp(0.85rem, 2.5vw, 1.5rem);
+    letter-spacing: clamp(1px, 0.3vw, 3px);
     text-transform: uppercase;
     display: inline-flex;
     align-items: center;
-    gap: 1rem;
+    gap: clamp(0.5rem, 1.5vw, 1rem);
     white-space: nowrap;
     
     /* Ultra-Premium Glassmorphism */
     background: rgba(15, 23, 42, 0.75);
-    backdrop-filter: blur(25px) saturate(200%);
-    -webkit-backdrop-filter: blur(25px) saturate(200%);
+    backdrop-filter: blur(clamp(15px, 3vw, 25px)) saturate(clamp(150%, 25vw, 200%));
+    -webkit-backdrop-filter: blur(clamp(15px, 3vw, 25px)) saturate(clamp(150%, 25vw, 200%));
     border: 1px solid rgba(255, 255, 255, 0.15);
     box-shadow: 
-        0 10px 40px rgba(0, 0, 0, 0.5),
+        0 clamp(8px, 2vw, 40px) rgba(0, 0, 0, 0.5),
         0 0 0 1px rgba(255, 255, 255, 0.05) inset,
         0 1px 0 rgba(255, 255, 255, 0.15) inset;
     
@@ -58,16 +58,16 @@
     }
 }
 
-.tm-status-badge:hover {
+.tm-status-badge-header:hover {
     transform: translateY(-4px) scale(1.02);
     box-shadow: 
-        0 20px 60px rgba(0, 0, 0, 0.6),
+        0 clamp(15px, 3vw, 60px) rgba(0, 0, 0, 0.6),
         0 0 0 1px rgba(255, 255, 255, 0.1) inset,
         0 2px 0 rgba(255, 255, 255, 0.2) inset;
 }
 
 /* Animated gradient overlay */
-.tm-status-badge::before {
+.tm-status-badge-header::before {
     content: '';
     position: absolute;
     top: 0;
@@ -89,18 +89,18 @@
 }
 
 /* Inner ambient glow layer */
-.tm-badge-glow {
+.tm-badge-glow-header {
     position: absolute;
-    inset: -3px;
+    inset: clamp(-2px, -0.5vw, -3px);
     border-radius: inherit;
     opacity: 0.6;
     z-index: -1;
-    filter: blur(15px);
+    filter: blur(clamp(10px, 2vw, 15px));
     transition: all 0.5s ease;
 }
 
 /* Rotating conic gradient for extra flair */
-.tm-badge-glow::after {
+.tm-badge-glow-header::after {
     content: '';
     position: absolute;
     inset: 0;
@@ -116,155 +116,280 @@
 }
 
 /* --- Typography & Iconography --- */
-.tm-status-text {
+.tm-status-text-header {
     display: flex;
     align-items: center;
-    gap: 0.8rem;
+    gap: clamp(0.5rem, 1.2vw, 0.8rem);
     text-shadow: 0 2px 8px rgba(0,0,0,0.4);
     position: relative;
     z-index: 1;
 }
 
-.tm-status-icon {
-    width: 1.2em;
-    height: 1.2em;
+.tm-status-icon-header {
+    width: clamp(1em, 2.5vw, 1.2em);
+    height: clamp(1em, 2.5vw, 1.2em);
     opacity: 0.95;
     filter: drop-shadow(0 2px 4px currentColor);
+    transition: all 0.3s ease;
 }
 
 /* --- State Variants (FIFA 2026 Color Palette) --- */
 
 /* UPCOMING: Electric Cyan / Future Energy */
-.tm-status-upcoming {
+.tm-status-upcoming-header {
     color: #00f5ff;
     border-color: rgba(0, 245, 255, 0.4);
+    background: rgba(15, 23, 42, 0.75);
 }
-.tm-status-upcoming .tm-badge-glow {
-    background: linear-gradient(135deg, rgba(0, 245, 255, 0.5), rgba(0, 150, 255, 0.4));
+.tm-status-upcoming-header .tm-badge-glow-header {
+    background: radial-gradient(circle at center, rgba(0, 245, 255, 0.6), rgba(0, 150, 255, 0.3));
 }
-.tm-status-upcoming .tm-status-icon { 
+.tm-status-upcoming-header .tm-status-icon-header { 
     stroke: #00f5ff; 
     filter: drop-shadow(0 0 8px rgba(0, 245, 255, 0.6));
+    animation: iconFloat 3s ease-in-out infinite;
 }
 
-/* LIVE: Stadium Red / Pure Adrenaline */
-.tm-status-live {
-    color: #ff3860;
-    border-color: rgba(255, 56, 96, 0.6);
-    animation: livePulse 2s ease-in-out infinite;
-}
-.tm-status-live .tm-badge-glow {
-    background: linear-gradient(135deg, rgba(255, 56, 96, 0.6), rgba(255, 0, 80, 0.5));
-}
-.tm-status-live .tm-status-icon { 
-    stroke: #ff3860;
-    filter: drop-shadow(0 0 12px rgba(255, 56, 96, 0.8));
-}
-
-/* Enhanced live state - attention grabbing */
-.tm-status-live::after {
+/* UPCOMING outer ring pulse */
+.tm-status-upcoming-header::after {
     content: '';
     position: absolute;
-    inset: -5px;
+    inset: clamp(-3px, -0.8vw, -4px);
     border-radius: inherit;
-    background: radial-gradient(circle at center, rgba(255, 56, 96, 0.3), transparent 70%);
-    animation: liveGlow 1.5s ease-in-out infinite alternate;
+    border: clamp(1px, 0.3vw, 2px) solid rgba(0, 245, 255, 0.3);
+    animation: upcomingPulse 2.5s ease-in-out infinite;
     pointer-events: none;
 }
 
-@keyframes liveGlow {
-    0% {
-        opacity: 0.5;
+@keyframes upcomingPulse {
+    0%, 100% {
         transform: scale(1);
+        opacity: 0.5;
+    }
+    50% {
+        transform: scale(1.05);
+        opacity: 0.8;
+    }
+}
+
+@keyframes iconFloat {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-3px);
+    }
+}
+
+/* LIVE: Stadium Red / Pure Adrenaline */
+.tm-status-live-header {
+    color: #ff3860;
+    border-color: rgba(255, 56, 96, 0.6);
+    background: rgba(255, 56, 96, 0.15);
+    backdrop-filter: blur(clamp(20px, 4vw, 30px)) saturate(clamp(200%, 30vw, 250%));
+    -webkit-backdrop-filter: blur(clamp(20px, 4vw, 30px)) saturate(clamp(200%, 30vw, 250%));
+    animation: livePulse 2s ease-in-out infinite;
+}
+.tm-status-live-header .tm-badge-glow-header {
+    background: radial-gradient(circle at center, rgba(255, 56, 96, 0.8), rgba(255, 0, 80, 0.5));
+    opacity: 0.9;
+}
+.tm-status-live-header .tm-status-icon-header { 
+    stroke: #ff3860;
+    filter: drop-shadow(0 0 clamp(10px, 2vw, 15px) rgba(255, 56, 96, 1));
+    animation: iconPulse 1.5s ease-in-out infinite;
+}
+
+/* LIVE expanding rings */
+.tm-status-live-header::before {
+    content: '';
+    position: absolute;
+    inset: clamp(-6px, -1.5vw, -8px);
+    border-radius: inherit;
+    background: radial-gradient(circle at center, rgba(255, 56, 96, 0.4), transparent 70%);
+    animation: liveExpand 2s ease-out infinite;
+    pointer-events: none;
+}
+
+.tm-status-live-header::after {
+    content: '';
+    position: absolute;
+    inset: clamp(-4px, -1vw, -6px);
+    border-radius: inherit;
+    border: clamp(2px, 0.5vw, 3px) solid rgba(255, 56, 96, 0.5);
+    animation: liveRingPulse 2s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes liveExpand {
+    0% {
+        transform: scale(0.8);
+        opacity: 0.8;
     }
     100% {
-        opacity: 1;
-        transform: scale(1.08);
+        transform: scale(1.3);
+        opacity: 0;
     }
 }
 
-/* FINISHED: Trophy Gold / Victory */
-.tm-status-finished {
-    color: #ffd700;
-    border-color: rgba(255, 215, 0, 0.5);
-}
-.tm-status-finished .tm-badge-glow {
-    background: linear-gradient(135deg, rgba(255, 215, 0, 0.5), rgba(255, 165, 0, 0.4));
-}
-.tm-status-finished .tm-status-icon { 
-    stroke: #ffd700;
-    filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.7));
-}
-
-/* --- Live Indicator Dot System (Enhanced) --- */
-.tm-live-dot {
-    position: relative;
-    width: clamp(12px, 2vw, 16px);
-    height: clamp(12px, 2vw, 16px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+@keyframes liveRingPulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 0.6;
+        border-width: clamp(2px, 0.5vw, 3px);
+    }
+    50% {
+        transform: scale(1.08);
+        opacity: 1;
+        border-width: clamp(3px, 0.6vw, 4px);
+    }
 }
 
-.tm-dot-core {
-    width: 100%;
-    height: 100%;
-    background: radial-gradient(circle at 30% 30%, #ff6b8a, #ff3860);
-    border-radius: 50%;
-    box-shadow: 
-        0 0 15px rgba(255, 56, 96, 0.9),
-        0 0 30px rgba(255, 56, 96, 0.6);
-    animation: dotPulse 1.2s ease-in-out infinite;
-}
-
-.tm-dot-ripple {
-    position: absolute;
-    inset: -5px;
-    border-radius: 50%;
-    border: 2px solid rgba(255, 56, 96, 0.7);
-    animation: rippleExpand 1.5s ease-out infinite;
-}
-
-.tm-dot-ripple:nth-child(2) {
-    animation-delay: 0.5s;
-}
-
-.tm-dot-ripple:nth-child(3) {
-    animation-delay: 1s;
-}
-
-/* --- Animations --- */
 @keyframes livePulse {
     0%, 100% {
         box-shadow: 
-            0 10px 40px rgba(255, 56, 96, 0.4),
+            0 clamp(8px, 2vw, 40px) rgba(255, 56, 96, 0.5),
+            0 clamp(15px, 3vw, 60px) rgba(255, 56, 96, 0.3),
+            0 0 clamp(60px, 10vw, 80px) rgba(255, 56, 96, 0.2),
             0 0 0 1px rgba(255, 255, 255, 0.1) inset,
             0 1px 0 rgba(255, 255, 255, 0.15) inset;
         transform: scale(1);
     }
     50% {
         box-shadow: 
-            0 15px 60px rgba(255, 56, 96, 0.6),
+            0 clamp(12px, 2.5vw, 60px) rgba(255, 56, 96, 0.7),
+            0 clamp(20px, 4vw, 80px) rgba(255, 56, 96, 0.5),
+            0 0 clamp(80px, 12vw, 100px) rgba(255, 56, 96, 0.4),
             0 0 0 1px rgba(255, 255, 255, 0.15) inset,
             0 2px 0 rgba(255, 255, 255, 0.2) inset;
         transform: scale(1.04);
     }
 }
 
+@keyframes iconPulse {
+    0%, 100% {
+        transform: scale(1);
+        filter: drop-shadow(0 0 clamp(10px, 2vw, 15px) rgba(255, 56, 96, 1));
+    }
+    50% {
+        transform: scale(1.15);
+        filter: drop-shadow(0 0 clamp(15px, 3vw, 25px) rgba(255, 56, 96, 1.2));
+    }
+}
+
+/* FINISHED: Trophy Gold / Victory */
+.tm-status-finished-header {
+    color: #ffd700;
+    border-color: rgba(255, 215, 0, 0.5);
+    background: rgba(255, 215, 0, 0.1);
+}
+.tm-status-finished-header .tm-badge-glow-header {
+    background: radial-gradient(circle at center, rgba(255, 215, 0, 0.7), rgba(255, 165, 0, 0.5));
+}
+.tm-status-finished-header .tm-status-icon-header { 
+    stroke: #ffd700;
+    filter: drop-shadow(0 0 clamp(8px, 1.5vw, 12px) rgba(255, 215, 0, 0.8));
+    animation: trophyShine 3s ease-in-out infinite;
+}
+
+/* FINISHED sparkle effect */
+.tm-status-finished-header::before {
+    content: '';
+    position: absolute;
+    inset: clamp(-3px, -0.8vw, -5px);
+    border-radius: inherit;
+    background: 
+        radial-gradient(circle at 20% 50%, rgba(255, 215, 0, 0.4) 0%, transparent 50%),
+        radial-gradient(circle at 80% 50%, rgba(255, 165, 0, 0.4) 0%, transparent 50%);
+    animation: sparkleRotate 4s linear infinite;
+    pointer-events: none;
+}
+
+.tm-status-finished-header::after {
+    content: '';
+    position: absolute;
+    inset: clamp(-1px, -0.3vw, -2px);
+    border-radius: inherit;
+    background: linear-gradient(45deg, transparent 30%, rgba(255, 215, 0, 0.3) 50%, transparent 70%);
+    background-size: 200% 200%;
+    animation: goldShimmer 3s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes sparkleRotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+@keyframes goldShimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+@keyframes trophyShine {
+    0%, 100% {
+        filter: drop-shadow(0 0 clamp(8px, 1.5vw, 12px) rgba(255, 215, 0, 0.8));
+    }
+    50% {
+        filter: drop-shadow(0 0 clamp(12px, 2.5vw, 20px) rgba(255, 215, 0, 1)) brightness(1.3);
+    }
+}
+
+/* --- Live Indicator Dot System (Enhanced) --- */
+.tm-live-dot-header {
+    position: relative;
+    width: clamp(10px, 2vw, 16px);
+    height: clamp(10px, 2vw, 16px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tm-dot-core-header {
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at 30% 30%, #ff6b8a, #ff3860);
+    border-radius: 50%;
+    box-shadow: 
+        0 0 clamp(10px, 2vw, 15px) rgba(255, 56, 96, 0.9),
+        0 0 clamp(20px, 4vw, 30px) rgba(255, 56, 96, 0.6),
+        0 0 clamp(30px, 6vw, 45px) rgba(255, 56, 96, 0.4);
+    animation: dotPulse 1.2s ease-in-out infinite;
+}
+
+.tm-dot-ripple-header {
+    position: absolute;
+    inset: clamp(-3px, -0.8vw, -5px);
+    border-radius: 50%;
+    border: clamp(1px, 0.3vw, 2px) solid rgba(255, 56, 96, 0.7);
+    animation: rippleExpand 1.5s ease-out infinite;
+}
+
+.tm-dot-ripple-header:nth-child(2) {
+    animation-delay: 0.5s;
+}
+
+.tm-dot-ripple-header:nth-child(3) {
+    animation-delay: 1s;
+}
+
+/* --- Animations --- */
 @keyframes dotPulse {
     0%, 100% { 
         transform: scale(1); 
         opacity: 1;
         box-shadow: 
-            0 0 15px rgba(255, 56, 96, 0.9),
-            0 0 30px rgba(255, 56, 96, 0.6);
+            0 0 clamp(10px, 2vw, 15px) rgba(255, 56, 96, 0.9),
+            0 0 clamp(20px, 4vw, 30px) rgba(255, 56, 96, 0.6),
+            0 0 clamp(30px, 6vw, 45px) rgba(255, 56, 96, 0.4);
     }
     50% { 
-        transform: scale(0.8); 
-        opacity: 0.9;
+        transform: scale(0.85); 
+        opacity: 0.95;
         box-shadow: 
-            0 0 20px rgba(255, 56, 96, 1),
-            0 0 40px rgba(255, 56, 96, 0.8);
+            0 0 clamp(15px, 3vw, 20px) rgba(255, 56, 96, 1),
+            0 0 clamp(30px, 6vw, 40px) rgba(255, 56, 96, 0.8),
+            0 0 clamp(45px, 9vw, 60px) rgba(255, 56, 96, 0.6);
     }
 }
 
@@ -272,7 +397,7 @@
     0% { 
         transform: scale(0.8); 
         opacity: 1; 
-        border-width: 3px; 
+        border-width: clamp(2px, 0.4vw, 3px); 
     }
     100% { 
         transform: scale(2.5); 
@@ -281,40 +406,185 @@
     }
 }
 
-/* --- Responsive Design --- */
-@media (max-width: 768px) {
-    .tm-status-badge {
-        padding: 0.8rem 2rem;
-        font-size: 0.95rem;
-        letter-spacing: 2px;
-    }
-    
-    .tm-status-text {
-        gap: 0.6rem;
+/* --- Comprehensive Responsive Design --- */
+
+/* Large Desktop */
+@media (min-width: 1440px) {
+    .tm-status-badge-header {
+        padding: 1.4rem 3.5rem;
+        font-size: 1.5rem;
+        letter-spacing: 3px;
     }
 }
 
+/* Standard Desktop */
+@media (max-width: 1200px) {
+    .tm-status-badge-header {
+        padding: 1.2rem 3rem;
+        font-size: 1.3rem;
+    }
+}
+
+/* Laptop */
+@media (max-width: 992px) {
+    .tm-status-badge-header {
+        padding: 1rem 2.5rem;
+        font-size: 1.1rem;
+        letter-spacing: 2.5px;
+    }
+    
+    .tm-status-text-header {
+        gap: 0.7rem;
+    }
+}
+
+/* Tablet */
+@media (max-width: 768px) {
+    .tm-header-header {
+        padding: 1.5rem 0;
+    }
+    
+    .tm-status-badge-header {
+        padding: 0.9rem 2rem;
+        font-size: 1rem;
+        letter-spacing: 2px;
+    }
+    
+    .tm-status-text-header {
+        gap: 0.6rem;
+    }
+    
+    .tm-status-icon-header {
+        width: 1.1em;
+        height: 1.1em;
+    }
+}
+
+/* Large Mobile */
+@media (max-width: 576px) {
+    .tm-header-header {
+        padding: 1rem 0;
+    }
+    
+    .tm-status-badge-header {
+        padding: 0.8rem 1.8rem;
+        font-size: 0.9rem;
+        letter-spacing: 1.8px;
+    }
+    
+    .tm-status-text-header {
+        gap: 0.5rem;
+    }
+    
+    .tm-status-icon-header {
+        width: 1em;
+        height: 1em;
+    }
+    
+    .tm-live-dot-header {
+        width: 12px;
+        height: 12px;
+    }
+}
+
+/* Small Mobile */
 @media (max-width: 480px) {
-    .tm-status-badge {
+    .tm-header-header {
+        padding: 0.8rem 0;
+    }
+    
+    .tm-status-badge-header {
         padding: 0.7rem 1.5rem;
         font-size: 0.85rem;
         letter-spacing: 1.5px;
+    }
+    
+    .tm-status-text-header {
+        gap: 0.4rem;
+    }
+    
+    .tm-status-icon-header {
+        width: 0.9em;
+        height: 0.9em;
+    }
+    
+    .tm-live-dot-header {
+        width: 10px;
+        height: 10px;
+    }
+    
+    .tm-dot-ripple-header {
+        inset: -3px;
+    }
+}
+
+/* Extra Small Mobile */
+@media (max-width: 360px) {
+    .tm-status-badge-header {
+        padding: 0.6rem 1.2rem;
+        font-size: 0.8rem;
+        letter-spacing: 1.2px;
+    }
+    
+    .tm-status-text-header {
+        gap: 0.3rem;
+    }
+}
+
+/* Landscape orientation adjustments */
+@media (max-height: 500px) and (orientation: landscape) {
+    .tm-header-header {
+        padding: 0.5rem 0;
+    }
+    
+    .tm-status-badge-header {
+        padding: 0.6rem 1.5rem;
+        font-size: 0.9rem;
+    }
+}
+
+/* High DPI / Retina displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .tm-status-badge-header {
+        backdrop-filter: blur(clamp(20px, 4vw, 30px)) saturate(clamp(180%, 28vw, 220%));
+        -webkit-backdrop-filter: blur(clamp(20px, 4vw, 30px)) saturate(clamp(180%, 28vw, 220%));
     }
 }
 
 /* --- Accessibility & Motion Preferences --- */
 @media (prefers-reduced-motion: reduce) {
-    .tm-status-live, 
-    .tm-dot-core, 
-    .tm-dot-ripple,
-    .tm-status-badge::before,
-    .tm-badge-glow::after,
-    .tm-status-live::after {
+    .tm-status-live-header, 
+    .tm-status-upcoming-header,
+    .tm-status-finished-header,
+    .tm-dot-core-header, 
+    .tm-dot-ripple-header,
+    .tm-status-badge-header::before,
+    .tm-status-badge-header::after,
+    .tm-badge-glow-header::after,
+    .tm-status-icon-header {
         animation: none !important;
     }
-    .tm-status-badge { 
+    .tm-status-badge-header { 
         transition: none; 
         opacity: 1;
         transform: none;
+    }
+}
+
+/* Print styles */
+@media print {
+    .tm-status-badge-header {
+        background: white !important;
+        color: black !important;
+        border: 2px solid black !important;
+        box-shadow: none !important;
+        backdrop-filter: none !important;
+    }
+    
+    .tm-badge-glow-header,
+    .tm-live-dot-header,
+    .tm-status-badge-header::before,
+    .tm-status-badge-header::after {
+        display: none !important;
     }
 }

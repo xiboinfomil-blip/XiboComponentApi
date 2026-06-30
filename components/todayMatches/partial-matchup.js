@@ -1,154 +1,221 @@
 const matchupEls = {
-    statusBadge: document.getElementById('match-status-badge'),
-    statusLabel: document.getElementById('status-label'),
-    liveDot: document.getElementById('live-indicator'),
-    timer: document.getElementById('match-timer'),
-    vsBadge: document.getElementById('vs-badge'),
-    drawRibbon: document.getElementById('draw-ribbon'),
-    card: document.getElementById('main-card'),
+    statusBadge: document.getElementById('match-status-badge-matchup'),
+    statusLabel: document.getElementById('status-label-matchup'),
+    liveDot: document.getElementById('live-indicator-matchup'),
+    timer: document.getElementById('match-timer-matchup'),
+    vsBadge: document.getElementById('vs-badge-matchup'),
+    drawRibbon: document.getElementById('draw-ribbon-matchup'),
+    card: document.getElementById('main-card-matchup') || document.querySelector('.tm-matchup-matchup')?.parentElement,
     teamA: {
-        container: document.getElementById('team-a-container'),
-        name: document.getElementById('name-a'),
-        score: document.getElementById('score-a'),
-        flag: document.getElementById('flag-a'),
-        fallback: document.querySelector('#team-a-container .tm-flag-fallback'),
-        badge: document.getElementById('badge-a'),
-        crown: document.getElementById('crown-a')
+        container: document.getElementById('team-a-container-matchup'),
+        name: document.getElementById('name-a-matchup'),
+        score: document.getElementById('score-a-matchup'),
+        flag: document.getElementById('flag-a-matchup'),
+        fallback: document.querySelector('#team-a-container-matchup .tm-flag-fallback-matchup'),
+        badge: document.getElementById('badge-a-matchup'),
+        crown: document.getElementById('crown-a-matchup'),
+        penaltyScore: document.getElementById('penalty-score-a-matchup'),
+        penaltySection: document.getElementById('penalty-a-matchup'),
+        events: document.getElementById('events-a-matchup')
     },
     teamB: {
-        container: document.getElementById('team-b-container'),
-        name: document.getElementById('name-b'),
-        score: document.getElementById('score-b'),
-        flag: document.getElementById('flag-b'),
-        fallback: document.querySelector('#team-b-container .tm-flag-fallback'),
-        badge: document.getElementById('badge-b'),
-        crown: document.getElementById('crown-b')
+        container: document.getElementById('team-b-container-matchup'),
+        name: document.getElementById('name-b-matchup'),
+        score: document.getElementById('score-b-matchup'),
+        flag: document.getElementById('flag-b-matchup'),
+        fallback: document.querySelector('#team-b-container-matchup .tm-flag-fallback-matchup'),
+        badge: document.getElementById('badge-b-matchup'),
+        crown: document.getElementById('crown-b-matchup'),
+        penaltyScore: document.getElementById('penalty-score-b-matchup'),
+        penaltySection: document.getElementById('penalty-b-matchup'),
+        events: document.getElementById('events-b-matchup')
     }
 };
 
-/**
- * Helper to map the specific API response to the format expected by renderMatchup
- */
-function mapApiToMatch(apiMatch) {
-    if (!apiMatch) return null;
+// Debug: Log initial element state
+console.log('🔍 Matchup Elements Initialized:', {
+    card: !!matchupEls.card,
+    vsBadge: !!matchupEls.vsBadge,
+    teamA: !!matchupEls.teamA.container,
+    teamB: !!matchupEls.teamB.container,
+    timer: !!matchupEls.timer
+});
 
-    const now = new Date();
-    // Handle date parsing with timezone offset
-    const matchDate = new Date(apiMatch.date.replace(' ', 'T') + '+04:00');
-    const isFinished = apiMatch.current_status === 'finished';
-    
-    // Determine simple status label for UI
-    let statusLabel = 'À venir';
-    let statusKey = 'upcoming';
-    let isLive = false;
-    let timeString = '';
-
-    // Format time as HH:mm
-    const timeOptions = { hour: '2-digit', minute: '2-digit' };
-    const formattedTime = !isNaN(matchDate.getTime()) 
-        ? matchDate.toLocaleTimeString('fr-FR', timeOptions) 
-        : apiMatch.date.split(' ')[1]?.substring(0, 5);
-
-    if (isFinished) {
-        statusLabel = 'Terminé';
-        statusKey = 'finished';
-        timeString = formattedTime;
-    } else {
-        // Simple check for live: if date is in past but not finished
-        if (now > matchDate && !isFinished) {
-            statusLabel = 'En direct';
-            statusKey = 'live';
-            isLive = true;
-            timeString = 'LIVE';
-        } else {
-            statusLabel = 'À venir';
-            statusKey = 'upcoming';
-            timeString = formattedTime;
-        }
-    }
-
-    return {
-        team_a: apiMatch.team_a,
-        team_b: apiMatch.team_b,
-        fulltime_a: apiMatch.fulltime_a,
-        fulltime_b: apiMatch.fulltime_b,
-        date: apiMatch.date,
-        // Constructing a statusInfo object to keep applyStatus/updateTimerDisplay compatible
-        statusInfo: {
-            status: statusKey,
-            timeString: timeString,
-            isLive: isLive,
-            label: statusLabel
-        },
-        // Keep original data for other uses if needed
-        raw: apiMatch
-    };
-}
+let prevScores = { a: null, b: null };
 
 function renderMatchup(match) {
-    // Check if we're in loading state
+    console.log('🎨 renderMatchup called with:', match);
+
     if (matchupEls.card && matchupEls.card.classList.contains('is-loading')) {
+        console.log('⏸️ Render skipped: Card is in loading state');
         return;
     }
 
-    // Normalize the API data first
-    const normalizedMatch = mapApiToMatch(match);
-    if (!normalizedMatch) return;
+    const normalizedMatch = match; 
+    if (!normalizedMatch) {
+        console.error('❌ Render aborted: Normalized match is null');
+        return;
+    }
 
-    // Text
-    const teamAName = normalizedMatch.team_a || 'Équipe A';
-    const teamBName = normalizedMatch.team_b || 'Équipe B';
+    // --- TEXT UPDATES ---
+    const teamAName = normalizedMatch.homeTeam || normalizedMatch.team_a || 'Équipe A';
+    const teamBName = normalizedMatch.awayTeam || normalizedMatch.team_b || 'Équipe B';
     
-    if (matchupEls.teamA.name) matchupEls.teamA.name.textContent = teamAName;
-    if (matchupEls.teamB.name) matchupEls.teamB.name.textContent = teamBName;
-    
-    if (matchupEls.teamA.score) matchupEls.teamA.score.textContent = (normalizedMatch.fulltime_a !== null && normalizedMatch.fulltime_a !== undefined) ? normalizedMatch.fulltime_a : '-';
-    if (matchupEls.teamB.score) matchupEls.teamB.score.textContent = (normalizedMatch.fulltime_b !== null && normalizedMatch.fulltime_b !== undefined) ? normalizedMatch.fulltime_b : '-';
+    if (matchupEls.teamA.name) {
+        matchupEls.teamA.name.textContent = teamAName;
+    }
 
-    // Flags - Reset animations before setting new flags
+    if (matchupEls.teamB.name) {
+        matchupEls.teamB.name.textContent = teamBName;
+    }
+    
+    // --- SCORE UPDATES ---
+    const scoreA = normalizedMatch.scoreInfo?.fulltime?.home;
+    const scoreB = normalizedMatch.scoreInfo?.fulltime?.away;
+
+    updateScoreWithAnimation(matchupEls.teamA.score, scoreA, 'a');
+    updateScoreWithAnimation(matchupEls.teamB.score, scoreB, 'b');
+
+    // --- PENALTY SCORES ---
+    updatePenaltyScores(normalizedMatch);
+
+    // --- FLAGS ---
     resetFlagAnimations();
-    setFlag(matchupEls.teamA, flagUrl(normalizedMatch.team_a), normalizedMatch.team_a);
-    setFlag(matchupEls.teamB, flagUrl(normalizedMatch.team_b), normalizedMatch.team_b);
+    
+    const flagUrlA = flagUrl(teamAName);
+    const flagUrlB = flagUrl(teamBName);
+    
+    setFlag(matchupEls.teamA, flagUrlA, teamAName);
+    setFlag(matchupEls.teamB, flagUrlB, teamBName);
 
-    // Ensure VS badge is visible
-    if (matchupEls.vsBadge) matchupEls.vsBadge.style.display = 'flex'; 
+    // --- VS BADGE FORCE SHOW ---
+    if (matchupEls.vsBadge) {
+        matchupEls.vsBadge.style.display = 'flex';
+    }
 
-    // Status & Timer
+    // --- STATUS & LIVE EFFECTS ---
     applyStatus(normalizedMatch.statusInfo, normalizedMatch);
+    
+    // --- TIMER DISPLAY (moved after applyStatus) ---
     updateTimerDisplay(normalizedMatch);
 
-    // Winner / Draw highlight
+    // --- GOAL EVENTS ---
+    renderGoalEvents(normalizedMatch);
+
+    // --- RESULT LOGIC ---
     applyResult(normalizedMatch);
     
-    // Trigger entrance animations after content is set
+    // --- ENTRANCE ANIMATIONS ---
     triggerEntranceAnimations();
+    
+    console.log('✅ Render Complete');
+}
+
+function updateScoreWithAnimation(el, newScore, teamKey) {
+    if (!el) return;
+    
+    // Ensure element is always visible regardless of animation state
+    el.style.opacity = '1';
+    el.style.visibility = 'visible';
+    
+    const displayScore = (newScore !== null && newScore !== undefined) ? newScore : '-';
+    
+    if (prevScores[teamKey] !== null && String(prevScores[teamKey]) !== String(displayScore)) {
+        el.classList.remove('score-update-pop');
+        void el.offsetWidth; // Trigger reflow
+        el.classList.add('score-update-pop');
+        
+        // Remove class after animation to allow re-triggering
+        setTimeout(() => el.classList.remove('score-update-pop'), 500);
+    }
+    
+    el.textContent = displayScore;
+    prevScores[teamKey] = displayScore;
+}
+
+function updatePenaltyScores(match) {
+    if (!match.scoreInfo) return;
+    
+    const hasPenalties = match.scoreInfo.hasPenalties;
+    
+    // FIX: Changed from .penalties to .penalty to match your normalizeMatchData output
+    const penaltyHome = match.scoreInfo.penalty?.home; 
+    const penaltyAway = match.scoreInfo.penalty?.away;
+    
+    // Team A penalties
+    if (matchupEls.teamA.penaltySection && matchupEls.teamA.penaltyScore) {
+        if (hasPenalties && penaltyHome !== null && penaltyHome !== undefined) {
+            matchupEls.teamA.penaltySection.style.display = 'flex'; // Use flex for alignment
+            matchupEls.teamA.penaltySection.classList.add('visible');
+            matchupEls.teamA.penaltyScore.textContent = penaltyHome;
+        } else {
+            matchupEls.teamA.penaltySection.style.display = 'none';
+            matchupEls.teamA.penaltySection.classList.remove('visible');
+        }
+    }
+    
+    // Team B penalties
+    if (matchupEls.teamB.penaltySection && matchupEls.teamB.penaltyScore) {
+        if (hasPenalties && penaltyAway !== null && penaltyAway !== undefined) {
+            matchupEls.teamB.penaltySection.style.display = 'flex';
+            matchupEls.teamB.penaltySection.classList.add('visible');
+            matchupEls.teamB.penaltyScore.textContent = penaltyAway;
+        } else {
+            matchupEls.teamB.penaltySection.style.display = 'none';
+            matchupEls.teamB.penaltySection.classList.remove('visible');
+        }
+    }
+}
+
+function renderGoalEvents(match) {
+    // FIX: Ensure we look at match.goals (from normalizeMatchData) 
+    // instead of match.events which might be undefined
+    const homeGoals = match.goals?.home || [];
+    const awayGoals = match.goals?.away || [];
+    
+    renderEventsList(matchupEls.teamA.events, homeGoals);
+    renderEventsList(matchupEls.teamB.events, awayGoals);
+}
+
+function renderEventsList(container, goals) {
+    if (!container) return;
+    container.innerHTML = '';
+    
+    if (!goals || goals.length === 0) return;
+    
+    goals.forEach(goal => {
+        const eventEl = document.createElement('div');
+        eventEl.className = 'tm-event-matchup'; // Updated class name to match CSS
+        
+        // Handle time formatting (e.g. 90 + 2)
+        let timeText = goal.time;
+        if (goal.extra) timeText += ` +${goal.extra}`;
+        
+        eventEl.innerHTML = `
+            <span class="tm-event-time-matchup">${timeText}'</span>
+            <span class="tm-event-player-matchup">${goal.player || 'Unknown'}</span>
+        `;
+        container.appendChild(eventEl);
+    });
 }
 
 function resetFlagAnimations() {
-    // Reset flag containers to allow re-animation
-    const flagContainers = document.querySelectorAll('.tm-flag-container');
+    const flagContainers = document.querySelectorAll('.tm-flag-container-matchup');
     flagContainers.forEach(container => {
         container.style.animation = 'none';
-        container.offsetHeight; // Trigger reflow
+        container.offsetHeight; 
         container.style.animation = null;
     });
 }
 
 function triggerEntranceAnimations() {
-    // Force re-trigger of CSS animations by removing and re-adding elements
     const teams = [matchupEls.teamA, matchupEls.teamB];
-    
     teams.forEach((team, index) => {
         if (team.container) {
-            // Remove animation classes
-            team.container.classList.remove('tm-team-a', 'tm-team-b');
-            
-            // Trigger reflow
+            team.container.classList.remove('tm-team-a-matchup', 'tm-team-b-matchup');
             void team.container.offsetWidth;
-            
-            // Re-add appropriate class with delay
             setTimeout(() => {
-                team.container.classList.add(index === 0 ? 'tm-team-a' : 'tm-team-b');
+                team.container.classList.add(index === 0 ? 'tm-team-a-matchup' : 'tm-team-b-matchup');
             }, 50);
         }
     });
@@ -157,31 +224,32 @@ function triggerEntranceAnimations() {
 function setFlag(teamObj, url, fallbackText) {
     if (!teamObj || !teamObj.flag || !teamObj.fallback) return;
     
-    // Reset display
     teamObj.flag.style.display = 'none';
     teamObj.fallback.style.display = 'flex';
     teamObj.fallback.textContent = fallbackText ? fallbackText.charAt(0).toUpperCase() : '?';
     
     if (url) {
-        // Create new image to avoid caching issues
         const img = new Image();
+        
         img.onload = () => { 
             teamObj.flag.src = url;
             teamObj.flag.style.display = 'block'; 
             teamObj.fallback.style.display = 'none'; 
             
-            // Trigger flag animation
-            const flagContainer = teamObj.flag.closest('.tm-flag-container');
+            const flagContainer = teamObj.flag.closest('.tm-flag-container-matchup');
             if (flagContainer) {
                 flagContainer.style.animation = 'none';
-                void flagContainer.offsetWidth; // Trigger reflow
+                void flagContainer.offsetWidth;
                 flagContainer.style.animation = 'flagPopIn 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards';
             }
         };
+        
         img.onerror = () => { 
+            console.warn(`Flag failed to load: ${url}`);
             teamObj.flag.style.display = 'none';  
             teamObj.fallback.style.display = 'flex'; 
         };
+        
         img.src = url;
     }
 }
@@ -190,34 +258,60 @@ function applyStatus(info, match) {
     if (!info) return;
 
     const displayStatus = info.status || 'upcoming';
-    const displayLabel = info.label || (displayStatus === 'finished' ? 'Terminé' : 'À venir');
     const isLive = info.isLive || false;
 
     if (matchupEls.statusBadge) {
-        // Remove old status classes
         matchupEls.statusBadge.classList.remove('tm-status-upcoming', 'tm-status-live', 'tm-status-finished');
-        // Add new status class
         matchupEls.statusBadge.classList.add(`tm-status-${displayStatus}`);
     }
     
-    if (matchupEls.statusLabel) matchupEls.statusLabel.textContent = displayLabel;
-    if (matchupEls.liveDot) matchupEls.liveDot.style.display = isLive ? 'block' : 'none';
+    if (matchupEls.statusLabel) matchupEls.statusLabel.textContent = info.label;
+    
+    const vsBadge = matchupEls.vsBadge;
+    const timer = matchupEls.timer;
+    
+    if (isLive) {
+        if (vsBadge) vsBadge.classList.add('is-live-pulse');
+        if (timer) timer.classList.add('is-live-pulse');
+        
+        const energyLeft = document.querySelector('.tm-vs-energy-left-matchup');
+        const energyRight = document.querySelector('.tm-vs-energy-right-matchup');
+        if (energyLeft) energyLeft.style.animationDuration = '0.8s';
+        if (energyRight) energyRight.style.animationDuration = '0.8s';
+        
+    } else {
+        if (vsBadge) vsBadge.classList.remove('is-live-pulse');
+        if (timer) timer.classList.remove('is-live-pulse');
+        
+        const energyLeft = document.querySelector('.tm-vs-energy-left-matchup');
+        const energyRight = document.querySelector('.tm-vs-energy-right-matchup');
+        if (energyLeft) energyLeft.style.animationDuration = '2s';
+        if (energyRight) energyRight.style.animationDuration = '2s';
+    }
 }
 
 function updateTimerDisplay(match) {
     if (!matchupEls.timer) return;
 
-    // If scores exist and status is finished, clear timer
-    if (match.statusInfo && match.statusInfo.status === 'finished') {
-        matchupEls.timer.textContent = '';
-        matchupEls.timer.classList.remove('is-live');
-        return; 
-    }
-
-    // Use statusInfo from mapped data
     if (match.statusInfo) {
-        matchupEls.timer.textContent = match.statusInfo.timeString || '';
-        matchupEls.timer.classList.toggle('is-live', match.statusInfo.isLive || false);
+        // FIX: Handle multiple possible time properties
+        const time = match.statusInfo.timeString || 
+                     match.statusInfo.time || 
+                     match.statusInfo.clock || 
+                     match.time || 
+                     '--:--';
+        
+        matchupEls.timer.textContent = time;
+        
+        if (match.statusInfo.isLive) {
+            matchupEls.timer.classList.add('is-live-pulse');
+        } else {
+            matchupEls.timer.classList.remove('is-live-pulse');
+        }
+    } else {
+        // If no statusInfo, show default
+        matchupEls.timer.textContent = '--:--';
+        matchupEls.timer.classList.remove('is-live-pulse');
     }
 }
 
@@ -238,13 +332,17 @@ function applyResult(match) {
         matchupEls.teamB.badge.style.opacity = '0'; 
         matchupEls.teamB.badge.innerHTML = ''; 
     }
+    
+    // Reset crowns
+    if (matchupEls.teamA.crown) matchupEls.teamA.crown.style.display = 'none';
+    if (matchupEls.teamB.crown) matchupEls.teamB.crown.style.display = 'none';
 
-    const a = match.fulltime_a;
-    const b = match.fulltime_b;
+    const a = match.scoreInfo?.fulltime?.home;
+    const b = match.scoreInfo?.fulltime?.away;
+    const hasPenalties = match.scoreInfo?.hasPenalties;
+    const winnerDraw = match.winner;
 
-    // Only apply result if both scores are present
     if (a === null || a === undefined || b === null || b === undefined) {
-        // Hide draw ribbon if no scores
         if (matchupEls.drawRibbon) matchupEls.drawRibbon.style.display = 'none';
         return;
     }
@@ -252,69 +350,151 @@ function applyResult(match) {
     const sa = parseInt(a);
     const sb = parseInt(b);
 
-    if (sa === sb) {
+    if (winnerDraw === 'Draw') {
+        console.log('🤝 Match is a DRAW');
         card.classList.add('is-draw');
         if (matchupEls.drawRibbon) {
             matchupEls.drawRibbon.style.display = 'flex';
-            // Animate draw ribbon
             matchupEls.drawRibbon.style.animation = 'none';
             void matchupEls.drawRibbon.offsetWidth;
             matchupEls.drawRibbon.style.animation = 'drawRibbonExpand 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards';
+            
+            if (hasPenalties) {
+                const textSpan = matchupEls.drawRibbon.querySelector('.tm-draw-text-matchup');
+                if(textSpan) textSpan.textContent = 'Match Nul (Après Tirs au But)';
+            } else {
+                const textSpan = matchupEls.drawRibbon.querySelector('.tm-draw-text-matchup');
+                if(textSpan) textSpan.textContent = 'Match Nul';
+            }
         }
     } else {
+        console.log(`🏆 Winner detected via API: ${winnerDraw}`);
         if (matchupEls.drawRibbon) matchupEls.drawRibbon.style.display = 'none';
+        
         card.classList.add('is-winner');
-        const winner = sa > sb ? matchupEls.teamA : matchupEls.teamB;
-        const loser = sa > sb ? matchupEls.teamB : matchupEls.teamA;
+        
+        let winnerObj, loserObj;
+        if (winnerDraw === match.homeTeam) {
+            winnerObj = matchupEls.teamA;
+            loserObj = matchupEls.teamB;
+        } else {
+            winnerObj = matchupEls.teamB;
+            loserObj = matchupEls.teamA;
+        }
 
-        if (winner.container) winner.container.classList.add('is-winner');
-        if (loser.container) loser.container.classList.add('is-loser');
+        if (winnerObj.container) winnerObj.container.classList.add('is-winner');
+        if (loserObj.container) loserObj.container.classList.add('is-loser');
+        
+        // Show crown for winner
+        if (winnerObj.crown) {
+            winnerObj.crown.style.display = 'block';
+            winnerObj.crown.style.animation = 'none';
+            void winnerObj.crown.offsetWidth;
+            winnerObj.crown.style.animation = 'badgeSlideUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards';
+        }
 
-        if (winner.badge) {
-            winner.badge.innerHTML = `
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M7 3v2H3v4c0 1.65 1.35 3 3 3h.72c.75 2.48 2.82 4.34 5.28 4.82V19h-3v2h8v-2h-3v-2.18c2.46-.48 4.53-2.34 5.28-4.82H18c1.65 0 3-1.35 3-3V5h-4V3H7zm0 7c-1.1 0-2-.9-2-2V6h2v4zm12-2c0 1.1-.9 2-2 2V6h2v4z"/>
-                </svg>
-                <span>Vainqueur</span>`;
-            winner.badge.style.opacity = '1';
+        if (winnerObj.badge) {
+            const penaltyText = hasPenalties ? ' (Tirs au but)' : '';
             
-            // Animate badge appearance
-            winner.badge.style.animation = 'none';
-            void winner.badge.offsetWidth;
-            winner.badge.style.animation = 'badgeSlideUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards';
         }
     }
 }
 
 function flagUrl(name) {
     if (!name) return null;
-    // Ensure the filename matches the API team names (e.g., "Korea Republic" -> "Korea_Republic.png")
-    return `/assets/flags/${name.replace(/ /g, '_')}.png`;
+    const cleanName = name.replace(/[^a-zA-Z0-9]/g, '_');
+    return `/assets/flags/${cleanName}.png`;
 }
 
-// Add CSS animation keyframes dynamically
+// Dynamic Styles Injection
 const style = document.createElement('style');
 style.textContent = `
     @keyframes drawRibbonExpand {
-        0% {
-            opacity: 0;
-            transform: translate(-50%, -50%) scaleX(0.5);
-        }
-        100% {
-            opacity: 1;
-            transform: translate(-50%, -50%) scaleX(1);
-        }
+        0% { opacity: 0; transform: translate(-50%, -50%) scaleX(0.5); }
+        100% { opacity: 1; transform: translate(-50%, -50%) scaleX(1); }
     }
     
     @keyframes badgeSlideUp {
-        0% {
-            opacity: 0;
-            transform: translateY(10px);
-        }
-        100% {
-            opacity: 1;
-            transform: translateY(0);
-        }
+        0% { opacity: 0; transform: translateY(10px); }
+        100% { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes scorePopUpdate {
+        0% { transform: scale(1); color: #fff; }
+        50% { transform: scale(1.3); color: #fbbf24; text-shadow: 0 0 30px rgba(251, 191, 36, 0.8); }
+        100% { transform: scale(1); color: #fff; }
+    }
+    .score-update-pop {
+        animation: scorePopUpdate 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes livePulseGlow {
+        0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); border-color: rgba(255, 255, 255, 0.25); }
+        50% { box-shadow: 0 0 20px 5px rgba(59, 130, 246, 0.2); border-color: rgba(59, 130, 246, 0.6); }
+        100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); border-color: rgba(255, 255, 255, 0.25); }
+    }
+    
+    .is-live-pulse {
+        animation: livePulseGlow 2s infinite;
+    }
+    
+    .tm-vs-badge-matchup.is-live-pulse .tm-vs-text-matchup {
+        color: #60a5fa;
+        text-shadow: 0 0 15px rgba(59, 130, 246, 0.8);
+    }
+    
+    .tm-crown-matchup {
+        display: none;
+        position: absolute;
+        top: -20px;
+        left: 50%;
+        transform: translateX(-50%);
+        color: #fbbf24;
+        font-size: 24px;
+        z-index: 10;
+    }
+    
+    .tm-penalty-section-matchup {
+        display: none;
+        margin-top: 8px;
+        text-align: center;
+    }
+    
+    .tm-penalty-label-matchup {
+        font-size: 10px;
+        opacity: 0.7;
+        margin-right: 4px;
+    }
+    
+    .tm-penalty-score-matchup {
+        font-size: 14px;
+        font-weight: bold;
+    }
+    
+    .tm-goal-events-matchup {
+        margin-top: 8px;
+        font-size: 20px;
+    }
+    
+    .tm-goal-event-matchup {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        margin: 2px 0;
+    }
+    
+    .tm-event-minute {
+        font-weight: bold;
+        color: #fbbf24;
+    }
+    
+    /* SAFETY NETS */
+    .tm-vs-badge-matchup {
+        display: flex !important;
+        visibility: visible !important;
+    }
+    .tm-team-matchup {
+        min-height: clamp(200px, 40vh, 400px);
     }
 `;
 document.head.appendChild(style);

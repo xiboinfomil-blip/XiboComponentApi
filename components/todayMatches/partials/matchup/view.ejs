@@ -1,74 +1,87 @@
-<section class="tm-matchup">
-    <!-- TEAM A -->
-    <div class="tm-team tm-team-a" id="team-a-container">
-        <div class="tm-crown" id="crown-a" aria-hidden="true">
+<!-- Main Wrapper -->
+<div class="tm-matchup-matchup" id="main-card-matchup">
+    
+    <!-- TEAM A (Left Side) -->
+    <div class="tm-team-matchup tm-team-a-matchup" id="team-a-container-matchup">
+        <div class="tm-crown-matchup" id="crown-a-matchup" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm0 2h14v2H5v-2z"/></svg>
         </div>
         
-        <div class="tm-flag-wrapper">
-            <div class="tm-flag-container">
-                <div class="tm-flag-shine"></div>
-                <!-- Replace src with actual flag URLs -->
-                <img id="flag-a" src="https://placehold.co/240x160/1e293b/FFF?text=Flag+A" alt="Team A Flag" class="tm-flag-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
-                <div class="tm-flag-fallback" style="display:none">A</div>
+        <div class="tm-flag-wrapper-matchup">
+            <div class="tm-flag-container-matchup">
+                <div class="tm-flag-shine-matchup"></div>
+                <img id="flag-a-matchup" src="/assets/flags/default.png" alt="Team A Flag" class="tm-flag-image-matchup">
+                <div class="tm-flag-fallback-matchup">A</div>
             </div>
         </div>
         
-        <div class="tm-team-info">
-            <div class="tm-team-name" id="name-a">Équipe A</div>
-            <div class="tm-result-badge" id="badge-a"></div>
+        <div class="tm-team-info-matchup">
+            <div class="tm-team-name-matchup" id="name-a-matchup">Équipe A</div>
+            <div class="tm-result-badge-matchup" id="badge-a-matchup"></div>
         </div>
         
-        <div class="tm-team-score" id="score-a">2</div>
+        <!-- MAIN SCORE -->
+        <div class="tm-team-score-matchup" id="score-a-matchup">-</div>
+
+        <!-- PENALTY SCORE -->
+        <div class="tm-penalty-section-matchup" id="penalty-a-matchup">
+            <span class="tm-penalty-label-matchup">Tirs au but</span>
+            <span class="tm-penalty-score-matchup" id="penalty-score-a-matchup">-</span>
+        </div>
+
+        <!-- GOAL SCORERS -->
+        <div class="tm-goal-events-matchup" id="events-a-matchup"></div>
     </div>
 
-    <!-- CENTER HUB -->
-    <div class="tm-center">
-        <!-- Battle VS Badge -->
-        <div class="tm-vs-badge" id="vs-badge">
-            <div class="tm-vs-clash-bg"></div>
-            <div class="tm-vs-energy-left"></div>
-            <div class="tm-vs-energy-right"></div>
-            
-            <span class="tm-vs-text">VS</span>
-            
-            <!-- Trophy Icon -->
-            <svg class="tm-trophy-icon" viewBox="0 0 24 24" fill="currentColor">
+    <!-- CENTER HUB (VS / Timer) -->
+    <div class="tm-center-matchup">
+        <div class="tm-vs-badge-matchup" id="vs-badge-matchup">
+            <div class="tm-vs-energy-left-matchup"></div>
+            <div class="tm-vs-energy-right-matchup"></div>
+            <span class="tm-vs-text-matchup">VS</span>
+            <svg class="tm-trophy-icon-matchup" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M7 3v2H3v4c0 1.65 1.35 3 3 3h.72c.75 2.48 2.82 4.34 5.28 4.82V19h-3v2h8v-2h-3v-2.18c2.46-.48 4.53-2.34 5.28-4.82H18c1.65 0 3-1.35 3-3V5h-4V3H7zm0 7c-1.1 0-2-.9-2-2V6h2v4zm12-2c0 1.1-.9 2-2 2V6h2v4z"/>
             </svg>
         </div>
         
-        <!-- Draw Ribbon -->
-        <div class="tm-draw-ribbon" id="draw-ribbon">
-            <span class="tm-draw-line"></span>
-            <span class="tm-draw-text">MATCH NUL</span>
-            <span class="tm-draw-line"></span>
+        <div class="tm-draw-ribbon-matchup" id="draw-ribbon-matchup" style="display: none;">
+            <span class="tm-draw-line-matchup"></span>
+            <span class="tm-draw-text-matchup">MATCH NUL</span>
+            <span class="tm-draw-line-matchup"></span>
         </div>
         
-        <!-- Timer -->
-        <div id="match-timer" class="tm-timer">78:42</div>
+        <div id="match-timer-matchup" class="tm-timer-matchup">--:--</div>
     </div>
 
-    <!-- TEAM B -->
-    <div class="tm-team tm-team-b" id="team-b-container">
-        <div class="tm-crown" id="crown-b" aria-hidden="true">
+    <!-- TEAM B (Right Side) -->
+    <div class="tm-team-matchup tm-team-b-matchup" id="team-b-container-matchup">
+        <div class="tm-crown-matchup" id="crown-b-matchup" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm0 2h14v2H5v-2z"/></svg>
         </div>
         
-        <div class="tm-flag-wrapper">
-            <div class="tm-flag-container">
-                <div class="tm-flag-shine"></div>
-                <!-- Replace src with actual flag URLs -->
-                <img id="flag-b" src="https://placehold.co/240x160/1e293b/FFF?text=Flag+B" alt="Team B Flag" class="tm-flag-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
-                <div class="tm-flag-fallback" style="display:none">B</div>
+        <div class="tm-flag-wrapper-matchup">
+            <div class="tm-flag-container-matchup">
+                <div class="tm-flag-shine-matchup"></div>
+                <img id="flag-b-matchup" src="/assets/flags/default.png" alt="Team B Flag" class="tm-flag-image-matchup">
+                <div class="tm-flag-fallback-matchup">B</div>
             </div>
         </div>
         
-        <div class="tm-team-info">
-            <div class="tm-team-name" id="name-b">Équipe B</div>
-            <div class="tm-result-badge" id="badge-b"></div>
+        <div class="tm-team-info-matchup">
+            <div class="tm-team-name-matchup" id="name-b-matchup">Équipe B</div>
+            <div class="tm-result-badge-matchup" id="badge-b-matchup"></div>
         </div>
         
-        <div class="tm-team-score" id="score-b">1</div>
+        <!-- MAIN SCORE -->
+        <div class="tm-team-score-matchup" id="score-b-matchup">-</div>
+
+        <!-- PENALTY SCORE -->
+        <div class="tm-penalty-section-matchup" id="penalty-b-matchup">
+            <span class="tm-penalty-label-matchup">Tirs au but</span>
+            <span class="tm-penalty-score-matchup" id="penalty-score-b-matchup">-</span>
+        </div>
+
+        <!-- GOAL SCORERS -->
+        <div class="tm-goal-events-matchup" id="events-b-matchup"></div>
     </div>
-</section>
+</div>

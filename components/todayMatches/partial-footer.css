@@ -2,7 +2,7 @@
    FIFA BROADCAST DATE TICKER - ENHANCED WITH ANIMATIONS
    ========================================= */
 
-.tm-footer { 
+.tm-footer-footer { 
     display: flex; 
     justify-content: center; 
     align-items: center;
@@ -12,7 +12,7 @@
 }
 
 /* Optional: Add subtle background gradient to footer area */
-.tm-footer::before {
+.tm-footer-footer::before {
     content: '';
     position: absolute;
     bottom: 0;
@@ -29,7 +29,7 @@
     );
 }
 
-.tm-date-pill {
+.tm-date-pill-footer {
     position: relative;
     display: inline-flex; 
     align-items: center; 
@@ -87,7 +87,7 @@
 }
 
 /* --- Glowing Border Effect --- */
-.tm-date-pill::before {
+.tm-date-pill-footer::before {
     content: '';
     position: absolute;
     top: -2px;
@@ -105,7 +105,7 @@
     z-index: -1;
 }
 
-.tm-date-pill:hover::before {
+.tm-date-pill-footer:hover::before {
     opacity: 1;
     animation: borderRotate 3s linear infinite;
 }
@@ -116,7 +116,7 @@
 }
 
 /* Subtle continuous shimmer effect */
-.tm-date-pill::after {
+.tm-date-pill-footer::after {
     content: '';
     position: absolute;
     top: 0;
@@ -139,7 +139,7 @@
 }
 
 /* --- Icon Styling --- */
-.tm-date-icon {
+.tm-date-icon-footer {
     width: 1.3em;
     height: 1.3em;
     color: #60a5fa;
@@ -167,7 +167,7 @@
     }
 }
 
-.tm-date-pill:hover .tm-date-icon {
+.tm-date-pill-footer:hover .tm-date-icon-footer {
     transform: scale(1.15) rotate(-8deg);
     color: #7dd3fc;
     opacity: 1;
@@ -175,7 +175,7 @@
 }
 
 /* --- Date Label --- */
-.tm-date-label {
+.tm-date-label-footer {
     color: #3b82f6;
     font-size: 0.75em;
     font-weight: 900;
@@ -200,14 +200,14 @@
     }
 }
 
-.tm-date-pill:hover .tm-date-label {
+.tm-date-pill-footer:hover .tm-date-label-footer {
     color: #00f5ff;
     opacity: 1;
     text-shadow: 0 0 10px rgba(0, 245, 255, 0.5);
 }
 
 /* --- Typography --- */
-.tm-date-text {
+.tm-date-text-footer {
     text-shadow: 0 2px 4px rgba(0,0,0,0.4);
     font-variant-numeric: tabular-nums;
     color: #ffffff;
@@ -233,7 +233,7 @@
 }
 
 /* --- Divider Line --- */
-.tm-date-divider {
+.tm-date-divider-footer {
     width: 2px;
     height: 60%;
     background: linear-gradient(to bottom, 
@@ -262,7 +262,7 @@
     }
 }
 
-.tm-date-pill:hover .tm-date-divider {
+.tm-date-pill-footer:hover .tm-date-divider-footer {
     height: 75%;
     opacity: 1;
     background: linear-gradient(to bottom, 
@@ -274,7 +274,7 @@
 }
 
 /* --- Glow Effect --- */
-.tm-date-glow {
+.tm-date-glow-footer {
     position: absolute;
     top: 50%;
     left: 50%;
@@ -306,12 +306,12 @@
     }
 }
 
-.tm-date-pill:hover .tm-date-glow {
+.tm-date-pill-footer:hover .tm-date-glow-footer {
     opacity: 1;
 }
 
 /* --- Hover State --- */
-.tm-date-pill:hover {
+.tm-date-pill-footer:hover {
     background: linear-gradient(135deg, 
         rgba(10, 15, 30, 0.85) 0%, 
         rgba(15, 23, 42, 0.75) 50%,
@@ -329,29 +329,29 @@
 
 /* --- Responsive Adjustments --- */
 @media (max-width: 768px) {
-    .tm-date-pill {
+    .tm-date-pill-footer {
         gap: 0.6rem;
         padding: 0.6rem 1.2rem;
         letter-spacing: 1.5px;
     }
     
-    .tm-date-label {
+    .tm-date-label-footer {
         display: none; /* Hide label on smaller screens */
     }
 }
 
 @media (max-width: 480px) {
-    .tm-date-pill {
+    .tm-date-pill-footer {
         gap: 0.5rem;
         padding: 0.55rem 1rem;
         letter-spacing: 1.2px;
     }
     
-    .tm-date-divider { 
+    .tm-date-divider-footer { 
         display: none; 
     }
     
-    .tm-date-icon {
+    .tm-date-icon-footer {
         width: 1.1em;
         height: 1.1em;
     }
@@ -363,24 +363,24 @@
     50% { opacity: 0.7; }
 }
 
-.tm-date-text.updating {
+.tm-date-text-footer.updating {
     animation: datePulse 0.6s ease-in-out;
 }
 
 /* --- Accessibility & Motion Preferences --- */
 @media (prefers-reduced-motion: reduce) {
-    .tm-date-pill,
-    .tm-date-icon,
-    .tm-date-label,
-    .tm-date-text,
-    .tm-date-divider,
-    .tm-date-glow,
-    .tm-date-pill::after {
+    .tm-date-pill-footer,
+    .tm-date-icon-footer,
+    .tm-date-label-footer,
+    .tm-date-text-footer,
+    .tm-date-divider-footer,
+    .tm-date-glow-footer,
+    .tm-date-pill-footer::after {
         animation: none !important;
         opacity: 1;
         transform: none;
     }
-    .tm-date-pill { 
+    .tm-date-pill-footer { 
         transition: none; 
     }
 }
