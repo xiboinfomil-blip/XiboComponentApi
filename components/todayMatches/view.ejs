@@ -5,18 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= title %></title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght=700;800;900&display=swap" rel="stylesheet">
     
-    <!-- 1. Global Config -->
     <script src="/assets/global/helpers/configHelper.js?v=1.0.0"></script>
 
-    <!-- 2. Main Component CSS (Dynamic + No Public Folder) -->
     <link rel="stylesheet" href="/assets/<%= componentName %>/style.css?v=4.0.0">
     
-    <!-- 3. Sub-Component CSS -->
-    <link rel="stylesheet" href="/assets/<%= componentName %>/partials/header/style.css?v=4.0.0">
-    <link rel="stylesheet" href="/assets/<%= componentName %>/partials/matchup/style.css?v=4.0.0">
-    <link rel="stylesheet" href="/assets/<%= componentName %>/partials/footer/style.css?v=4.0.0">
+    <link rel="stylesheet" href="/assets/<%= componentName %>/partial-header.css?v=4.0.0">
+    <link rel="stylesheet" href="/assets/<%= componentName %>/partial-matchup.css?v=4.0.0">
+    <link rel="stylesheet" href="/assets/<%= componentName %>/partial-footer.css?v=4.0.0">
 </head>
 <body style="background: transparent; margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; height: 100vh; width: 100vw; overflow: hidden;">
     
@@ -24,7 +21,6 @@
         <div class="tm-card-container">
             <div class="tm-card-worldcup" id="main-card" data-state="upcoming">
 
-                <!-- Background Effects (Global) -->
                 <div class="tm-bg-effects">
                     <div class="tm-gradient-orb tm-orb-1"></div>
                     <div class="tm-gradient-orb tm-orb-2"></div>
@@ -35,13 +31,10 @@
                 <div class="tm-glass-overlay"></div>
 
                 <div class="tm-card-content">
-                    <!-- Include Header Partial -->
                     <%- include('partials/header/view') %>
 
-                    <!-- Include Matchup Partial -->
                     <%- include('partials/matchup/view') %>
 
-                    <!-- Include Footer Partial -->
                     <%- include('partials/footer/view') %>
                 </div>
 
@@ -49,10 +42,8 @@
         </div>
     </div>
 
-    <!-- 4. Main Component Script (Dynamic + No Public Folder) -->
     <script src="/assets/<%= componentName %>/script.js?v=4.0.0"></script>
     
-    <!-- 5. Sub-Component Scripts -->
-    <script src="/assets/<%= componentName %>/partials/matchup/script.js?v=4.0.0"></script>
+    <script src="/assets/<%= componentName %>/partial-matchup.js?v=4.0.0"></script>
 </body>
 </html>

@@ -5,37 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= title %></title>
     
-    <!-- 1. Global Config -->
     <script src="/assets/global/helpers/configHelper.js?v=1.0.0"></script>
 
-    <!-- 2. Main Component CSS (DYNAMIC) -->
     <link rel="stylesheet" href="/assets/<%= componentName %>/style.css?v=4.1.0">
     
-    <!-- 3. Sub-Component CSS (DYNAMIC) -->
-    <link rel="stylesheet" href="/assets/<%= componentName %>/partials/header/style.css?v=4.1.0">
-    <link rel="stylesheet" href="/assets/<%= componentName %>/partials/podium/style.css?v=4.1.0">
-    <link rel="stylesheet" href="/assets/<%= componentName %>/partials/table/style.css?v=4.1.0">
+    <link rel="stylesheet" href="/assets/<%= componentName %>/partial-header.css?v=4.1.0">
+    <link rel="stylesheet" href="/assets/<%= componentName %>/partial-podium.css?v=4.1.0">
+    <link rel="stylesheet" href="/assets/<%= componentName %>/partial-table.css?v=4.1.0">
 </head>
 <body style="background: transparent; margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; height: 100vh; width: 100vw; overflow: hidden;">
     
     <div id="leaderboard-container">
         <div class="ambient-glow"></div>
         
-        <!-- Include Header Partial -->
         <%- include('partials/header/view') %>
         
-        <!-- Podium Container (Content injected by JS) -->
         <div id="podium-section" class="podium-container"></div>
 
-        <!-- Include Table Partial -->
         <%- include('partials/table/view') %>
     </div>
 
-    <!-- 4. Main Component Script (DYNAMIC) -->
     <script src="/assets/<%= componentName %>/script.js?v=4.1.0"></script>
     
-    <!-- 5. Sub-Component Scripts (DYNAMIC) -->
-    <script src="/assets/<%= componentName %>/partials/podium/script.js?v=4.1.0"></script>
-    <script src="/assets/<%= componentName %>/partials/table/script.js?v=4.1.0"></script>
+    <script src="/assets/<%= componentName %>/partial-podium.js?v=4.1.0"></script>
+    <script src="/assets/<%= componentName %>/partial-table.js?v=4.1.0"></script>
 </body>
 </html>
