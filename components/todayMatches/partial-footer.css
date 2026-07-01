@@ -1,30 +1,30 @@
 /* =========================================
-   FIFA BROADCAST DATE TICKER - ENHANCED WITH ANIMATIONS
+   FIFA BROADCAST DATE TICKER - CLEAN & OVERFLOW-SAFE
    ========================================= */
 
 .tm-footer-footer { 
     display: flex; 
     justify-content: center; 
     align-items: center;
-    padding: 1.5rem 0 2.5rem;
+    /* Reduced padding to prevent vertical crowding */
+    padding: clamp(1rem, 2.5vh, 2rem) 0;
     flex-shrink: 0;
     position: relative;
+    width: 100%;
 }
 
-/* Optional: Add subtle background gradient to footer area */
+/* Subtle bottom line instead of heavy gradient */
 .tm-footer-footer::before {
     content: '';
     position: absolute;
     bottom: 0;
     left: 50%;
     transform: translateX(-50%);
-    width: 60%;
+    width: 50%;
     height: 1px;
     background: linear-gradient(90deg, 
         transparent 0%, 
-        rgba(59, 130, 246, 0.3) 20%, 
-        rgba(59, 130, 246, 0.5) 50%, 
-        rgba(59, 130, 246, 0.3) 80%, 
+        rgba(59, 130, 246, 0.3) 50%, 
         transparent 100%
     );
 }
@@ -33,86 +33,50 @@
     position: relative;
     display: inline-flex; 
     align-items: center; 
-    gap: 0.8rem;
-    padding: clamp(0.65rem, 1.6vh, 0.95rem) clamp(1.5rem, 3.2vw, 2.25rem);
+    gap: clamp(0.6rem, 1.5vmin, 1rem);
+    padding: clamp(0.6rem, 1.5vmin, 1rem) clamp(1.5rem, 3vmin, 2.5rem);
     
-    /* FIFA Broadcast Glass Effect */
+    /* Cleaner Glass Effect */
     background: linear-gradient(135deg, 
-        rgba(10, 15, 30, 0.75) 0%, 
-        rgba(15, 23, 42, 0.65) 50%,
-        rgba(10, 15, 30, 0.75) 100%
+        rgba(10, 15, 30, 0.8) 0%, 
+        rgba(15, 23, 42, 0.7) 100%
     );
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    backdrop-filter: blur(clamp(10px, 2vmin, 20px)) saturate(150%);
+    -webkit-backdrop-filter: blur(clamp(10px, 2vmin, 20px)) saturate(150%);
     
     border-radius: 999px;
-    border: 1.5px solid rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    
+    /* OPTIMIZED SHADOW: Single clean layer, no heavy spread */
     box-shadow: 
-        0 8px 32px rgba(0, 0, 0, 0.4),
-        0 2px 8px rgba(59, 130, 246, 0.15),
-        inset 0 1px 0 rgba(255, 255, 255, 0.08),
-        inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+        0 clamp(4px, 1vmin, 15px) rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
     
     color: #e2e8f0;
-    font-size: clamp(0.8rem, 2vw, 1rem);
+    font-size: clamp(0.9rem, 2vmin, 1.3rem);
     font-weight: 800; 
-    letter-spacing: 2px;
+    letter-spacing: clamp(1px, 0.3vmin, 2px);
     text-transform: uppercase;
     
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     overflow: hidden;
-    cursor: default;
     z-index: 1;
     
     /* Smooth Entrance Animation */
     opacity: 0;
-    transform: translateY(20px) scale(0.95);
-    animation: datePillEntrance 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    transform: translateY(10px) scale(0.98);
+    animation: datePillEntrance 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
     animation-delay: 0.2s;
 }
 
-/* Smooth entrance animation */
 @keyframes datePillEntrance {
     0% {
         opacity: 0;
-        transform: translateY(20px) scale(0.95);
-    }
-    60% {
-        transform: translateY(-3px) scale(1.02);
+        transform: translateY(10px) scale(0.98);
     }
     100% {
         opacity: 1;
         transform: translateY(0) scale(1);
     }
-}
-
-/* --- Glowing Border Effect --- */
-.tm-date-pill-footer::before {
-    content: '';
-    position: absolute;
-    top: -2px;
-    left: -2px;
-    right: -2px;
-    bottom: -2px;
-    background: linear-gradient(45deg, 
-        transparent 30%, 
-        rgba(59, 130, 246, 0.3) 50%, 
-        transparent 70%
-    );
-    border-radius: 999px;
-    opacity: 0;
-    transition: opacity 0.4s ease;
-    z-index: -1;
-}
-
-.tm-date-pill-footer:hover::before {
-    opacity: 1;
-    animation: borderRotate 3s linear infinite;
-}
-
-@keyframes borderRotate {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
 }
 
 /* Subtle continuous shimmer effect */
@@ -126,10 +90,10 @@
     background: linear-gradient(
         90deg,
         transparent,
-        rgba(255, 255, 255, 0.08),
+        rgba(255, 255, 255, 0.05),
         transparent
     );
-    animation: dateShimmer 4s ease-in-out infinite;
+    animation: dateShimmer 5s ease-in-out infinite;
     pointer-events: none;
 }
 
@@ -140,14 +104,13 @@
 
 /* --- Icon Styling --- */
 .tm-date-icon-footer {
-    width: 1.3em;
-    height: 1.3em;
+    width: clamp(1.2em, 2.5vmin, 1.5em);
+    height: clamp(1.2em, 2.5vmin, 1.5em);
     color: #60a5fa;
     opacity: 0.9;
-    transition: all 0.3s ease;
-    filter: drop-shadow(0 0 8px rgba(96, 165, 250, 0.4));
+    /* Reduced drop shadow */
+    filter: drop-shadow(0 0 clamp(4px, 1vmin, 8px) rgba(96, 165, 250, 0.3));
     
-    /* Icon entrance animation */
     animation: iconBounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
     animation-delay: 0.4s;
     opacity: 0;
@@ -159,7 +122,7 @@
         transform: scale(0) rotate(-180deg);
     }
     60% {
-        transform: scale(1.2) rotate(10deg);
+        transform: scale(1.1) rotate(10deg);
     }
     100% {
         opacity: 0.9;
@@ -167,23 +130,14 @@
     }
 }
 
-.tm-date-pill-footer:hover .tm-date-icon-footer {
-    transform: scale(1.15) rotate(-8deg);
-    color: #7dd3fc;
-    opacity: 1;
-    filter: drop-shadow(0 0 12px rgba(125, 211, 252, 0.6));
-}
-
 /* --- Date Label --- */
 .tm-date-label-footer {
     color: #3b82f6;
-    font-size: 0.75em;
+    font-size: clamp(0.65em, 1.2vmin, 0.8em);
     font-weight: 900;
-    letter-spacing: 2.5px;
+    letter-spacing: clamp(1px, 0.3vmin, 2px);
     opacity: 0.85;
-    transition: all 0.3s ease;
     
-    /* Label fade-in animation */
     animation: labelFadeIn 0.5s ease forwards;
     animation-delay: 0.5s;
     opacity: 0;
@@ -192,7 +146,7 @@
 @keyframes labelFadeIn {
     0% {
         opacity: 0;
-        transform: translateX(-10px);
+        transform: translateX(-5px);
     }
     100% {
         opacity: 0.85;
@@ -200,31 +154,24 @@
     }
 }
 
-.tm-date-pill-footer:hover .tm-date-label-footer {
-    color: #00f5ff;
-    opacity: 1;
-    text-shadow: 0 0 10px rgba(0, 245, 255, 0.5);
-}
-
 /* --- Typography --- */
 .tm-date-text-footer {
-    text-shadow: 0 2px 4px rgba(0,0,0,0.4);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
     font-variant-numeric: tabular-nums;
     color: #ffffff;
     font-weight: 900;
-    letter-spacing: 1.8px;
+    letter-spacing: clamp(1px, 0.2vmin, 2px);
     
-    /* Text slide-in animation */
     animation: textSlideIn 0.6s ease forwards;
     animation-delay: 0.6s;
     opacity: 0;
-    transform: translateX(-15px);
+    transform: translateX(-10px);
 }
 
 @keyframes textSlideIn {
     0% {
         opacity: 0;
-        transform: translateX(-15px);
+        transform: translateX(-10px);
     }
     100% {
         opacity: 1;
@@ -234,18 +181,16 @@
 
 /* --- Divider Line --- */
 .tm-date-divider-footer {
-    width: 2px;
-    height: 60%;
+    width: clamp(1px, 0.2vmin, 2px);
+    height: 50%;
     background: linear-gradient(to bottom, 
         transparent, 
-        rgba(59, 130, 246, 0.6), 
+        rgba(59, 130, 246, 0.5), 
         transparent
     );
     border-radius: 2px;
-    opacity: 0.5;
-    transition: all 0.3s ease;
+    opacity: 0.4;
     
-    /* Divider grow animation */
     animation: dividerGrow 0.5s ease forwards;
     animation-delay: 0.7s;
     height: 0;
@@ -257,107 +202,119 @@
         opacity: 0;
     }
     100% {
-        height: 60%;
-        opacity: 0.5;
+        height: 50%;
+        opacity: 0.4;
     }
 }
 
-.tm-date-pill-footer:hover .tm-date-divider-footer {
-    height: 75%;
-    opacity: 1;
-    background: linear-gradient(to bottom, 
-        transparent, 
-        #00f5ff, 
-        transparent
-    );
-    box-shadow: 0 0 8px rgba(0, 245, 255, 0.5);
-}
-
-/* --- Glow Effect --- */
+/* --- Glow Effect (Subtle) --- */
 .tm-date-glow-footer {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 120%;
-    height: 120%;
+    width: 110%;
+    height: 110%;
     background: radial-gradient(circle, 
-        rgba(59, 130, 246, 0.15) 0%, 
+        rgba(59, 130, 246, 0.1) 0%, 
         transparent 70%
     );
     opacity: 0;
-    transition: opacity 0.4s ease;
     pointer-events: none;
     z-index: -1;
     
-    /* Glow pulse animation */
-    animation: glowPulse 3s ease-in-out infinite;
+    animation: glowPulse 4s ease-in-out infinite;
     animation-delay: 1s;
 }
 
 @keyframes glowPulse {
     0%, 100% {
         opacity: 0;
-        transform: translate(-50%, -50%) scale(0.8);
+        transform: translate(-50%, -50%) scale(0.9);
     }
     50% {
         opacity: 0.3;
-        transform: translate(-50%, -50%) scale(1.1);
+        transform: translate(-50%, -50%) scale(1.05);
     }
 }
 
-.tm-date-pill-footer:hover .tm-date-glow-footer {
-    opacity: 1;
+/* --- Responsive Adjustments for TV --- */
+
+/* Ultra HD 4K TV */
+@media (min-width: 3840px) {
+    .tm-date-pill-footer {
+        padding: 1.2rem 3rem;
+        font-size: 1.6rem;
+    }
 }
 
-/* --- Hover State --- */
-.tm-date-pill-footer:hover {
-    background: linear-gradient(135deg, 
-        rgba(10, 15, 30, 0.85) 0%, 
-        rgba(15, 23, 42, 0.75) 50%,
-        rgba(10, 15, 30, 0.85) 100%
-    );
-    border-color: rgba(59, 130, 246, 0.35);
-    color: #ffffff;
-    box-shadow: 
-        0 12px 40px rgba(0, 0, 0, 0.5),
-        0 4px 12px rgba(59, 130, 246, 0.25),
-        inset 0 1px 0 rgba(255, 255, 255, 0.12),
-        inset 0 -1px 0 rgba(0, 0, 0, 0.3);
-    transform: translateY(-2px);
+/* Large Desktop / Small TV */
+@media (min-width: 1920px) and (max-width: 3839px) {
+    .tm-date-pill-footer {
+        padding: 1rem 2.5rem;
+        font-size: 1.4rem;
+    }
 }
 
-/* --- Responsive Adjustments --- */
-@media (max-width: 768px) {
+/* Standard Desktop */
+@media (min-width: 1440px) and (max-width: 1919px) {
+    .tm-date-pill-footer {
+        padding: 0.9rem 2.2rem;
+        font-size: 1.2rem;
+    }
+}
+
+/* Laptop */
+@media (min-width: 1024px) and (max-width: 1439px) {
+    .tm-date-pill-footer {
+        padding: 0.8rem 2rem;
+        font-size: 1.1rem;
+    }
+}
+
+/* Tablet */
+@media (min-width: 768px) and (max-width: 1023px) {
+    .tm-footer-footer {
+        padding: 1rem 0;
+    }
+    
     .tm-date-pill-footer {
         gap: 0.6rem;
+        padding: 0.7rem 1.8rem;
+        font-size: 1rem;
+    }
+}
+
+/* Mobile */
+@media (max-width: 767px) {
+    .tm-footer-footer {
+        padding: 0.8rem 0;
+    }
+    
+    .tm-date-pill-footer {
+        gap: 0.5rem;
         padding: 0.6rem 1.2rem;
-        letter-spacing: 1.5px;
+        font-size: 0.9rem;
     }
     
     .tm-date-label-footer {
-        display: none; /* Hide label on smaller screens */
-    }
-}
-
-@media (max-width: 480px) {
-    .tm-date-pill-footer {
-        gap: 0.5rem;
-        padding: 0.55rem 1rem;
-        letter-spacing: 1.2px;
+        display: none;
     }
     
     .tm-date-divider-footer { 
         display: none; 
     }
-    
-    .tm-date-icon-footer {
-        width: 1.1em;
-        height: 1.1em;
+}
+
+/* High DPI / Retina displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .tm-date-pill-footer {
+        backdrop-filter: blur(clamp(15px, 3vmin, 25px)) saturate(180%);
+        -webkit-backdrop-filter: blur(clamp(15px, 3vmin, 25px)) saturate(180%);
     }
 }
 
-/* --- Animation for Date Update --- */
+/* Animation for Date Update */
 @keyframes datePulse {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.7; }
@@ -365,22 +322,4 @@
 
 .tm-date-text-footer.updating {
     animation: datePulse 0.6s ease-in-out;
-}
-
-/* --- Accessibility & Motion Preferences --- */
-@media (prefers-reduced-motion: reduce) {
-    .tm-date-pill-footer,
-    .tm-date-icon-footer,
-    .tm-date-label-footer,
-    .tm-date-text-footer,
-    .tm-date-divider-footer,
-    .tm-date-glow-footer,
-    .tm-date-pill-footer::after {
-        animation: none !important;
-        opacity: 1;
-        transform: none;
-    }
-    .tm-date-pill-footer { 
-        transition: none; 
-    }
 }

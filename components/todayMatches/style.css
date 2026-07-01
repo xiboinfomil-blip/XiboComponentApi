@@ -12,7 +12,6 @@
     height: 100%; 
     display: flex; 
     overflow: hidden; 
-    /* Ensure container doesn't exceed viewport on mobile */
     max-width: 100vw;
     max-height: 100vh;
 }
@@ -23,11 +22,13 @@
     width: 100%; 
     height: 100%; 
     flex: 1;
-    /* Responsive border radius: smaller on mobile */
-    border-radius: clamp(1rem, 3vw, 2rem); 
+    border-radius: clamp(1.5rem, 4vw, 3rem); 
     overflow: hidden;
     background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #0f172a 100%);
-    box-shadow: 0 40px 100px rgba(0,0,0,.7), 0 0 0 1px rgba(255,255,255,.1), inset 0 1px 0 rgba(255,255,255,.15);
+    box-shadow: 
+        0 clamp(40px, 8vw, 120px) rgba(0,0,0,.8), 
+        0 0 0 2px rgba(255,255,255,.15), 
+        inset 0 2px 0 rgba(255,255,255,.2);
     transition: all .6s cubic-bezier(.4,0,.2,1);
     display: flex; flex-direction: column;
 }
@@ -36,27 +37,27 @@
 /* ---------- Background Effects ---------- */
 .tm-bg-effects-main { position:absolute; inset:0; overflow:hidden; z-index:1; pointer-events: none;}
 .tm-gradient-orb-main {
-    position:absolute; border-radius:50%; filter:blur(100px); opacity:.35;
+    position:absolute; border-radius:50%; filter:blur(clamp(80px, 15vw, 150px)); opacity:.4;
     pointer-events:none; mix-blend-mode:screen;
 }
-/* Responsive Orbs: Scale down on smaller screens */
+/* Responsive Orbs: Enhanced for TV */
 .tm-orb-1-main { 
-    width: clamp(200px, 30vw, 350px); 
-    height: clamp(200px, 30vw, 350px); 
+    width: clamp(250px, 35vw, 450px); 
+    height: clamp(250px, 35vw, 450px); 
     background:radial-gradient(circle,#6366f1,#8b5cf6 50%,transparent 70%); 
     top:-10%; right:-10%; 
     animation:orb1 18s ease-in-out infinite; 
 }
 .tm-orb-2-main { 
-    width: clamp(180px, 25vw, 300px); 
-    height: clamp(180px, 25vw, 300px); 
+    width: clamp(220px, 30vw, 400px); 
+    height: clamp(220px, 30vw, 400px); 
     background:radial-gradient(circle,#ec4899,#f43f5e 50%,transparent 70%); 
     bottom:-10%; left:-10%; 
     animation:orb2 22s ease-in-out infinite reverse; 
 }
 .tm-orb-3-main { 
-    width: clamp(150px, 20vw, 260px); 
-    height: clamp(150px, 20vw, 260px); 
+    width: clamp(200px, 25vw, 350px); 
+    height: clamp(200px, 25vw, 350px); 
     background:radial-gradient(circle,#06b6d4,#3b82f6 50%,transparent 70%); 
     top:50%; left:50%; 
     transform:translate(-50%,-50%); 
@@ -64,12 +65,12 @@
 }
 .tm-mesh-gradient-main {
     position:absolute; inset:0;
-    background: radial-gradient(circle at 20% 80%, rgba(120,119,198,.2) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(255,119,198,.2) 0%, transparent 50%);
+    background: radial-gradient(circle at 20% 80%, rgba(120,119,198,.25) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255,119,198,.25) 0%, transparent 50%);
     animation:meshRot 40s linear infinite;
 }
 .tm-noise-overlay-main {
-    position:absolute; inset:0; opacity:.03; pointer-events:none;
+    position:absolute; inset:0; opacity:.04; pointer-events:none;
     background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 @keyframes orb1 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(30px,-30px) scale(1.2)} }
@@ -78,31 +79,31 @@
 @keyframes meshRot { to { transform:rotate(360deg); } }
 
 .tm-glass-overlay-main {
-    position:absolute; inset:0; background:rgba(10,14,39,.5);
-    backdrop-filter:blur(60px) saturate(200%); -webkit-backdrop-filter:blur(60px) saturate(200%);
+    position:absolute; inset:0; background:rgba(10,14,39,.55);
+    backdrop-filter:blur(clamp(60px, 12vw, 100px)) saturate(clamp(200%, 35vw, 250%)); 
+    -webkit-backdrop-filter:blur(clamp(60px, 12vw, 100px)) saturate(clamp(200%, 35vw, 250%));
     z-index:2; pointer-events: none;
 }
 
 /* ---------- Content Core ---------- */
 .tm-card-content-main {
     position:relative; z-index:3;
-    /* Responsive Padding: Less on mobile, more on desktop */
-    padding: clamp(1rem, 4vh, 4rem) clamp(1rem, 5vw, 5rem); 
+    padding: clamp(1.5rem, 5vh, 5rem) clamp(1.5rem, 6vw, 6rem); 
     display:flex; flex-direction:column; 
     height:100%; width:100%;
     justify-content: space-between; 
-    gap: clamp(1rem, 3vh, 2rem); 
+    gap: clamp(1.5rem, 4vh, 3rem); 
     overflow: hidden;
 }
 
 /* Empty State */
 .tm-empty-state-main {
     text-align:center; 
-    padding: clamp(1rem, 3vw, 2rem); 
-    background:rgba(15,23,42,.7); 
-    backdrop-filter:blur(60px);
-    border-radius: clamp(1rem, 2vw, 2rem); 
-    border:1px solid rgba(255,255,255,.1);
+    padding: clamp(1.5rem, 4vw, 3rem); 
+    background:rgba(15,23,42,.75); 
+    backdrop-filter:blur(clamp(60px, 12vw, 100px));
+    border-radius: clamp(1.5rem, 3vw, 3rem); 
+    border:2px solid rgba(255,255,255,.15);
     width:100%; 
     height: 100%; 
     display: flex; 
@@ -111,75 +112,70 @@
     align-items: center;
 }
 .tm-empty-icon-main { 
-    margin-bottom:0.75rem; 
+    margin-bottom:1rem; 
     color:#64748b; 
-    opacity:.5; 
-    /* Responsive Icon Size */
-    font-size: clamp(2rem, 5vw, 3rem);
+    opacity:.6; 
+    font-size: clamp(2.5rem, 6vw, 4rem);
 }
 .tm-empty-state-main h3 { 
     font-family:'Space Grotesk',sans-serif; 
-    font-size:clamp(1.15rem, 3vw, 1.6rem); 
+    font-size:clamp(1.4rem, 3.5vw, 2rem); 
     font-weight:800; 
     color:#f1f5f9; 
-    margin-bottom:.35rem; 
+    margin-bottom:.5rem; 
 }
 .tm-empty-state-main p  { 
-    font-size:clamp(0.85rem, 2vw, 1.1rem); 
+    font-size:clamp(1rem, 2.5vw, 1.3rem); 
     color:#94a3b8; 
     font-weight:500; 
-    line-height:1.4; 
+    line-height:1.5; 
 }
 
 /* ---------- Mobile Specific Adjustments ---------- */
 @media (max-width: 768px) {
     .tm-card-worldcup-main {
-        /* On mobile, remove large shadows for better performance */
-        box-shadow: 0 10px 30px rgba(0,0,0,.5);
+        box-shadow: 0 15px 40px rgba(0,0,0,.6);
     }
     
     .tm-bg-effects-main {
-        /* Reduce blur intensity on mobile for performance */
         filter: blur(0.5px);
     }
     
     .tm-gradient-orb-main {
-        opacity: 0.2; /* Dim background effects on mobile */
+        opacity: 0.25;
     }
 }
 
 @media (max-width: 480px) {
     .tm-card-content-main {
-        /* Tighter spacing on very small screens */
         gap: 1rem;
         padding: 1rem;
     }
     
-    /* Ensure partials don't overflow */
     .tm-card-content-main > * {
         width: 100%;
-        min-width: 0; /* Prevent flex items from overflowing */
+        min-width: 0;
     }
 }
 
 /* Landscape Mode Optimization */
 @media (max-height: 500px) and (orientation: landscape) {
     .tm-card-content-main {
-        padding: 0.5rem 1rem;
-        gap: 0.5rem;
+        padding: 0.8rem 1.5rem;
+        gap: 0.8rem;
     }
     
     .tm-empty-state-main h3 {
-        font-size: 1.2rem;
+        font-size: 1.3rem;
     }
     
     .tm-empty-state-main p {
-        font-size: 0.9rem;
+        font-size: 1rem;
     }
 }
 
 /* =========================================
-   LOADING STATE STYLES
+   LOADING STATE STYLES - TV OPTIMIZED
    ========================================= */
 
 .tm-card-worldcup-main.is-loading {
@@ -199,10 +195,10 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 1.5rem;
+    gap: clamp(1.5rem, 3vw, 2.5rem);
     z-index: 100;
-    background: rgba(10, 15, 30, 0.8);
-    backdrop-filter: blur(20px);
+    background: rgba(10, 15, 30, 0.85);
+    backdrop-filter: blur(clamp(20px, 4vw, 40px));
     border-radius: inherit;
     animation: fadeIn 0.3s ease;
 }
@@ -223,8 +219,8 @@
 
 .tm-loading-spinner-main {
     position: relative;
-    width: 80px;
-    height: 80px;
+    width: clamp(80px, 15vw, 120px);
+    height: clamp(80px, 15vw, 120px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -234,7 +230,7 @@
     position: absolute;
     inset: 0;
     border-radius: 50%;
-    border: 3px solid transparent;
+    border: clamp(3px, 0.6vw, 5px) solid transparent;
 }
 
 .tm-spinner-ring-main:nth-child(1) {
@@ -268,11 +264,11 @@
 }
 
 .tm-spinner-icon-main {
-    width: 40px;
-    height: 40px;
+    width: clamp(40px, 8vw, 60px);
+    height: clamp(40px, 8vw, 60px);
     color: #ffffff;
     animation: pulseIcon 1.5s ease-in-out infinite;
-    filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.5));
+    filter: drop-shadow(0 0 clamp(20px, 4vw, 40px) rgba(255, 255, 255, 0.6));
 }
 
 @keyframes pulseIcon {
@@ -281,19 +277,19 @@
         opacity: 1;
     }
     50% { 
-        transform: scale(1.1); 
-        opacity: 0.8;
+        transform: scale(1.15); 
+        opacity: 0.85;
     }
 }
 
 .tm-loading-text-main {
     font-family: 'Space Grotesk', sans-serif;
-    font-size: 1rem;
+    font-size: clamp(1rem, 2vw, 1.4rem);
     font-weight: 700;
     color: #e2e8f0;
-    letter-spacing: 2px;
+    letter-spacing: clamp(2px, 0.4vw, 3px);
     text-transform: uppercase;
-    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+    text-shadow: 0 3px clamp(10px, 2vw, 20px) rgba(0, 0, 0, 0.6);
     animation: textPulse 2s ease-in-out infinite;
 }
 
@@ -308,14 +304,16 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 1.5rem;
-    padding: 3rem;
+    gap: clamp(1.5rem, 3vw, 2.5rem);
+    padding: clamp(2rem, 4vw, 4rem);
     text-align: center;
 }
 
 .tm-error-icon-main {
     color: #ef4444;
     animation: shakeError 0.5s ease-in-out;
+    width: clamp(50px, 10vw, 80px);
+    height: clamp(50px, 10vw, 80px);
 }
 
 @keyframes shakeError {
@@ -326,7 +324,7 @@
 
 .tm-error-state-main h3 {
     font-family: 'Space Grotesk', sans-serif;
-    font-size: 1.5rem;
+    font-size: clamp(1.5rem, 3vw, 2.2rem);
     font-weight: 800;
     color: #f1f5f9;
     margin: 0;
@@ -334,31 +332,31 @@
 
 .tm-error-state-main p {
     font-family: 'Space Grotesk', sans-serif;
-    font-size: 1rem;
+    font-size: clamp(1rem, 2vw, 1.4rem);
     color: #94a3b8;
     margin: 0;
 }
 
 .tm-retry-btn-main {
     margin-top: 1rem;
-    padding: 0.75rem 2rem;
+    padding: clamp(0.75rem, 1.5vw, 1.2rem) clamp(2rem, 4vw, 3rem);
     background: linear-gradient(135deg, #3b82f6, #2563eb);
     border: none;
     border-radius: 999px;
     color: white;
     font-family: 'Space Grotesk', sans-serif;
     font-weight: 700;
-    font-size: 0.9rem;
+    font-size: clamp(0.9rem, 1.8vw, 1.2rem);
     letter-spacing: 1px;
     text-transform: uppercase;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+    box-shadow: 0 clamp(4px, 1vw, 8px) clamp(15px, 3vw, 25px) rgba(59, 130, 246, 0.5);
 }
 
 .tm-retry-btn-main:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6);
+    box-shadow: 0 clamp(6px, 1.2vw, 10px) clamp(20px, 4vw, 30px) rgba(59, 130, 246, 0.7);
 }
 
 .tm-retry-btn-main:active {
@@ -371,8 +369,8 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 1.5rem;
-    padding: 3rem;
+    gap: clamp(1.5rem, 3vw, 2.5rem);
+    padding: clamp(2rem, 4vw, 4rem);
     text-align: center;
 }
 
@@ -383,7 +381,7 @@
 
 .tm-empty-state-main h3 {
     font-family: 'Space Grotesk', sans-serif;
-    font-size: 1.5rem;
+    font-size: clamp(1.5rem, 3vw, 2.2rem);
     font-weight: 800;
     color: #f1f5f9;
     margin: 0;
@@ -391,7 +389,7 @@
 
 .tm-empty-state-main p {
     font-family: 'Space Grotesk', sans-serif;
-    font-size: 1rem;
+    font-size: clamp(1rem, 2vw, 1.4rem);
     color: #94a3b8;
     margin: 0;
 }
@@ -407,4 +405,72 @@
     opacity: 1;
     transform: scale(1);
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* =========================================
+   TV-SPECIFIC ENHANCEMENTS
+   ========================================= */
+
+/* Ultra HD 4K TV */
+@media (min-width: 3840px) {
+    .tm-card-worldcup-main {
+        border-radius: 3.5rem;
+        box-shadow: 
+            0 150px rgba(0,0,0,.9), 
+            0 0 0 3px rgba(255,255,255,.2), 
+            inset 0 3px 0 rgba(255,255,255,.25);
+    }
+    
+    .tm-card-content-main {
+        padding: 6rem 7rem;
+        gap: 4rem;
+    }
+}
+
+/* Large Desktop / Small TV */
+@media (min-width: 1920px) and (max-width: 3839px) {
+    .tm-card-worldcup-main {
+        border-radius: 2.5rem;
+        box-shadow: 
+            0 100px rgba(0,0,0,.85), 
+            0 0 0 2px rgba(255,255,255,.18), 
+            inset 0 2px 0 rgba(255,255,255,.22);
+    }
+    
+    .tm-card-content-main {
+        padding: 4.5rem 5.5rem;
+        gap: 3rem;
+    }
+}
+
+/* Standard Desktop */
+@media (min-width: 1440px) and (max-width: 1919px) {
+    .tm-card-worldcup-main {
+        border-radius: 2rem;
+    }
+    
+    .tm-card-content-main {
+        padding: 3.5rem 4.5rem;
+        gap: 2.5rem;
+    }
+}
+
+/* High DPI / Retina displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .tm-glass-overlay-main {
+        backdrop-filter:blur(clamp(80px, 15vw, 120px)) saturate(clamp(220%, 38vw, 270%)); 
+        -webkit-backdrop-filter:blur(clamp(80px, 15vw, 120px)) saturate(clamp(220%, 38vw, 270%));
+    }
+    
+    .tm-gradient-orb-main {
+        filter:blur(clamp(100px, 18vw, 180px));
+    }
+}
+
+/* Container optimization for TV display */
+@media screen and (min-width: 1200px) {
+    .tm-wrapper-main {
+        max-width: 100%;
+        margin: 0 auto;
+    }
 }

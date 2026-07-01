@@ -1,6 +1,6 @@
 /* =========================================
-   FIFA CINEMATIC MATCHUP SYSTEM - ENHANCED & STABILIZED
-   Display-Only Optimized Version
+   FIFA CINEMATIC MATCHUP - OVERFLOW-SAFE & MAX RESPONSIVE
+   TV Broadcast Optimized
    ========================================= */
 
 /* --- Grid Architecture --- */
@@ -9,15 +9,17 @@
     display: grid;
     grid-template-columns: 1fr auto 1fr;
     align-items: center;
-    gap: clamp(2rem, 8vw, 6rem);
-    min-height: 0;
+    /* Use vmin for gap to prevent overflow on both axes */
+    gap: clamp(1.5rem, 6vmin, 5rem);
     width: 100%;
-    padding: 0 clamp(1.5rem, 4vw, 3rem);
+    height: 100%;
+    max-height: 100%;
+    padding: 0 clamp(1rem, 4vmin, 4rem);
     font-family: 'Space Grotesk', sans-serif;
     user-select: none;
     -webkit-user-select: none;
-    will-change: transform;
     contain: layout style paint;
+    overflow: hidden; /* CRITICAL: Prevents any child from breaking container */
 }
 
 /* --- Team Column --- */
@@ -25,17 +27,17 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: clamp(1rem, 3vh, 2rem);
+    justify-content: center;
+    gap: clamp(0.5rem, 2vmin, 1.5rem);
     position: relative;
     min-width: 0;
+    height: 100%;
+    max-height: 100%;
     opacity: 0;
-    
-    /* CRITICAL FIX: Prevent collapse */
-    min-height: clamp(250px, 40vh, 400px); 
-    justify-content: center;
+    overflow: hidden; /* Contains goal events */
 }
 
-/* Team A entrance + Ambient Float */
+/* Team Entrances & Floats */
 .tm-team-a-matchup {
     animation: 
         teamSlideInLeft 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
@@ -53,7 +55,6 @@
     50% { transform: translateY(-8px); }
 }
 
-/* Team B entrance + Ambient Float (Reverse Phase) */
 .tm-team-b-matchup {
     animation: 
         teamSlideInRight 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
@@ -73,47 +74,47 @@
 
 /* Crown (Winner Indicator) */
 .tm-crown-matchup {
-    width: clamp(36px, 7vw, 64px);
-    height: clamp(36px, 7vw, 64px);
+    width: clamp(2rem, 6vmin, 5rem);
+    height: clamp(2rem, 6vmin, 5rem);
     color: #fbbf24;
     opacity: 0;
     transform: translateY(8px) scale(0.6);
     transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-    filter: drop-shadow(0 0 20px rgba(251, 191, 36, 0.8));
+    filter: drop-shadow(0 0 clamp(10px, 3vmin, 25px) rgba(251, 191, 36, 0.9));
+    flex-shrink: 0;
 }
 .tm-crown-matchup svg { width: 100%; height: 100%; display: block; }
 
-/* Flag Container - Premium Glass Panel */
+/* Flag Container - Responsive via vmin to prevent vertical overflow */
 .tm-flag-wrapper-matchup { 
     position: relative; 
     display: flex; 
     justify-content: center; 
     width: 100%; 
+    flex-shrink: 1;
 }
 
 .tm-flag-container-matchup {
     position: relative;
-    width: clamp(120px, 28vw, 240px);
+    /* KEY FIX: Use vmin so flag scales with the smallest viewport dimension */
+    width: clamp(80px, 22vmin, 280px);
     aspect-ratio: 3/2;
-    border-radius: 1.25rem;
+    border-radius: clamp(0.5rem, 1.5vmin, 1.25rem);
     overflow: hidden;
-    /* Enhanced Glassmorphism */
-    background: rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(40px) saturate(180%);
-    -webkit-backdrop-filter: blur(40px) saturate(180%);
-    border: 3px solid rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(clamp(20px, 5vmin, 60px)) saturate(clamp(150%, 25vmin, 220%));
+    -webkit-backdrop-filter: blur(clamp(20px, 5vmin, 60px)) saturate(clamp(150%, 25vmin, 220%));
+    border: clamp(1px, 0.3vmin, 3px) solid rgba(255, 255, 255, 0.35);
     box-shadow: 
-        0 25px 50px rgba(0, 0, 0, 0.6),
-        inset 0 0 20px rgba(255, 255, 255, 0.05);
+        0 clamp(10px, 4vmin, 50px) rgba(0, 0, 0, 0.7),
+        inset 0 0 clamp(10px, 3vmin, 25px) rgba(255, 255, 255, 0.08);
     
     animation: 
         flagPopIn 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
         borderPulse 4s ease-in-out infinite 1s;
     opacity: 0;
     transform: scale(0.8);
-    
-    /* CRITICAL FIX: Prevent collapse if image fails */
-    min-height: 80px;
+    flex-shrink: 1;
 }
 
 @keyframes flagPopIn {
@@ -123,8 +124,14 @@
 }
 
 @keyframes borderPulse {
-    0%, 100% { border-color: rgba(255, 255, 255, 0.15); box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6); }
-    50% { border-color: rgba(255, 255, 255, 0.4); box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6), 0 0 30px rgba(255,255,255,0.15); }
+    0%, 100% { 
+        border-color: rgba(255, 255, 255, 0.2); 
+        box-shadow: 0 clamp(10px, 4vmin, 50px) rgba(0, 0, 0, 0.7); 
+    }
+    50% { 
+        border-color: rgba(255, 255, 255, 0.5); 
+        box-shadow: 0 clamp(10px, 4vmin, 50px) rgba(0, 0, 0, 0.7), 0 0 clamp(15px, 4vmin, 40px) rgba(255,255,255,0.2); 
+    }
 }
 
 /* Continuous Shimmer Effect */
@@ -132,7 +139,7 @@
     position: absolute;
     top: 0; left: -100%;
     width: 100%; height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
     z-index: 2;
     animation: shineLoop 5s ease-in-out infinite;
     animation-delay: 1.5s;
@@ -157,37 +164,36 @@
     width: 100%; height: 100%;
     display: flex !important;
     align-items: center; justify-content: center;
-    font-size: clamp(2.5rem, 6vw, 4rem);
+    font-size: clamp(1.5rem, 6vmin, 4rem);
     font-weight: 900;
     color: #a78bfa;
-    background: linear-gradient(135deg, rgba(99,102,241,0.4), rgba(168,85,247,0.4));
+    background: linear-gradient(135deg, rgba(99,102,241,0.5), rgba(168,85,247,0.5));
 }
 
-/* CRITICAL FIX: Fallback safety if text is missing */
-.tm-flag-fallback-matchup:empty::before {
-    content: '?';
-}
+.tm-flag-fallback-matchup:empty::before { content: '?'; }
 
 /* Team Info Grouping */
 .tm-team-info-matchup {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.5rem;
+    gap: clamp(0.2rem, 0.8vmin, 0.6rem);
     width: 100%;
+    flex-shrink: 0;
 }
 
 .tm-team-name-matchup {
-    font-size: clamp(1.4rem, 4.5vw, 2.8rem);
+    font-size: clamp(0.9rem, 4vmin, 3rem);
     font-weight: 700;
     color: #f1f5f9;
     text-align: center;
     line-height: 1.1;
-    text-shadow: 0 2px 20px rgba(0, 0, 0, 0.6);
+    text-shadow: 0 2px clamp(10px, 3vmin, 25px) rgba(0, 0, 0, 0.7);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
     width: 100%;
+    max-width: 100%;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     
@@ -197,7 +203,6 @@
     transform: translateY(15px);
 }
 
-/* CRITICAL FIX: Name placeholder if empty */
 .tm-team-name-matchup:empty::before {
     content: attr(data-placeholder, 'Équipe');
     opacity: 0.5;
@@ -208,23 +213,23 @@
     100% { opacity: 1; transform: translateY(0); }
 }
 
+/* Score - Uses vmin to guarantee no vertical overflow */
 .tm-team-score-matchup {
-    font-size: clamp(4rem, 12vw, 9rem);
+    font-size: clamp(3rem, 12vmin, 11rem);
     font-weight: 900;
     color: #fff;
     line-height: 0.9;
     font-variant-numeric: tabular-nums;
-    text-shadow: 0 4px 30px rgba(0, 0, 0, 0.7);
+    text-shadow: 0 3px clamp(15px, 4vmin, 40px) rgba(0, 0, 0, 0.8);
     letter-spacing: -2px;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     
-    /* FIX: Start visible, only animate the pop */
     opacity: 1 !important; 
     transform: scale(1) !important;
     visibility: visible !important;
+    flex-shrink: 1;
     
-    /* Apply animation only when class is added via JS */
     transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), color 0.3s ease;
 }
 
@@ -235,8 +240,8 @@
 }
 
 @keyframes scoreGlow {
-    0%, 100% { text-shadow: 0 4px 30px rgba(0, 0, 0, 0.7), 0 0 60px rgba(255, 255, 255, 0.1); }
-    50% { text-shadow: 0 4px 30px rgba(0, 0, 0, 0.7), 0 0 90px rgba(255, 255, 255, 0.3); }
+    0%, 100% { text-shadow: 0 3px clamp(15px, 4vmin, 40px) rgba(0, 0, 0, 0.8), 0 0 clamp(30px, 8vmin, 80px) rgba(255, 255, 255, 0.15); }
+    50% { text-shadow: 0 3px clamp(15px, 4vmin, 40px) rgba(0, 0, 0, 0.8), 0 0 clamp(50px, 12vmin, 120px) rgba(255, 255, 255, 0.35); }
 }
 
 /* Result Badge */
@@ -245,9 +250,9 @@
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    padding: 0.4rem 1rem;
+    padding: clamp(0.2rem, 0.6vmin, 0.5rem) clamp(0.6rem, 1.5vmin, 1.2rem);
     border-radius: 2rem;
-    font-size: 0.8rem;
+    font-size: clamp(0.5rem, 1.2vmin, 0.9rem);
     font-weight: 800;
     letter-spacing: 1px;
     text-transform: uppercase;
@@ -255,6 +260,7 @@
     opacity: 0;
     transform: translateY(6px);
     transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    flex-shrink: 0;
 }
 
 /* --- Center Hub --- */
@@ -263,10 +269,12 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: clamp(1.5rem, 3.5vh, 2.5rem);
+    gap: clamp(1rem, 3vmin, 2.5rem);
     flex-shrink: 0;
-    min-width: clamp(120px, 22vw, 200px);
+    min-width: clamp(60px, 18vmin, 200px);
     position: relative;
+    height: 100%;
+    max-height: 100%;
     
     animation: centerFadeIn 0.6s ease forwards;
     animation-delay: 0.5s;
@@ -278,47 +286,46 @@
     100% { opacity: 1; transform: scale(1); }
 }
 
-/* VS Badge - 3D Floating Element */
+/* VS Badge */
 .tm-vs-badge-matchup {
-    width: clamp(70px, 15vw, 130px);
-    height: clamp(70px, 15vw, 130px);
+    width: clamp(3rem, 12vmin, 10rem);
+    height: clamp(3rem, 12vmin, 10rem);
     border-radius: 50%;
-    background: linear-gradient(145deg, rgba(255,255,255,0.12), rgba(255,255,255,0.03));
-    backdrop-filter: blur(30px) saturate(200%);
-    -webkit-backdrop-filter: blur(30px) saturate(200%);
+    background: linear-gradient(145deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05));
+    backdrop-filter: blur(clamp(15px, 4vmin, 40px)) saturate(clamp(150%, 25vmin, 220%));
+    -webkit-backdrop-filter: blur(clamp(15px, 4vmin, 40px)) saturate(clamp(150%, 25vmin, 220%));
     
-    /* CRITICAL FIX: Force visibility */
     display: flex !important; 
     visibility: visible !important;
     opacity: 1 !important;
     
     align-items: center;
     justify-content: center;
-    border: 3px solid rgba(255, 255, 255, 0.25);
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+    border: clamp(1px, 0.3vmin, 3px) solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 clamp(10px, 4vmin, 50px) rgba(0, 0, 0, 0.7);
     position: relative;
     z-index: 10;
+    flex-shrink: 1;
     
     animation: 
         vsBadgeEntrance 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
         vsFloat 6s ease-in-out infinite 1s;
 }
 
-/* Heartbeat Glow Pseudo-element */
 .tm-vs-badge-matchup::after {
     content: '';
     position: absolute;
-    inset: -8px;
+    inset: -8%;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(59, 130, 246, 0.3), transparent 70%);
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.4), transparent 70%);
     z-index: -1;
     opacity: 0;
     animation: heartbeatGlow 3s ease-in-out infinite;
 }
 
 @keyframes heartbeatGlow {
-    0%, 100% { opacity: 0.3; transform: scale(1); }
-    50% { opacity: 0.7; transform: scale(1.2); }
+    0%, 100% { opacity: 0.4; transform: scale(1); }
+    50% { opacity: 0.8; transform: scale(1.25); }
 }
 
 @keyframes vsBadgeEntrance {
@@ -337,20 +344,20 @@
 .tm-vs-energy-right-matchup {
     position: absolute;
     width: 40%;
-    height: 2px;
+    height: clamp(1px, 0.3vmin, 3px);
     top: 50%;
     opacity: 0;
 }
 
 .tm-vs-energy-left-matchup {
-    left: -20px;
+    left: -20%;
     background: linear-gradient(90deg, transparent, #3b82f6);
     animation: energyFlow 2s linear infinite;
     animation-delay: 1s;
 }
 
 .tm-vs-energy-right-matchup {
-    right: -20px;
+    right: -20%;
     background: linear-gradient(270deg, transparent, #ef4444);
     animation: energyFlow 2s linear infinite;
     animation-delay: 1s;
@@ -358,16 +365,15 @@
 
 @keyframes energyFlow {
     0% { opacity: 0; transform: translateX(-10px); }
-    50% { opacity: 0.8; }
+    50% { opacity: 0.9; }
     100% { opacity: 0; transform: translateX(10px); }
 }
 
 .tm-vs-text-matchup { 
-    font-size: clamp(1.3rem, 4vw, 2.2rem);
+    font-size: clamp(0.8rem, 3.5vmin, 2.2rem);
     font-weight: 900; 
     color: #e2e8f0;
-    text-shadow: 0 2px 10px rgba(0,0,0,0.4);
-    transition: all 0.3s ease;
+    text-shadow: 0 2px clamp(5px, 1.5vmin, 15px) rgba(0,0,0,0.5);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
@@ -378,17 +384,17 @@
     position: absolute; 
     opacity: 0; 
     transform: scale(0.5); 
-    filter: drop-shadow(0 0 15px rgba(251, 191, 36, 0.8)); 
+    filter: drop-shadow(0 0 clamp(8px, 2vmin, 20px) rgba(251, 191, 36, 0.9)); 
     transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 /* Timer */
 .tm-timer-matchup {
     font-variant-numeric: tabular-nums;
-    font-size: clamp(1.5rem, 4.5vw, 2.5rem);
+    font-size: clamp(1rem, 4vmin, 2.5rem);
     font-weight: 700;
     color: #f8fafc;
-    text-shadow: 0 2px 20px rgba(0, 0, 0, 0.6);
+    text-shadow: 0 2px clamp(10px, 3vmin, 25px) rgba(0, 0, 0, 0.7);
     text-align: center;
     letter-spacing: 2px;
     -webkit-font-smoothing: antialiased;
@@ -397,11 +403,7 @@
     animation: timerFadeIn 0.5s ease forwards;
     animation-delay: 0.9s;
     opacity: 0;
-    transition: color 0.3s ease, text-shadow 0.3s ease;
-    
-    /* CRITICAL FIX: Prevent layout shift */
-    min-height: 2.5rem;
-    display: block;
+    flex-shrink: 0;
 }
 
 @keyframes timerFadeIn {
@@ -418,10 +420,10 @@
     align-items: center;
     justify-content: center;
     gap: 0.75rem;
-    padding: 0.8rem 1.5rem;
-    background: linear-gradient(135deg, rgba(148,163,184,0.2), rgba(203,213,225,0.1));
-    backdrop-filter: blur(25px) saturate(180%);
-    border: 2px solid rgba(226, 232, 240, 0.4);
+    padding: clamp(0.4rem, 1vmin, 0.9rem) clamp(0.8rem, 2vmin, 1.8rem);
+    background: linear-gradient(135deg, rgba(148,163,184,0.25), rgba(203,213,225,0.15));
+    backdrop-filter: blur(clamp(15px, 4vmin, 35px)) saturate(clamp(150%, 25vmin, 200%));
+    border: clamp(1px, 0.2vmin, 2px) solid rgba(226, 232, 240, 0.5);
     border-radius: 999px;
     opacity: 0;
     transform: translate(-50%, -50%) scaleX(0.7);
@@ -431,12 +433,12 @@
 
 .tm-draw-line-matchup { 
     flex: 1; 
-    height: 1px; 
-    background: linear-gradient(90deg, transparent, rgba(226,232,240,0.5), transparent); 
+    height: clamp(1px, 0.2vmin, 2px); 
+    background: linear-gradient(90deg, transparent, rgba(226,232,240,0.6), transparent); 
 }
 
 .tm-draw-text-matchup { 
-    font-size: clamp(0.85rem, 2vw, 1.1rem);
+    font-size: clamp(0.6rem, 2vmin, 1.2rem);
     font-weight: 800; 
     letter-spacing: 2px; 
     color: #e2e8f0; 
@@ -444,18 +446,19 @@
 }
 
 /* =========================================
-   NEW ADDITIONS: PENALTIES & GOAL SCORERS
+   PENALTIES & GOAL SCORERS - OVERFLOW SAFE
    ========================================= */
 
 /* --- Penalty Section --- */
 .tm-penalty-section-matchup {
-    display: none; /* Hidden by default */
+    display: none;
     flex-direction: row;
     align-items: center;
-    margin-top: 0.5rem;
+    margin-top: clamp(0.2rem, 0.8vmin, 0.6rem);
     opacity: 0;
     transform: translateY(8px);
     transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    flex-shrink: 0;
 }
 
 .tm-penalty-section-matchup.visible {
@@ -465,54 +468,57 @@
 }
 
 .tm-penalty-label-matchup {
-    font-size: clamp(0.55rem, 1.2vw, 0.7rem);
+    font-size: clamp(0.4rem, 1vmin, 0.75rem);
     font-weight: 700;
     letter-spacing: 1.5px;
     text-transform: uppercase;
     color: #94a3b8;
-    margin-bottom: 0.15rem;
+    margin-bottom: 0.1rem;
 }
 
 .tm-penalty-score-matchup {
-    font-size: clamp(1.2rem, 3vw, 1.8rem);
+    font-size: clamp(0.8rem, 2.5vmin, 1.8rem);
     font-weight: 900;
     color: #fbbf24;
     line-height: 1;
-    text-shadow: 0 0 15px rgba(251, 191, 36, 0.4);
+    text-shadow: 0 0 clamp(8px, 2vmin, 20px) rgba(251, 191, 36, 0.5);
 }
 
 .score-update-pop {
     transform: scale(1.3) !important;
     color: #fbbf24 !important;
-    text-shadow: 0 0 30px rgba(251, 191, 36, 0.8) !important;
+    text-shadow: 0 0 clamp(15px, 4vmin, 40px) rgba(251, 191, 36, 0.9) !important;
 }
 
-/* --- Goal Events List --- */
+/* --- Goal Events List - KEY OVERFLOW FIX --- */
 .tm-goal-events-matchup {
     display: flex;
     flex-direction: column;
-    gap: 0.3rem;
-    margin-top: 0.75rem;
+    gap: clamp(0.1rem, 0.4vmin, 0.3rem);
+    margin-top: clamp(0.3rem, 1vmin, 0.8rem);
     width: 100%;
-    max-height: clamp(80px, 15vh, 140px);
+    /* CRITICAL: Use remaining space instead of fixed height */
+    flex: 1;
+    min-height: 0; /* Allows flex child to shrink below content size */
+    max-height: 100%;
     overflow-y: auto;
-    scrollbar-width: none; /* Firefox */
+    scrollbar-width: none;
+    flex-shrink: 1;
 }
 
-.tm-goal-events-matchup::-webkit-scrollbar { 
-    display: none; /* Chrome/Safari */
-}
+.tm-goal-events-matchup::-webkit-scrollbar { display: none; }
 
 .tm-event-matchup {
     display: flex;
     align-items: center;
-    gap: 0.4rem;
-    padding: 0.2rem 0.6rem;
-    border-radius: 6px;
-    background: rgba(255, 255, 255, 0.04);
+    gap: clamp(0.2rem, 0.6vmin, 0.5rem);
+    padding: clamp(0.1rem, 0.4vmin, 0.25rem) clamp(0.3rem, 0.8vmin, 0.7rem);
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.06);
     backdrop-filter: blur(8px);
     animation: eventFadeIn 0.4s ease forwards;
     opacity: 0;
+    flex-shrink: 0;
 }
 
 @keyframes eventFadeIn {
@@ -521,16 +527,16 @@
 }
 
 .tm-event-time-matchup {
-    font-size: clamp(0.6rem, 1.3vw, 0.75rem);
+    font-size: clamp(0.4rem, 1.1vmin, 0.8rem);
     font-weight: 800;
     color: #60a5fa;
-    min-width: 2rem;
+    min-width: 1.8rem;
     text-align: center;
     font-variant-numeric: tabular-nums;
 }
 
 .tm-event-player-matchup {
-    font-size: clamp(0.6rem, 1.3vw, 0.75rem);
+    font-size: clamp(0.4rem, 1.1vmin, 0.8rem);
     font-weight: 600;
     color: #cbd5e1;
     white-space: nowrap;
@@ -538,7 +544,6 @@
     text-overflow: ellipsis;
 }
 
-/* Team B events align right */
 .tm-team-b-matchup .tm-event-matchup {
     flex-direction: row-reverse;
     text-align: right;
@@ -552,14 +557,14 @@
 
 /* --- State Adjustments --- */
 .tm-card-worldcup-main.is-winner .tm-team-matchup.is-winner { 
-    transform: translateY(-5px) scale(1.03); 
+    transform: translateY(-3px) scale(1.02); 
     z-index: 4; 
     animation: winnerFloat 4s ease-in-out infinite;
 }
 
 @keyframes winnerFloat {
-    0%, 100% { transform: translateY(-5px) scale(1.03); }
-    50% { transform: translateY(-10px) scale(1.03); }
+    0%, 100% { transform: translateY(-3px) scale(1.02); }
+    50% { transform: translateY(-8px) scale(1.02); }
 }
 
 .tm-card-worldcup-main.is-winner .tm-team-matchup.is-winner .tm-crown-matchup { 
@@ -574,23 +579,23 @@
 }
 
 .tm-card-worldcup-main.is-winner .tm-team-matchup.is-winner .tm-flag-container-matchup { 
-    border-color: rgba(251, 191, 36, 0.8); 
+    border-color: rgba(251, 191, 36, 0.9); 
     animation: winnerGlow 3s ease-in-out infinite; 
 }
 
 @keyframes winnerGlow { 
-    0%, 100% { box-shadow: 0 0 0 2px rgba(251,191,36,0.2), 0 0 40px rgba(251,191,36,0.3); } 
-    50% { box-shadow: 0 0 0 3px rgba(251,191,36,0.4), 0 0 60px rgba(251,191,36,0.5); } 
+    0%, 100% { box-shadow: 0 0 0 2px rgba(251,191,36,0.3), 0 0 clamp(20px, 6vmin, 60px) rgba(251,191,36,0.4); } 
+    50% { box-shadow: 0 0 0 3px rgba(251,191,36,0.5), 0 0 clamp(30px, 8vmin, 80px) rgba(251,191,36,0.6); } 
 }
 
 .tm-card-worldcup-main.is-winner .tm-team-matchup.is-winner .tm-team-name-matchup { color: #fde68a; }
 .tm-card-worldcup-main.is-winner .tm-team-matchup.is-winner .tm-team-score-matchup { 
     color: #fbbf24; 
-    text-shadow: 0 0 40px rgba(251, 191, 36, 0.4);
+    text-shadow: 0 0 clamp(20px, 6vmin, 60px) rgba(251, 191, 36, 0.5);
 }
 
 .tm-card-worldcup-main.is-winner .tm-team-matchup.is-loser { 
-    transform: translateY(3px) scale(0.96); 
+    transform: translateY(2px) scale(0.97); 
     opacity: 0.5; 
     filter: saturate(0.2) brightness(0.8); 
     animation: none;
@@ -599,53 +604,15 @@
 .tm-card-worldcup-main.is-winner .tm-draw-ribbon-matchup { opacity: 0; }
 .tm-card-worldcup-main.is-draw .tm-draw-ribbon-matchup { opacity: 1; transform: translate(-50%, -50%) scaleX(1); }
 
-/* Mobile Optimization */
-@media (max-width: 640px) {
-    .tm-matchup-matchup { 
-        gap: clamp(1rem, 4vw, 2rem); 
-        padding: 0 clamp(1rem, 3vw, 1.5rem);
-    }
+/* High DPI / Retina displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
     .tm-flag-container-matchup {
-        width: clamp(100px, 24vw, 160px);
-    }
-    .tm-team-score-matchup {
-        font-size: clamp(3rem, 10vw, 5rem);
-    }
-    .tm-vs-badge-matchup { 
-        width: clamp(55px, 12vw, 80px); 
-        height: clamp(55px, 12vw, 80px); 
-    }
-    .tm-vs-text-matchup {
-        font-size: clamp(1rem, 3vw, 1.4rem);
-    }
-    .tm-timer-matchup {
-        font-size: clamp(1.2rem, 3.5vw, 1.8rem);
+        backdrop-filter: blur(clamp(30px, 7vmin, 80px)) saturate(clamp(180%, 30vmin, 250%));
+        -webkit-backdrop-filter: blur(clamp(30px, 7vmin, 80px)) saturate(clamp(180%, 30vmin, 250%));
     }
     
-    /* Mobile adjustments for new elements */
-    .tm-goal-events-matchup { max-height: 80px; gap: 0.2rem; }
-    .tm-event-matchup { padding: 0.15rem 0.4rem; }
-    .tm-penalty-section-matchup { margin-top: 0.3rem; }
-}
-
-/* Tablet Optimization */
-@media (min-width: 641px) and (max-width: 1024px) {
-    .tm-matchup-matchup {
-        gap: clamp(1.5rem, 6vw, 4rem);
-    }
-    .tm-flag-container-matchup {
-        width: clamp(110px, 26vw, 200px);
-    }
-    .tm-team-score-matchup {
-        font-size: clamp(3.5rem, 11vw, 7rem);
-    }
-}
-
-/* Minimal Reduced Motion Support */
-@media (prefers-reduced-motion: reduce) {
-    * {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
+    .tm-vs-badge-matchup {
+        backdrop-filter: blur(clamp(25px, 6vmin, 70px)) saturate(clamp(180%, 30vmin, 250%));
+        -webkit-backdrop-filter: blur(clamp(25px, 6vmin, 70px)) saturate(clamp(180%, 30vmin, 250%));
     }
 }
