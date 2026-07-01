@@ -299,8 +299,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (config.dummy) params.append('dummy', 'true');
 
             const queryString = params.toString();
-            const apiUrl = queryString ? `/api/todayMatches?${queryString}` : '/api/todayMatches';
-            
+            const REAL_BACKEND_URL = 'https://xibo-component-api.vercel.app';
+        const apiUrl = queryString 
+    ? `${REAL_BACKEND_URL}/api/todayMatches?${queryString}` 
+    : `${REAL_BACKEND_URL}/api/todayMatches`;
             const response = await fetch(apiUrl);
             if (!response.ok) throw new Error(`Network response was not ok: ${response.status}`);
             
