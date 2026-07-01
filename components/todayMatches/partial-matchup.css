@@ -1,5 +1,5 @@
 /* =========================================
-   FIFA CINEMATIC MATCHUP - OVERFLOW-SAFE & MAX RESPONSIVE
+   FIFA CINEMATIC MATCHUP - OPTIMIZED SHADOWS
    TV Broadcast Optimized
    ========================================= */
 
@@ -9,7 +9,6 @@
     display: grid;
     grid-template-columns: 1fr auto 1fr;
     align-items: center;
-    /* Use vmin for gap to prevent overflow on both axes */
     gap: clamp(1.5rem, 6vmin, 5rem);
     width: 100%;
     height: 100%;
@@ -19,7 +18,7 @@
     user-select: none;
     -webkit-user-select: none;
     contain: layout style paint;
-    overflow: hidden; /* CRITICAL: Prevents any child from breaking container */
+    overflow: hidden;
 }
 
 /* --- Team Column --- */
@@ -34,7 +33,7 @@
     height: 100%;
     max-height: 100%;
     opacity: 0;
-    overflow: hidden; /* Contains goal events */
+    overflow: hidden;
 }
 
 /* Team Entrances & Floats */
@@ -72,7 +71,7 @@
     50% { transform: translateY(-8px); }
 }
 
-/* Crown (Winner Indicator) */
+/* Crown (Winner Indicator) - REDUCED SHADOW */
 .tm-crown-matchup {
     width: clamp(2rem, 6vmin, 5rem);
     height: clamp(2rem, 6vmin, 5rem);
@@ -80,12 +79,12 @@
     opacity: 0;
     transform: translateY(8px) scale(0.6);
     transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-    filter: drop-shadow(0 0 clamp(10px, 3vmin, 25px) rgba(251, 191, 36, 0.9));
+    filter: drop-shadow(0 0 clamp(5px, 1.5vmin, 12px) rgba(251, 191, 36, 0.7));
     flex-shrink: 0;
 }
 .tm-crown-matchup svg { width: 100%; height: 100%; display: block; }
 
-/* Flag Container - Responsive via vmin to prevent vertical overflow */
+/* Flag Container - REDUCED SHADOWS */
 .tm-flag-wrapper-matchup { 
     position: relative; 
     display: flex; 
@@ -96,7 +95,6 @@
 
 .tm-flag-container-matchup {
     position: relative;
-    /* KEY FIX: Use vmin so flag scales with the smallest viewport dimension */
     width: clamp(80px, 22vmin, 280px);
     aspect-ratio: 3/2;
     border-radius: clamp(0.5rem, 1.5vmin, 1.25rem);
@@ -105,9 +103,8 @@
     backdrop-filter: blur(clamp(20px, 5vmin, 60px)) saturate(clamp(150%, 25vmin, 220%));
     -webkit-backdrop-filter: blur(clamp(20px, 5vmin, 60px)) saturate(clamp(150%, 25vmin, 220%));
     border: clamp(1px, 0.3vmin, 3px) solid rgba(255, 255, 255, 0.35);
-    box-shadow: 
-        0 clamp(10px, 4vmin, 50px) rgba(0, 0, 0, 0.7),
-        inset 0 0 clamp(10px, 3vmin, 25px) rgba(255, 255, 255, 0.08);
+    /* SIMPLIFIED: Single shadow instead of multiple */
+    box-shadow: 0 clamp(5px, 2vmin, 20px) rgba(0, 0, 0, 0.4);
     
     animation: 
         flagPopIn 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
@@ -126,11 +123,11 @@
 @keyframes borderPulse {
     0%, 100% { 
         border-color: rgba(255, 255, 255, 0.2); 
-        box-shadow: 0 clamp(10px, 4vmin, 50px) rgba(0, 0, 0, 0.7); 
+        box-shadow: 0 clamp(5px, 2vmin, 20px) rgba(0, 0, 0, 0.4); 
     }
     50% { 
         border-color: rgba(255, 255, 255, 0.5); 
-        box-shadow: 0 clamp(10px, 4vmin, 50px) rgba(0, 0, 0, 0.7), 0 0 clamp(15px, 4vmin, 40px) rgba(255,255,255,0.2); 
+        box-shadow: 0 clamp(5px, 2vmin, 20px) rgba(0, 0, 0, 0.4), 0 0 clamp(8px, 2vmin, 15px) rgba(255,255,255,0.15); 
     }
 }
 
@@ -188,7 +185,8 @@
     color: #f1f5f9;
     text-align: center;
     line-height: 1.1;
-    text-shadow: 0 2px clamp(10px, 3vmin, 25px) rgba(0, 0, 0, 0.7);
+    /* REDUCED: Smaller text shadow */
+    text-shadow: 0 1px clamp(5px, 1.5vmin, 12px) rgba(0, 0, 0, 0.5);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -213,14 +211,15 @@
     100% { opacity: 1; transform: translateY(0); }
 }
 
-/* Score - Uses vmin to guarantee no vertical overflow */
+/* Score - REDUCED SHADOW */
 .tm-team-score-matchup {
     font-size: clamp(3rem, 12vmin, 11rem);
     font-weight: 900;
     color: #fff;
     line-height: 0.9;
     font-variant-numeric: tabular-nums;
-    text-shadow: 0 3px clamp(15px, 4vmin, 40px) rgba(0, 0, 0, 0.8);
+    /* SIMPLIFIED: Single, smaller shadow */
+    text-shadow: 0 2px clamp(8px, 2vmin, 20px) rgba(0, 0, 0, 0.6);
     letter-spacing: -2px;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -240,8 +239,8 @@
 }
 
 @keyframes scoreGlow {
-    0%, 100% { text-shadow: 0 3px clamp(15px, 4vmin, 40px) rgba(0, 0, 0, 0.8), 0 0 clamp(30px, 8vmin, 80px) rgba(255, 255, 255, 0.15); }
-    50% { text-shadow: 0 3px clamp(15px, 4vmin, 40px) rgba(0, 0, 0, 0.8), 0 0 clamp(50px, 12vmin, 120px) rgba(255, 255, 255, 0.35); }
+    0%, 100% { text-shadow: 0 2px clamp(8px, 2vmin, 20px) rgba(0, 0, 0, 0.6), 0 0 clamp(15px, 4vmin, 40px) rgba(255, 255, 255, 0.1); }
+    50% { text-shadow: 0 2px clamp(8px, 2vmin, 20px) rgba(0, 0, 0, 0.6), 0 0 clamp(25px, 6vmin, 60px) rgba(255, 255, 255, 0.2); }
 }
 
 /* Result Badge */
@@ -286,7 +285,7 @@
     100% { opacity: 1; transform: scale(1); }
 }
 
-/* VS Badge */
+/* VS Badge - REDUCED SHADOW */
 .tm-vs-badge-matchup {
     width: clamp(3rem, 12vmin, 10rem);
     height: clamp(3rem, 12vmin, 10rem);
@@ -302,7 +301,8 @@
     align-items: center;
     justify-content: center;
     border: clamp(1px, 0.3vmin, 3px) solid rgba(255, 255, 255, 0.3);
-    box-shadow: 0 clamp(10px, 4vmin, 50px) rgba(0, 0, 0, 0.7);
+    /* SIMPLIFIED: Single shadow */
+    box-shadow: 0 clamp(5px, 2vmin, 20px) rgba(0, 0, 0, 0.4);
     position: relative;
     z-index: 10;
     flex-shrink: 1;
@@ -373,7 +373,8 @@
     font-size: clamp(0.8rem, 3.5vmin, 2.2rem);
     font-weight: 900; 
     color: #e2e8f0;
-    text-shadow: 0 2px clamp(5px, 1.5vmin, 15px) rgba(0,0,0,0.5);
+    /* REDUCED: Smaller text shadow */
+    text-shadow: 0 1px clamp(3px, 0.8vmin, 8px) rgba(0,0,0,0.4);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
@@ -384,17 +385,18 @@
     position: absolute; 
     opacity: 0; 
     transform: scale(0.5); 
-    filter: drop-shadow(0 0 clamp(8px, 2vmin, 20px) rgba(251, 191, 36, 0.9)); 
+    /* REDUCED: Smaller glow */
+    filter: drop-shadow(0 0 clamp(4px, 1vmin, 10px) rgba(251, 191, 36, 0.7)); 
     transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* Timer */
+/* Timer - REDUCED SHADOW */
 .tm-timer-matchup {
     font-variant-numeric: tabular-nums;
     font-size: clamp(1rem, 4vmin, 2.5rem);
     font-weight: 700;
     color: #f8fafc;
-    text-shadow: 0 2px clamp(10px, 3vmin, 25px) rgba(0, 0, 0, 0.7);
+    text-shadow: 0 1px clamp(5px, 1.5vmin, 12px) rgba(0, 0, 0, 0.5);
     text-align: center;
     letter-spacing: 2px;
     -webkit-font-smoothing: antialiased;
@@ -481,25 +483,25 @@
     font-weight: 900;
     color: #fbbf24;
     line-height: 1;
-    text-shadow: 0 0 clamp(8px, 2vmin, 20px) rgba(251, 191, 36, 0.5);
+    /* REDUCED: Smaller glow */
+    text-shadow: 0 0 clamp(4px, 1vmin, 10px) rgba(251, 191, 36, 0.4);
 }
 
 .score-update-pop {
     transform: scale(1.3) !important;
     color: #fbbf24 !important;
-    text-shadow: 0 0 clamp(15px, 4vmin, 40px) rgba(251, 191, 36, 0.9) !important;
+    text-shadow: 0 0 clamp(8px, 2vmin, 20px) rgba(251, 191, 36, 0.7) !important;
 }
 
-/* --- Goal Events List - KEY OVERFLOW FIX --- */
+/* --- Goal Events List --- */
 .tm-goal-events-matchup {
     display: flex;
     flex-direction: column;
     gap: clamp(0.1rem, 0.4vmin, 0.3rem);
     margin-top: clamp(0.3rem, 1vmin, 0.8rem);
     width: 100%;
-    /* CRITICAL: Use remaining space instead of fixed height */
     flex: 1;
-    min-height: 0; /* Allows flex child to shrink below content size */
+    min-height: 0;
     max-height: 100%;
     overflow-y: auto;
     scrollbar-width: none;
@@ -555,7 +557,7 @@
     to { opacity: 1; transform: translateX(0); }
 }
 
-/* --- State Adjustments --- */
+/* --- State Adjustments - REDUCED SHADOWS --- */
 .tm-card-worldcup-main.is-winner .tm-team-matchup.is-winner { 
     transform: translateY(-3px) scale(1.02); 
     z-index: 4; 
@@ -580,18 +582,20 @@
 
 .tm-card-worldcup-main.is-winner .tm-team-matchup.is-winner .tm-flag-container-matchup { 
     border-color: rgba(251, 191, 36, 0.9); 
+    /* REDUCED: Simpler glow animation */
     animation: winnerGlow 3s ease-in-out infinite; 
 }
 
 @keyframes winnerGlow { 
-    0%, 100% { box-shadow: 0 0 0 2px rgba(251,191,36,0.3), 0 0 clamp(20px, 6vmin, 60px) rgba(251,191,36,0.4); } 
-    50% { box-shadow: 0 0 0 3px rgba(251,191,36,0.5), 0 0 clamp(30px, 8vmin, 80px) rgba(251,191,36,0.6); } 
+    0%, 100% { box-shadow: 0 0 0 1px rgba(251,191,36,0.2), 0 0 clamp(10px, 3vmin, 30px) rgba(251,191,36,0.3); } 
+    50% { box-shadow: 0 0 0 2px rgba(251,191,36,0.4), 0 0 clamp(15px, 4vmin, 40px) rgba(251,191,36,0.4); } 
 }
 
 .tm-card-worldcup-main.is-winner .tm-team-matchup.is-winner .tm-team-name-matchup { color: #fde68a; }
 .tm-card-worldcup-main.is-winner .tm-team-matchup.is-winner .tm-team-score-matchup { 
     color: #fbbf24; 
-    text-shadow: 0 0 clamp(20px, 6vmin, 60px) rgba(251, 191, 36, 0.5);
+    /* REDUCED: Smaller glow */
+    text-shadow: 0 0 clamp(10px, 3vmin, 30px) rgba(251, 191, 36, 0.4);
 }
 
 .tm-card-worldcup-main.is-winner .tm-team-matchup.is-loser { 
