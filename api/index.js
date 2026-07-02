@@ -28,8 +28,6 @@ app.use('/assets/global', express.static(globalPath));
 // ==========================================
 // 2. DYNAMIC COMPONENT STATIC ASSET ROUTING
 // ==========================================
-// 🧠 FIXED: Exposing the component folders completely BEFORE any security intercepts
-// This allows paths like /assets/leaderboard/partials/header/style.css to resolve cleanly.
 const componentsDir = path.join(__dirname, '../components');
 
 if (fs.existsSync(componentsDir)) {
@@ -39,38 +37,30 @@ if (fs.existsSync(componentsDir)) {
     const componentPath = path.join(componentsDir, component);
     
     if (fs.statSync(componentPath).isDirectory()) {
-      // Mounts the folder to Express static server. 
-      // Everything inside components/[componentName]/* is now queryable via /assets/[componentName]/*
       app.use(`/assets/${component}`, express.static(componentPath));
     }
   });
 }
 
 // ==========================================
-// 3. SECURITY HEADERS & BLOCK RULES
+// 3. OPEN ACCESS & IFRAME CONFIGURATION
 // ==========================================
+// This block handles both Iframe embedding (Xibo) and CORS (API access)
 app.use((req, res, next) => {
+  // 1. Allow Iframing (for Xibo)
   res.removeHeader('X-Frame-Options');
   res.setHeader("Content-Security-Policy", "frame-ancestors *;");
-  next();
-});
 
-// Explicitly block direct browser access to raw template engine files (.ejs)
-app.use('/assets/', (req, res, next) => {
-  if (req.path.endsWith('.ejs')) {
-    return res.status(403).send('Forbidden');
+  // 2. Allow CORS (for API fetches from localhost or other domains)
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  
+  // Handle preflight requests (OPTIONS) immediately
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
   }
-  next();
-});
 
-app.use('/api/', (req, res, next) => {
-  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
-  next();
-});
-
-// Performance Cache Configuration for deep assets
-app.use('/assets/', (req, res, next) => {
-  res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
   next();
 });
 
