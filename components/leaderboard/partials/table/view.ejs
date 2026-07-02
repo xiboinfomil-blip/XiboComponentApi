@@ -1,13 +1,15 @@
-<div class="table-wrapper" id="scroll-wrapper">
-    <table>
+<!-- table.ejs -->
+<div class="wc26-table-wrapper" id="scroll-wrapper">
+    <table class="wc26-leaderboard">
         <thead>
             <tr>
-                <th style="width: 15%">Rang</th>
-                <th style="width: 60%">Nom</th>
-                <th class="col-right" style="width: 25%">Points</th>
+                <th class="col-rank">RANG</th>
+                <th class="col-name">NOM</th>
+                <th class="col-pts">POINTS</th>
             </tr>
         </thead>
         <tbody id="table-body">
+            <!-- Loading State -->
             <tr id="loading-row">
                 <td colspan="3" class="loading-status">
                     <div class="empty-state">

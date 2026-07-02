@@ -39,9 +39,9 @@ function renderTable(data) {
     displayData.forEach(item => {
         html += `
             <tr data-rank="${item.rank || '-'}">
-                <td class="rank-cell"><span class="rank-badge">${item.rank || '-'}</span></td>
-                <td class="name-cell"><span class="team-name">${item.key.toUpperCase() || "Inconnu"}</span></td>
-                <td class="points-cell col-right">
+                <td class="col-rank"><span class="rank-badge">${item.rank || '-'}</span></td>
+                <td class="col-name"><span class="team-name">${item.key.toUpperCase() || "INCONNU"}</span></td>
+                <td class="col-pts">
                     <span class="points-badge">
                         <span class="pts-highlight">${item.point ?? 0}</span>
                         <span class="pts-label">PTS</span>

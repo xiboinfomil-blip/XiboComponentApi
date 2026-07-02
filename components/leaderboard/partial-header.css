@@ -1,21 +1,53 @@
-/* CORE CONTAINER */
-.wc26-header {
-    /* Deep FIFA Navy - not pure black, rich and broadcast-ready */
-    background: linear-gradient(180deg, #0B132B 0%, #070C1A 100%);
-    position: relative;
-    padding: clamp(12px, 2.5cqi, 18px) clamp(20px, 4cqi, 32px);
-    overflow: hidden;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+/* style.css */
+
+/* Import premium fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Montserrat:wght@800;900&display=swap');
+
+:root {
+    --fifa-black: #0B132B;
+    --fifa-deep: #050810;
+    --fifa-gold: #C6A558;
+    --fifa-gold-light: #E0C078;
+    --glass-border: rgba(255, 255, 255, 0.08);
 }
 
-/* AMBIENT GLOW - Only top center, very subtle */
+/* CORE CONTAINER */
+.wc26-header {
+    position: relative;
+    padding: clamp(16px, 3cqi, 24px) clamp(24px, 5cqi, 40px);
+    background: radial-gradient(circle at 50% -20%, #1A2238 0%, var(--fifa-black) 70%);
+    overflow: hidden;
+    border-bottom: 1px solid var(--glass-border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    isolation: isolate;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+/* GEOMETRIC PATTERN (Nod to the 48-team grid) */
+.wc26-pattern {
+    position: absolute;
+    inset: 0;
+    background-image: 
+        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    opacity: 0.4;
+    z-index: -1;
+    mask-image: radial-gradient(circle at center, black 40%, transparent 80%);
+    -webkit-mask-image: radial-gradient(circle at center, black 40%, transparent 80%);
+}
+
+/* AMBIENT GLOW */
 .wc26-glow {
     position: absolute;
-    top: -60%; left: 50%;
+    top: -50%; left: 50%;
     transform: translateX(-50%);
-    width: 70%; height: 180%;
-    background: radial-gradient(circle, rgba(198, 165, 88, 0.06) 0%, transparent 65%);
+    width: 80%; height: 200%;
+    background: radial-gradient(circle, rgba(198, 165, 88, 0.08) 0%, transparent 60%);
     pointer-events: none;
+    z-index: -1;
 }
 
 /* CONTENT WRAPPER */
@@ -23,56 +55,56 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 4px;
+    gap: 6px;
     position: relative;
     z-index: 2;
 }
 
-/* TITLE LOCKUP - Logo sits inline with text */
+/* TITLE LOCKUP */
 .title-lockup {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: clamp(8px, 1.5cqi, 14px);
+    gap: clamp(10px, 2cqi, 16px);
     line-height: 1;
 }
 
 .wc26-logo-inline {
-    height: clamp(18px, 3.5cqi, 28px);
+    height: clamp(22px, 4cqi, 32px);
     width: auto;
-    flex-shrink: 0;
+    filter: drop-shadow(0 0 10px rgba(198, 165, 88, 0.2));
 }
 
 .wc26-title {
     font-family: 'Montserrat', system-ui, sans-serif;
-    font-size: clamp(15px, 3.2cqi, 22px);
-    font-weight: 800;
-    letter-spacing: 0.8px;
+    font-size: clamp(18px, 4cqi, 26px);
+    font-weight: 900;
+    letter-spacing: 1.5px;
     text-transform: uppercase;
     margin: 0;
     color: #FFFFFF;
     white-space: nowrap;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.5);
 }
 
-/* SUBTITLE - Muted gold, smaller, elegant */
+/* SUBTITLE - Refined Gold */
 .wc26-subtitle {
     font-family: 'Inter', system-ui, sans-serif;
-    font-size: clamp(9px, 1.6cqi, 12px);
-    color: #C6A558; /* FIFA Gold */
+    font-size: clamp(10px, 1.8cqi, 13px);
+    color: var(--fifa-gold);
     font-weight: 600;
-    letter-spacing: 2.5px;
+    letter-spacing: 3px;
     text-transform: uppercase;
     margin: 0;
-    opacity: 0.85;
+    opacity: 0.9;
 }
 
-/* ACCENT LINE - Thin gold, centered */
+/* ACCENT LINE - Static Gradient */
 .wc26-accent {
-    position: absolute;
-    bottom: 0; left: 50%;
-    transform: translateX(-50%);
-    width: min(60px, 15%);
-    height: 1px;
-    background: linear-gradient(90deg, transparent, #C6A558, transparent);
-    opacity: 0.6;
+    margin-top: 12px;
+    width: min(80px, 20%);
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--fifa-gold), var(--fifa-gold-light), var(--fifa-gold), transparent);
+    opacity: 0.8;
+    box-shadow: 0 0 8px rgba(198, 165, 88, 0.4);
 }
