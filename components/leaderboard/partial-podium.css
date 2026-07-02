@@ -16,15 +16,19 @@
     display: none; /* Toggled by JS */
     justify-content: center;
     align-items: flex-end;
-    padding: clamp(12px, 2vh, 24px) clamp(16px, 4vw, 32px) 0;
-    background: radial-gradient(ellipse at 50% 0%, var(--fifa-gold-dim) 0%, transparent 60%);
+    /* Responsive padding: smaller on mobile */
+    padding: clamp(8px, 1.5vh, 24px) clamp(8px, 2vw, 32px) 0;
+    background: radial-gradient(ellipse at 50% 0%, var(--fifa-gold-dim) 0%, transparent 70%);
     border-bottom: 1px solid rgba(255, 255, 255, 0.04);
     flex-shrink: 0;
-    height: clamp(160px, 22vh, 240px);
+    
+    /* Fluid Height: Uses viewport height but caps it so it doesn't take over huge screens */
+    height: min(25vh, 280px); 
+    min-height: 140px; /* Prevent it from becoming too small on landscape phones */
     width: 100%;
     box-sizing: border-box;
+    overflow: hidden; /* Prevents animation spill */
     
-    /* Container entrance */
     opacity: 0;
     animation: podiumContainerFade 0.8s ease-out forwards;
 }
@@ -33,10 +37,11 @@
     display: flex;
     justify-content: center;
     align-items: flex-end;
-    gap: clamp(8px, 1.5vw, 16px);
+    gap: clamp(4px, 1.5vw, 16px); /* Smaller gap on mobile */
     width: 100%;
-    max-width: 700px;
+    max-width: 800px; /* Slightly wider cap for modern screens */
     height: 100%;
+    padding-bottom: 0;
 }
 
 /* PODIUM ITEM */
@@ -48,39 +53,30 @@
     justify-content: flex-end;
     height: 100%;
     position: relative;
+    min-width: 0; /* Critical for flex children to shrink properly */
     
-    /* ENTRANCE ANIMATION - Each item slides up */
     opacity: 0;
     transform: translateY(40px) scale(0.95);
-    animation: podiumItemEntrance 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-    
-    /* STAY ANIMATION - Subtle floating effect */
-    /* Note: The second animation (podiumFloat) starts after the entrance finishes */
     animation: podiumItemEntrance 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards,
                podiumFloat 6s ease-in-out infinite;
 }
 
-/* Staggered delays for dramatic reveal */
-/* Format: entrance-delay, stay-animation-delay */
-.podium-item.second { 
-    animation-delay: 0.1s, 0.9s; 
-}
-.podium-item.first { 
-    animation-delay: 0.25s, 1.05s; 
-}
-.podium-item.third { 
-    animation-delay: 0.4s, 1.2s; 
-}
+/* Staggered delays */
+.podium-item.second { animation-delay: 0.1s, 0.9s; }
+.podium-item.first  { animation-delay: 0.25s, 1.05s; }
+.podium-item.third  { animation-delay: 0.4s, 1.2s; }
 
 .podium-content {
     display: flex;
     flex-direction: column;
     align-items: center;
     z-index: 2;
-    margin-bottom: clamp(8px, 1.5vh, 16px);
+    margin-bottom: clamp(4px, 1vh, 12px);
     text-align: center;
+    width: 100%; /* Ensure content doesn't overflow item width */
+    padding: 0 4px; /* Safety padding for text */
+    box-sizing: border-box;
     
-    /* Content fade in */
     opacity: 0;
     transform: translateY(-10px);
     animation: podiumContentFade 0.6s ease-out forwards;
@@ -92,10 +88,9 @@
     font-family: 'Montserrat', sans-serif;
     font-weight: 900;
     line-height: 1;
-    margin-bottom: 4px;
+    margin-bottom: 2px;
     letter-spacing: -1px;
     
-    /* Rank number pop animation */
     opacity: 0;
     transform: scale(0.5);
     animation: rankPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
@@ -106,17 +101,17 @@
     font-family: 'Montserrat', sans-serif;
     font-weight: 800;
     color: var(--text-white);
-    font-size: clamp(11px, 1.8vw, 16px);
-    margin: 0 0 4px 0;
+    /* Responsive font size based on viewport width, but capped */
+    font-size: clamp(9px, 1.4vw, 14px); 
+    margin: 0 0 2px 0;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 100%;
+    width: 100%;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     text-shadow: 0 2px 4px rgba(0,0,0,0.5);
     
-    /* Name slide in */
     opacity: 0;
     transform: translateX(-15px);
     animation: nameSlide 0.5s ease-out forwards;
@@ -126,11 +121,10 @@
 .podium-points {
     font-family: 'Inter', sans-serif;
     font-weight: 700;
-    font-size: clamp(10px, 1.5vw, 14px);
+    font-size: clamp(8px, 1.2vw, 12px);
     opacity: 0;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
     
-    /* Points fade in */
     animation: pointsFade 0.5s ease-out forwards;
     animation-delay: calc(var(--item-delay, 0s) + 0.6s);
 }
@@ -139,44 +133,49 @@
 
 /* GOLD (#1) */
 .podium-item.first .podium-rank {
-    font-size: clamp(32px, 5vw, 48px);
+    font-size: clamp(24px, 4.5vw, 48px);
     background: linear-gradient(180deg, #E0C078 0%, #C6A558 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    filter: drop-shadow(0 0 15px rgba(198, 165, 88, 0.4));
+    filter: drop-shadow(0 0 10px rgba(198, 165, 88, 0.4));
 }
 .podium-item.first .podium-points { color: var(--fifa-gold); }
 
 /* SILVER (#2) */
 .podium-item.second .podium-rank {
-    font-size: clamp(24px, 3.5vw, 36px);
+    font-size: clamp(18px, 3.2vw, 36px);
     color: var(--fifa-silver);
-    text-shadow: 0 0 10px rgba(148, 163, 184, 0.3);
+    text-shadow: 0 0 8px rgba(148, 163, 184, 0.3);
 }
 .podium-item.second .podium-points { color: var(--fifa-silver); }
 
 /* BRONZE (#3) */
 .podium-item.third .podium-rank {
-    font-size: clamp(20px, 3vw, 30px);
+    font-size: clamp(16px, 2.8vw, 30px);
     color: #D97706;
-    text-shadow: 0 0 10px rgba(217, 119, 6, 0.3);
+    text-shadow: 0 0 8px rgba(217, 119, 6, 0.3);
 }
 .podium-item.third .podium-points { color: #D97706; }
 
 /* --- ARCHITECTURAL BARS --- */
 .podium-bar {
     width: 100%;
-    border-radius: clamp(8px, 1vw, 12px) clamp(8px, 1vw, 12px) 0 0;
+    border-radius: clamp(6px, 0.8vw, 12px) clamp(6px, 0.8vw, 12px) 0 0;
     position: relative;
     display: flex;
     justify-content: center;
     align-items: flex-start;
-    padding-top: clamp(8px, 1.5vh, 16px);
+    padding-top: clamp(4px, 1vh, 16px);
     box-sizing: border-box;
     border: 1px solid rgba(255, 255, 255, 0.05);
     border-bottom: none;
     
-    /* Bar rise animation */
+    /* Use flex-grow to determine height relatively if needed, 
+       but here we use specific heights for the "step" look. 
+       We use % of container height for better responsiveness. */
+    height: auto; 
+    flex-grow: 0;
+    
     opacity: 0;
     transform: scaleY(0);
     transform-origin: bottom;
@@ -184,22 +183,23 @@
     animation-delay: var(--item-delay, 0s);
 }
 
-/* Bar Heights & Gradients */
+/* Bar Heights - Using % of container context or fixed responsive units */
+/* Since flex items stretch, we set explicit heights that scale with viewport */
 .podium-bar.first {
-    height: clamp(70px, 12vh, 110px);
+    height: clamp(60px, 10vh, 110px);
     background: linear-gradient(180deg, rgba(198, 165, 88, 0.25) 0%, rgba(198, 165, 88, 0.05) 100%);
     border-color: rgba(198, 165, 88, 0.3);
-    box-shadow: 0 -10px 30px rgba(198, 165, 88, 0.1);
+    box-shadow: 0 -5px 20px rgba(198, 165, 88, 0.1);
 }
 
 .podium-bar.second {
-    height: clamp(50px, 8vh, 80px);
+    height: clamp(45px, 7vh, 80px);
     background: linear-gradient(180deg, rgba(148, 163, 184, 0.2) 0%, rgba(148, 163, 184, 0.05) 100%);
     border-color: rgba(148, 163, 184, 0.2);
 }
 
 .podium-bar.third {
-    height: clamp(35px, 6vh, 60px);
+    height: clamp(30px, 5vh, 60px);
     background: linear-gradient(180deg, rgba(217, 119, 6, 0.2) 0%, rgba(217, 119, 6, 0.05) 100%);
     border-color: rgba(217, 119, 6, 0.2);
 }
@@ -207,141 +207,97 @@
 /* TROPHY ICON */
 .trophy-glow {
     color: var(--fifa-gold);
-    filter: drop-shadow(0 0 12px rgba(198, 165, 88, 0.6));
+    filter: drop-shadow(0 0 8px rgba(198, 165, 88, 0.6));
     
-    /* Trophy entrance */
     opacity: 0;
     transform: scale(0) rotate(-180deg);
     animation: trophySpin 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
                fifaTrophyPulse 3s ease-in-out infinite alternate;
     animation-delay: calc(var(--item-delay, 0s) + 0.5s), calc(var(--item-delay, 0s) + 1.3s);
+    
+    /* Ensure trophy doesn't overflow bar */
+    display: flex;
+    justify-content: center;
+    width: 100%;
 }
 
-/* Updated sizing for the detailed FIFA trophy SVG */
 .podium-trophy-icon {
-    width: clamp(48px, 7vw, 64px);
+    width: clamp(32px, 6vw, 64px);
     height: auto;
-    filter: drop-shadow(0 6px 16px rgba(198, 165, 88, 0.6));
+    max-height: 80%; /* Don't let it exceed bar height */
+    filter: drop-shadow(0 4px 12px rgba(198, 165, 88, 0.6));
 }
 
 /* ==================== */
 /* ANIMATIONS           */
 /* ==================== */
-
-/* Container fade in */
 @keyframes podiumContainerFade {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
-/* Podium item entrance - Slide up with scale */
 @keyframes podiumItemEntrance {
-    0% {
-        opacity: 0;
-        transform: translateY(40px) scale(0.95);
-    }
-    100% {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
+    0% { opacity: 0; transform: translateY(40px) scale(0.95); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* Stay animation - Gentle floating/breathing */
 @keyframes podiumFloat {
-    0%, 100% {
-        transform: translateY(0);
-        filter: brightness(1);
-    }
-    50% {
-        transform: translateY(-4px);
-        filter: brightness(1.05);
-    }
+    0%, 100% { transform: translateY(0); filter: brightness(1); }
+    50% { transform: translateY(-3px); filter: brightness(1.05); }
 }
 
-/* Content fade in */
 @keyframes podiumContentFade {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
-/* Rank number pop with bounce */
 @keyframes rankPop {
-    0% {
-        opacity: 0;
-        transform: scale(0.5);
-    }
-    100% {
-        opacity: 1;
-        transform: scale(1);
-    }
+    0% { opacity: 0; transform: scale(0.5); }
+    100% { opacity: 1; transform: scale(1); }
 }
 
-/* Name slide from left */
 @keyframes nameSlide {
-    from {
-        opacity: 0;
-        transform: translateX(-15px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
+    from { opacity: 0; transform: translateX(-15px); }
+    to { opacity: 1; transform: translateX(0); }
 }
 
-/* Points fade in */
 @keyframes pointsFade {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 0.9;
-    }
+    from { opacity: 0; }
+    to { opacity: 0.9; }
 }
 
-/* Bar rise from bottom */
 @keyframes barRise {
-    from {
-        opacity: 0;
-        transform: scaleY(0);
-    }
-    to {
-        opacity: 1;
-        transform: scaleY(1);
-    }
+    from { opacity: 0; transform: scaleY(0); }
+    to { opacity: 1; transform: scaleY(1); }
 }
 
-/* Trophy spin entrance */
 @keyframes trophySpin {
-    from {
-        opacity: 0;
-        transform: scale(0) rotate(-180deg);
-    }
-    to {
-        opacity: 1;
-        transform: scale(1) rotate(0deg);
-    }
+    from { opacity: 0; transform: scale(0) rotate(-180deg); }
+    to { opacity: 1; transform: scale(1) rotate(0deg); }
 }
 
-/* FIFA-specific pulse animation for the trophy */
 @keyframes fifaTrophyPulse {
     from { 
-        filter: drop-shadow(0 6px 16px rgba(198, 165, 88, 0.5)) 
-                drop-shadow(0 0 25px rgba(198, 165, 88, 0.3));
+        filter: drop-shadow(0 4px 12px rgba(198, 165, 88, 0.5)) 
+                drop-shadow(0 0 20px rgba(198, 165, 88, 0.3));
         transform: scale(1) translateY(0);
     }
     to { 
-        filter: drop-shadow(0 8px 20px rgba(198, 165, 88, 0.8)) 
-                drop-shadow(0 0 35px rgba(198, 165, 88, 0.5));
-        transform: scale(1.04) translateY(-3px);
+        filter: drop-shadow(0 6px 16px rgba(198, 165, 88, 0.8)) 
+                drop-shadow(0 0 30px rgba(198, 165, 88, 0.5));
+        transform: scale(1.04) translateY(-2px);
+    }
+}
+
+/* EXTRA MOBILE TWEAKS */
+@media (max-width: 400px) {
+    .podium-flex {
+        gap: 2px;
+    }
+    .podium-name {
+        font-size: 10px; /* Force smaller text on very small screens */
+    }
+    .podium-points {
+        font-size: 9px;
     }
 }
