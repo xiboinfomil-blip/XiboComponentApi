@@ -23,6 +23,10 @@
     height: clamp(160px, 22vh, 240px);
     width: 100%;
     box-sizing: border-box;
+    
+    /* Container entrance */
+    opacity: 0;
+    animation: podiumContainerFade 0.8s ease-out forwards;
 }
 
 .podium-flex {
@@ -44,6 +48,28 @@
     justify-content: flex-end;
     height: 100%;
     position: relative;
+    
+    /* ENTRANCE ANIMATION - Each item slides up */
+    opacity: 0;
+    transform: translateY(40px) scale(0.95);
+    animation: podiumItemEntrance 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    
+    /* STAY ANIMATION - Subtle floating effect */
+    /* Note: The second animation (podiumFloat) starts after the entrance finishes */
+    animation: podiumItemEntrance 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards,
+               podiumFloat 6s ease-in-out infinite;
+}
+
+/* Staggered delays for dramatic reveal */
+/* Format: entrance-delay, stay-animation-delay */
+.podium-item.second { 
+    animation-delay: 0.1s, 0.9s; 
+}
+.podium-item.first { 
+    animation-delay: 0.25s, 1.05s; 
+}
+.podium-item.third { 
+    animation-delay: 0.4s, 1.2s; 
 }
 
 .podium-content {
@@ -53,6 +79,12 @@
     z-index: 2;
     margin-bottom: clamp(8px, 1.5vh, 16px);
     text-align: center;
+    
+    /* Content fade in */
+    opacity: 0;
+    transform: translateY(-10px);
+    animation: podiumContentFade 0.6s ease-out forwards;
+    animation-delay: calc(var(--item-delay, 0s) + 0.3s);
 }
 
 /* TYPOGRAPHY */
@@ -62,6 +94,12 @@
     line-height: 1;
     margin-bottom: 4px;
     letter-spacing: -1px;
+    
+    /* Rank number pop animation */
+    opacity: 0;
+    transform: scale(0.5);
+    animation: rankPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    animation-delay: calc(var(--item-delay, 0s) + 0.4s);
 }
 
 .podium-name {
@@ -77,14 +115,24 @@
     text-transform: uppercase;
     letter-spacing: 0.5px;
     text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    
+    /* Name slide in */
+    opacity: 0;
+    transform: translateX(-15px);
+    animation: nameSlide 0.5s ease-out forwards;
+    animation-delay: calc(var(--item-delay, 0s) + 0.5s);
 }
 
 .podium-points {
     font-family: 'Inter', sans-serif;
     font-weight: 700;
     font-size: clamp(10px, 1.5vw, 14px);
-    opacity: 0.9;
+    opacity: 0;
     letter-spacing: 1px;
+    
+    /* Points fade in */
+    animation: pointsFade 0.5s ease-out forwards;
+    animation-delay: calc(var(--item-delay, 0s) + 0.6s);
 }
 
 /* --- RANK SPECIFIC STYLES --- */
@@ -127,6 +175,13 @@
     box-sizing: border-box;
     border: 1px solid rgba(255, 255, 255, 0.05);
     border-bottom: none;
+    
+    /* Bar rise animation */
+    opacity: 0;
+    transform: scaleY(0);
+    transform-origin: bottom;
+    animation: barRise 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    animation-delay: var(--item-delay, 0s);
 }
 
 /* Bar Heights & Gradients */
@@ -153,15 +208,140 @@
 .trophy-glow {
     color: var(--fifa-gold);
     filter: drop-shadow(0 0 12px rgba(198, 165, 88, 0.6));
-    animation: pulse-gold 3s ease-in-out infinite alternate;
+    
+    /* Trophy entrance */
+    opacity: 0;
+    transform: scale(0) rotate(-180deg);
+    animation: trophySpin 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
+               fifaTrophyPulse 3s ease-in-out infinite alternate;
+    animation-delay: calc(var(--item-delay, 0s) + 0.5s), calc(var(--item-delay, 0s) + 1.3s);
 }
 
+/* Updated sizing for the detailed FIFA trophy SVG */
 .podium-trophy-icon {
-    width: clamp(24px, 4vw, 36px);
+    width: clamp(48px, 7vw, 64px);
     height: auto;
+    filter: drop-shadow(0 6px 16px rgba(198, 165, 88, 0.6));
 }
 
-@keyframes pulse-gold {
-    from { filter: drop-shadow(0 0 8px rgba(198, 165, 88, 0.4)); transform: scale(1); }
-    to { filter: drop-shadow(0 0 16px rgba(198, 165, 88, 0.8)); transform: scale(1.05); }
+/* ==================== */
+/* ANIMATIONS           */
+/* ==================== */
+
+/* Container fade in */
+@keyframes podiumContainerFade {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* Podium item entrance - Slide up with scale */
+@keyframes podiumItemEntrance {
+    0% {
+        opacity: 0;
+        transform: translateY(40px) scale(0.95);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Stay animation - Gentle floating/breathing */
+@keyframes podiumFloat {
+    0%, 100% {
+        transform: translateY(0);
+        filter: brightness(1);
+    }
+    50% {
+        transform: translateY(-4px);
+        filter: brightness(1.05);
+    }
+}
+
+/* Content fade in */
+@keyframes podiumContentFade {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Rank number pop with bounce */
+@keyframes rankPop {
+    0% {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Name slide from left */
+@keyframes nameSlide {
+    from {
+        opacity: 0;
+        transform: translateX(-15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Points fade in */
+@keyframes pointsFade {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 0.9;
+    }
+}
+
+/* Bar rise from bottom */
+@keyframes barRise {
+    from {
+        opacity: 0;
+        transform: scaleY(0);
+    }
+    to {
+        opacity: 1;
+        transform: scaleY(1);
+    }
+}
+
+/* Trophy spin entrance */
+@keyframes trophySpin {
+    from {
+        opacity: 0;
+        transform: scale(0) rotate(-180deg);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+    }
+}
+
+/* FIFA-specific pulse animation for the trophy */
+@keyframes fifaTrophyPulse {
+    from { 
+        filter: drop-shadow(0 6px 16px rgba(198, 165, 88, 0.5)) 
+                drop-shadow(0 0 25px rgba(198, 165, 88, 0.3));
+        transform: scale(1) translateY(0);
+    }
+    to { 
+        filter: drop-shadow(0 8px 20px rgba(198, 165, 88, 0.8)) 
+                drop-shadow(0 0 35px rgba(198, 165, 88, 0.5));
+        transform: scale(1.04) translateY(-3px);
+    }
 }

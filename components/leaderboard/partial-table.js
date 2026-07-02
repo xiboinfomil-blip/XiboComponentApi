@@ -82,10 +82,18 @@ function renderTable(data) {
     
     tableBody.innerHTML = html;
 
-    // Trigger scrolling safely if rows were added
+    // Get config and trigger scrolling safely if rows were added
     if (displayData.length > 0) {
         setTimeout(function() { 
-            initializeAutoscroll(0.5); 
+            var config = {};
+            if (typeof getConfig === 'function') {
+                config = getConfig() || {};
+            } else {
+                console.warn('Xibo warning: getConfig is not available yet. Proceeding with defaults.');
+            }
+            
+            var speed = (config.speed !== undefined && config.speed !== null) ? config.speed : 0.5;
+            initializeAutoscroll(speed); 
         }, 150); // Small delay to allow Xibo's renderer to calculate the layout heights properly
     }
 }

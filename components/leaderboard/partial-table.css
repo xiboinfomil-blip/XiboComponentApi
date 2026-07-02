@@ -71,8 +71,30 @@
     border: 1px solid var(--row-border);
     border-radius: clamp(8px, 1.5vw, 14px);
     margin-bottom: clamp(4px, 0.6vh, 8px);
-    /* No transitions for static performance */
+    
+    /* ENTRANCE ANIMATION */
+    opacity: 0;
+    transform: translateY(20px) scale(0.98);
+    animation: wc26-rowEntrance 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    
+    /* STAY ANIMATION - Subtle breathing effect */
+    animation: wc26-rowEntrance 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards,
+               wc26-rowPulse 4s ease-in-out infinite;
+    animation-delay: var(--animation-delay, 0s), calc(var(--animation-delay, 0s) + 0.6s);
 }
+
+/* Staggered entrance delays for each row */
+.wc26-leaderboard tbody tr:nth-child(1) { --animation-delay: 0.05s; }
+.wc26-leaderboard tbody tr:nth-child(2) { --animation-delay: 0.1s; }
+.wc26-leaderboard tbody tr:nth-child(3) { --animation-delay: 0.15s; }
+.wc26-leaderboard tbody tr:nth-child(4) { --animation-delay: 0.2s; }
+.wc26-leaderboard tbody tr:nth-child(5) { --animation-delay: 0.25s; }
+.wc26-leaderboard tbody tr:nth-child(6) { --animation-delay: 0.3s; }
+.wc26-leaderboard tbody tr:nth-child(7) { --animation-delay: 0.35s; }
+.wc26-leaderboard tbody tr:nth-child(8) { --animation-delay: 0.4s; }
+.wc26-leaderboard tbody tr:nth-child(9) { --animation-delay: 0.45s; }
+.wc26-leaderboard tbody tr:nth-child(10) { --animation-delay: 0.5s; }
+.wc26-leaderboard tbody tr:nth-child(n+11) { --animation-delay: 0.55s; }
 
 /* CELL STYLING */
 .wc26-leaderboard th,
@@ -137,6 +159,12 @@
     color: var(--text-white);
     background: rgba(255, 255, 255, 0.06);
     border: 1px solid rgba(255, 255, 255, 0.08);
+    
+    /* Badge entrance animation */
+    opacity: 0;
+    transform: scale(0.8);
+    animation: wc26-badgePop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    animation-delay: calc(var(--animation-delay, 0s) + 0.2s);
 }
 
 /* TEAM NAME */
@@ -150,6 +178,12 @@
     max-width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
+    
+    /* Text slide-in animation */
+    opacity: 0;
+    transform: translateX(-10px);
+    animation: wc26-textSlide 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    animation-delay: calc(var(--animation-delay, 0s) + 0.15s);
 }
 
 /* POINTS BADGE */
@@ -161,6 +195,12 @@
     border: 1px solid rgba(198, 165, 88, 0.15);
     border-radius: clamp(6px, 1vw, 10px);
     padding: clamp(4px, 0.8vh, 8px) clamp(8px, 1.5vw, 14px);
+    
+    /* Points badge entrance */
+    opacity: 0;
+    transform: scale(0.9);
+    animation: wc26-pointsFade 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    animation-delay: calc(var(--animation-delay, 0s) + 0.25s);
 }
 
 .pts-highlight {
@@ -214,6 +254,71 @@
     animation: wc26-spin 1s linear infinite;
 }
 
+/* ==================== */
+/* ANIMATIONS           */
+/* ==================== */
+
+/* Row Entrance - Slide up and fade in */
+@keyframes wc26-rowEntrance {
+    0% {
+        opacity: 0;
+        transform: translateY(20px) scale(0.98);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Row Stay Animation - Subtle pulse/breathing effect */
+@keyframes wc26-rowPulse {
+    0%, 100% {
+        border-color: rgba(255, 255, 255, 0.04);
+        box-shadow: 0 0 0 rgba(198, 165, 88, 0);
+    }
+    50% {
+        border-color: rgba(255, 255, 255, 0.08);
+        box-shadow: 0 4px 20px rgba(198, 165, 88, 0.06);
+    }
+}
+
+/* Badge Pop - Scale with bounce */
+@keyframes wc26-badgePop {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Text Slide - Smooth horizontal reveal */
+@keyframes wc26-textSlide {
+    0% {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Points Fade - Gentle scale and fade */
+@keyframes wc26-pointsFade {
+    0% {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Spinner rotation */
 @keyframes wc26-spin {
     to { transform: rotate(360deg); }
 }
