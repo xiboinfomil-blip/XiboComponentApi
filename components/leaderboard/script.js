@@ -11,8 +11,9 @@ async function initLeaderboard() {
         const queryString = params.toString();
         const REAL_BACKEND_URL = 'https://xibo-component-api.vercel.app';
         const apiUrl = queryString 
-    ? `${REAL_BACKEND_URL}/api/leaderboard?${queryString}` 
-    : `${REAL_BACKEND_URL}/api/leaderboard`;
+            ? `${REAL_BACKEND_URL}/api/leaderboard?${queryString}` 
+            : `${REAL_BACKEND_URL}/api/leaderboard`;
+        
         const response = await fetch(apiUrl);
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
@@ -42,4 +43,9 @@ async function initLeaderboard() {
     }
 }
 
-document.addEventListener('DOMContentLoaded', initLeaderboard);
+// Vérifie si le DOM est déjà chargé ou non
+if (document.readyState === "loading") {
+    document.addEventListener('DOMContentLoaded', initLeaderboard);
+} else {
+    initLeaderboard();
+}
