@@ -9,6 +9,8 @@ const { circuitBreaker } = require('../helpers/fetchWithCircuitBreaker');
 
 const app = express();
 
+app.locals.version = Date.now();
+
 // ==========================================
 // 1. CORE BODY PARSERS & MAIN STATIC STORAGE
 // ==========================================
@@ -106,6 +108,7 @@ if (fs.existsSync(componentsDir)) {
               speed: Number(req.query.speed) || 3000,
               refetch: req.query.refetch === 'true',
               dummy: req.query.dummy === 'true',
+              Version: app.locals.version
             };
             res.render(viewPath, locals);
           });
