@@ -4,7 +4,7 @@
 async function initLeaderboard() {
     try {
         // DEFENSIVE CHECK: Fallback safely if configHelper.js isn't fully loaded yet
-        let config = {};
+        let cofig = {};
         if (typeof getConfig === 'function') {
             config = getConfig() || {};
         } else {
