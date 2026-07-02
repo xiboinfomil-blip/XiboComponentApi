@@ -30,7 +30,7 @@ function renderPodium(data) {
 
     podiumSection.style.display = 'flex';
 
-    // FIFA World Cup Trophy SVG (Kept same as your original, it's already vector-based)
+    // FIFA World Cup Trophy SVG
     const trophySvg = `
         <svg viewBox="0 0 80 100" fill="none" class="podium-trophy-icon">
             <defs>
@@ -84,11 +84,11 @@ function renderPodium(data) {
             <div class="podium-content">
                 <div class="podium-rank">#${rank}</div>
                 <div class="podium-name">${(item.key || "INCONNU").toUpperCase()}</div>
-                <div class="podium-points">${item.point ?? 0} PTS</div>
             </div>
             
             <div class="podium-bar ${positionClass}">
                 ${isGold ? `<div class="trophy-glow">${trophySvg}</div>` : ''}
+                <div class="podium-bar-points">${item.point ?? 0} PTS</div>
             </div>
         </div>`;
     };
