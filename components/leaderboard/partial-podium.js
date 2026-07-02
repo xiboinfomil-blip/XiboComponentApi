@@ -1,20 +1,16 @@
-// podium.js
 function renderPodium(data) {
     const podiumSection = document.getElementById('podium-section');
     if (!podiumSection) return;
 
-    // Aggregate data by rank
     const rankMap = {};
     const rankCounts = {};
     
     data.forEach(item => {
         if (!rankCounts[item.rank]) rankCounts[item.rank] = 0;
         rankCounts[item.rank]++;
-        // Only keep the first item found for each rank
         if (!rankMap[item.rank]) rankMap[item.rank] = item;
     });
 
-    // Check uniqueness for podium eligibility
     const isRank1Unique = rankCounts[1] === 1;
     const isRank2Unique = rankCounts[2] === 1;
     const isRank3Unique = rankCounts[3] === 1;
@@ -30,71 +26,66 @@ function renderPodium(data) {
 
     podiumSection.style.display = 'flex';
 
-    // FIFA World Cup Trophy SVG
+    // --- BEAUTIFUL TROPHY SVG ---
     const trophySvg = `
-        <svg viewBox="0 0 80 100" fill="none" class="podium-trophy-icon">
+        <svg viewBox="0 0 100 120" class="podium-trophy-icon" xmlns="http://www.w3.org/2000/svg">
             <defs>
-                <linearGradient id="fifaGold" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" style="stop-color:#FFE5A0;stop-opacity:1" />
-                    <stop offset="20%" style="stop-color:#F5D76E;stop-opacity:1" />
-                    <stop offset="40%" style="stop-color:#E8C547;stop-opacity:1" />
-                    <stop offset="60%" style="stop-color:#C6A558;stop-opacity:1" />
-                    <stop offset="80%" style="stop-color:#B8944F;stop-opacity:1" />
-                    <stop offset="100%" style="stop-color:#9A7B3D;stop-opacity:1" />
+                <linearGradient id="goldMain" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#FFF6D5" />
+                    <stop offset="20%" style="stop-color:#F9E076" />
+                    <stop offset="50%" style="stop-color:#D4AF37" />
+                    <stop offset="80%" style="stop-color:#997B26" />
+                    <stop offset="100%" style="stop-color:#755818" />
                 </linearGradient>
-                <linearGradient id="fifaGoldDark" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" style="stop-color:#A67C3D;stop-opacity:1" />
-                    <stop offset="100%" style="stop-color:#7A5C2A;stop-opacity:1" />
+                <linearGradient id="goldShadow" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" style="stop-color:#8B6914" />
+                    <stop offset="50%" style="stop-color:#5C450E" />
+                    <stop offset="100%" style="stop-color:#8B6914" />
                 </linearGradient>
-                <linearGradient id="fifaHighlight" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" style="stop-color:#FFF8DC;stop-opacity:0.9" />
-                    <stop offset="50%" style="stop-color:#FFE5A0;stop-opacity:0.5" />
-                    <stop offset="100%" style="stop-color:#E8C547;stop-opacity:0" />
+                <linearGradient id="shine" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#FFFFFF;stop-opacity:0.8" />
+                    <stop offset="100%" style="stop-color:#FFFFFF;stop-opacity:0" />
                 </linearGradient>
-                <linearGradient id="malachite" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" style="stop-color:#2D5016;stop-opacity:1" />
-                    <stop offset="50%" style="stop-color:#1E3A0F;stop-opacity:1" />
-                    <stop offset="100%" style="stop-color:#15290A;stop-opacity:1" />
+                <linearGradient id="baseMat" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" style="stop-color:#4A3B2A" />
+                    <stop offset="100%" style="stop-color:#2C2216" />
                 </linearGradient>
             </defs>
-            <rect x="15" y="82" width="50" height="10" fill="url(#malachite)" stroke="#0F1F08" stroke-width="0.5" rx="2"/>
-            <rect x="18" y="84" width="44" height="2" fill="#3D6B1F" opacity="0.6"/>
-            <path d="M30 72 L32 82 L48 82 L50 72 Z" fill="url(#fifaGold)" stroke="#8B6914" stroke-width="0.5"/>
-            <path d="M25 72 C22 65, 20 55, 22 45 C24 35, 28 28, 32 22 C34 19, 36 16, 38 14" fill="url(#fifaGold)" stroke="#8B6914" stroke-width="0.5" stroke-linecap="round"/>
-            <path d="M55 72 C58 65, 60 55, 58 45 C56 35, 52 28, 48 22 C46 19, 44 16, 42 14" fill="url(#fifaGold)" stroke="#8B6914" stroke-width="0.5" stroke-linecap="round"/>
-            <circle cx="40" cy="28" r="14" fill="url(#fifaGold)" stroke="#8B6914" stroke-width="0.5"/>
-            <ellipse cx="36" cy="24" rx="6" ry="8" fill="url(#fifaHighlight)" opacity="0.5" transform="rotate(-20 36 24)"/>
-            <ellipse cx="40" cy="28" rx="12" ry="4" fill="none" stroke="#9A7B3D" stroke-width="0.8" opacity="0.6"/>
-            <ellipse cx="40" cy="28" rx="10" ry="7" fill="none" stroke="#9A7B3D" stroke-width="0.8" opacity="0.5"/>
-            <ellipse cx="40" cy="28" rx="5" ry="13" fill="none" stroke="#9A7B3D" stroke-width="0.8" opacity="0.5"/>
-            <path d="M28 50 C30 48, 32 46, 34 44" fill="none" stroke="#9A7B3D" stroke-width="1" opacity="0.4"/>
-            <path d="M52 50 C50 48, 48 46, 46 44" fill="none" stroke="#9A7B3D" stroke-width="1" opacity="0.4"/>
-            <path d="M34 18 C36 16, 38 15, 40 15 C42 15, 44 16, 46 18" fill="url(#fifaGoldDark)" stroke="#7A5C2A" stroke-width="0.5"/>
-            <path d="M26 60 C24 50, 25 40, 28 32" fill="none" stroke="#FFF8DC" stroke-width="2" opacity="0.3" stroke-linecap="round"/>
-            <path d="M54 60 C56 50, 55 40, 52 32" fill="none" stroke="#FFF8DC" stroke-width="2" opacity="0.2" stroke-linecap="round"/>
-            <rect x="32" y="74" width="16" height="1.5" fill="#9A7B3D" opacity="0.5" rx="0.5"/>
-            <rect x="33" y="77" width="14" height="1.5" fill="#9A7B3D" opacity="0.4" rx="0.5"/>
+            <g class="trophy-body">
+                <path d="M15 35 C 5 35, 5 65, 25 70" fill="none" stroke="url(#goldShadow)" stroke-width="6" stroke-linecap="round"/>
+                <path d="M85 35 C 95 35, 95 65, 75 70" fill="none" stroke="url(#goldShadow)" stroke-width="6" stroke-linecap="round"/>
+                <rect x="35" y="95" width="30" height="8" rx="2" fill="url(#baseMat)" stroke="#1a120b" stroke-width="1"/>
+                <rect x="30" y="103" width="40" height="6" rx="2" fill="url(#baseMat)" stroke="#1a120b" stroke-width="1"/>
+                <rect x="42" y="75" width="16" height="20" fill="url(#goldMain)" stroke="#755818" stroke-width="0.5"/>
+                <path d="M25 30 Q 25 80, 50 80 Q 75 80, 75 30 L 70 30 Q 70 70, 50 70 Q 30 70, 30 30 Z" fill="url(#goldMain)" stroke="#755818" stroke-width="1"/>
+                <ellipse cx="50" cy="30" rx="25" ry="6" fill="none" stroke="#FFF6D5" stroke-width="2"/>
+                <ellipse cx="50" cy="30" rx="25" ry="6" fill="url(#goldShadow)" opacity="0.3"/>
+                <path d="M25 35 C 10 35, 10 60, 28 65" fill="none" stroke="url(#goldMain)" stroke-width="5" stroke-linecap="round"/>
+                <path d="M75 35 C 90 35, 90 60, 72 65" fill="none" stroke="url(#goldMain)" stroke-width="5" stroke-linecap="round"/>
+                <path d="M35 35 Q 35 60, 45 70" fill="none" stroke="url(#shine)" stroke-width="3" opacity="0.6" stroke-linecap="round"/>
+                <circle cx="30" cy="40" r="2" fill="white" opacity="0.4"/>
+            </g>
         </svg>`;
 
     const createPodiumItem = (item, rank, positionClass, delay) => {
-        const isGold = rank === 1;
-        
         return `
         <div class="podium-item ${positionClass}" style="--item-delay: ${delay}s">
             <div class="podium-content">
+                <div class="trophy-glow">
+                    ${trophySvg}
+                </div>
                 <div class="podium-rank">#${rank}</div>
                 <div class="podium-name">${(item.key || "INCONNU").toUpperCase()}</div>
             </div>
             
             <div class="podium-bar ${positionClass}">
-                ${isGold ? `<div class="trophy-glow">${trophySvg}</div>` : ''}
-                <div class="podium-bar-points">${item.point ?? 0} PTS</div>
+                <!-- Added burning-points class -->
+                <div class="podium-bar-points burning-points">${item.point ?? 0} PTS</div>
             </div>
         </div>`;
     };
 
     let html = '<div class="podium-flex">';
-    // Order: 2nd -> 1st -> 3rd for visual centering
     if (show2) html += createPodiumItem(rankMap[2], 2, 'second', 0.1);
     if (show1) html += createPodiumItem(rankMap[1], 1, 'first', 0.25);
     if (show3) html += createPodiumItem(rankMap[3], 3, 'third', 0.4);
