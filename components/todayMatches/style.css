@@ -22,7 +22,6 @@
     display: flex; justify-content: center; align-items: center;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; 
     overflow: hidden;
-    background: #020205; /* Pitch black for max neon contrast */
 }
 
 .tm-card-container-main { 
