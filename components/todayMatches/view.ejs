@@ -10,7 +10,6 @@
     <script src="/assets/global/helpers/configHelper.js?v=<%= Version %>"></script>
 
     <link rel="stylesheet" href="/assets/<%= componentName %>/style.css?v=<%= Version %>">
-    
     <link rel="stylesheet" href="/assets/<%= componentName %>/partial-header.css?v=<%= Version %>">
     <link rel="stylesheet" href="/assets/<%= componentName %>/partial-matchup.css?v=<%= Version %>">
     <link rel="stylesheet" href="/assets/<%= componentName %>/partial-footer.css?v=<%= Version %>">
@@ -25,16 +24,13 @@
                     <div class="tm-gradient-orb-main tm-orb-1-main"></div>
                     <div class="tm-gradient-orb-main tm-orb-2-main"></div>
                     <div class="tm-gradient-orb-main tm-orb-3-main"></div>
-                    <div class="tm-mesh-gradient-main"></div>
                     <div class="tm-noise-overlay-main"></div>
                 </div>
                 <div class="tm-glass-overlay-main"></div>
 
                 <div class="tm-card-content-main">
                     <%- include('partials/header/view') %>
-
                     <%- include('partials/matchup/view') %>
-
                     <%- include('partials/footer/view') %>
                 </div>
 
@@ -43,7 +39,6 @@
     </div>
 
     <script src="/assets/<%= componentName %>/script.js?v=<%= Version %>"></script>
-    
     <script src="/assets/<%= componentName %>/partial-matchup.js?v=<%= Version %>"></script>
 </body>
 </html>
