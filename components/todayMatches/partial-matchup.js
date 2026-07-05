@@ -388,9 +388,28 @@ style.textContent = `
         100% { opacity: 1; transform: translate(-50%, -50%) scaleX(1); }
     }
     
+    /* FIX: Updated animation to include translateX(-50%) so the crown stays centered while animating */
+    /* FIX: Updated animation to include translateX(-50%) so the crown stays centered while animating */
     @keyframes badgeSlideUp {
-        0% { opacity: 0; transform: translateY(10px); }
-        100% { opacity: 1; transform: translateY(0); }
+        0% { 
+            opacity: 0; 
+            transform: translateX(-50%) translateY(20px) scale(0.5) rotate(-10deg); 
+            filter: drop-shadow(0 0 0px rgba(255, 215, 0, 0));
+        }
+        60% {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-5px) scale(1.1) rotate(5deg);
+        }
+        100% { 
+            opacity: 1; 
+            transform: translateX(-50%) translateY(0) scale(1) rotate(0deg); 
+            /* Re-apply the full gold filter at the end */
+            filter: 
+                drop-shadow(0 1px 0px #FFF8DC) 
+                drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6)) 
+                drop-shadow(0 0 15px rgba(255, 215, 0, 0.7)) 
+                drop-shadow(0 0 30px rgba(255, 165, 0, 0.4));
+        }
     }
 
     @keyframes scorePopUpdate {
@@ -417,16 +436,8 @@ style.textContent = `
         text-shadow: 0 0 15px rgba(59, 130, 246, 0.8);
     }
     
-    .tm-crown-matchup {
-        display: none;
-        position: absolute;
-        top: -20px;
-        left: 50%;
-        transform: translateX(-50%);
-        color: #fbbf24;
-        font-size: 24px;
-        z-index: 10;
-    }
+    /* FIX: REMOVED the old .tm-crown-matchup block that was forcing top: -20px. 
+       This was causing the crown to escape the container and get clipped by overflow: hidden. */
     
     .tm-penalty-section-matchup {
         display: none;
