@@ -1,6 +1,6 @@
 /* =========================================
-   FIFA / EA SPORTS FC - FULL PREMIUM GLASSMORPHISM
-   High-Contrast, Neon, Slanted, Aggressive, Animated
+   FIFA / EA SPORTS FC - TRUE GLASSMORPHISM
+   Transparent Glass, Neon Refraction, Animated
    ========================================= */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700;800;900&display=swap');
@@ -9,7 +9,11 @@
     --neon-cyan: #00f0ff;
     --neon-magenta: #ff0055;
     --neon-purple: #7000ff;
-    --glass-bg: rgba(5, 5, 15, 0.75);
+    
+    /* FIX: True transparent glass base (was 0.75, now 0.03) */
+    --glass-bg: rgba(255, 255, 255, 0.03); 
+    --glass-border: rgba(255, 255, 255, 0.15);
+    --glass-highlight: rgba(255, 255, 255, 0.25);
 }
 
 /* Reset & Base */
@@ -22,6 +26,7 @@
     display: flex; justify-content: center; align-items: center;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; 
     overflow: hidden;
+    background: #020205; /* Pitch black to make neon pop */
 }
 
 .tm-card-container-main { 
@@ -115,10 +120,12 @@
     100% { transform: translateY(-100%); opacity: 0; }
 }
 
+/* FIX: Increased opacity on orbs so they bleed through the glass */
 .tm-gradient-orb-main {
     position: absolute; border-radius: 50%; 
-    filter: blur(clamp(80px, 15vw, 150px)); 
-    opacity: 0.3; pointer-events: none; mix-blend-mode: screen;
+    filter: blur(clamp(60px, 12vw, 120px)); 
+    opacity: 0.65; /* Was 0.3, now much brighter */
+    pointer-events: none; mix-blend-mode: screen;
 }
 
 /* Orb 1 - Cyan (Top Right) */
@@ -146,7 +153,7 @@
 .tm-orb-4-main { 
     width: clamp(180px, 22vw, 320px); height: clamp(180px, 22vw, 320px); 
     background: radial-gradient(circle, #ffffff 0%, var(--neon-cyan) 50%, transparent 70%); 
-    top: 20%; left: 15%; animation: orbFloat4 20s ease-in-out infinite; opacity: 0.15;
+    top: 20%; left: 15%; animation: orbFloat4 20s ease-in-out infinite; opacity: 0.4;
 }
 
 @keyframes orbFloat1 { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(30px, -40px) scale(1.15); } }
@@ -165,10 +172,14 @@
 
 .tm-glass-overlay-main {
     position: absolute; inset: 0; 
+    /* FIX: True transparent glass */
     background: var(--glass-bg);
-    backdrop-filter: blur(24px) saturate(150%); 
-    -webkit-backdrop-filter: blur(24px) saturate(150%);
+    /* FIX: Heavy blur and saturation to create the frosted glass refraction */
+    backdrop-filter: blur(40px) saturate(250%); 
+    -webkit-backdrop-filter: blur(40px) saturate(250%);
     z-index: 5; pointer-events: none;
+    /* FIX: Inner border to simulate the physical edge of the glass */
+    box-shadow: inset 0 0 0 1px var(--glass-border);
 }
 
 /* ANIMATION: The "Rare Card" Holographic Sweep */
@@ -236,11 +247,13 @@
     display: flex; flex-direction: column; align-items: flex-end;
     gap: 0.25rem;
     padding: clamp(0.5rem, 1vw, 0.75rem) clamp(1rem, 2vw, 1.5rem);
+    /* FIX: Transparent glass for the badge */
     background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(15px) saturate(180%);
+    -webkit-backdrop-filter: blur(15px) saturate(180%);
     clip-path: polygon(10px 0, 100% 0, 100% 100%, 0 100%);
     border-left: 3px solid var(--neon-magenta);
-    box-shadow: 0 0 15px rgba(255, 0, 85, 0.3);
+    box-shadow: 0 0 15px rgba(255, 0, 85, 0.3), inset 0 1px 0 var(--glass-highlight);
 }
 
 .tm-date-label { font-size: clamp(0.7rem, 1.2vw, 0.9rem); color: var(--neon-magenta); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
@@ -258,12 +271,15 @@
 /* Empty State */
 .tm-empty-state-main {
     text-align: center; padding: clamp(1.5rem, 4vw, 3rem); 
-    background: rgba(10, 15, 30, 0.6); backdrop-filter: blur(20px);
-    border-radius: 20px; border: 1px solid rgba(0, 240, 255, 0.2);
+    /* FIX: Transparent glass for empty state */
+    background: rgba(255, 255, 255, 0.04); 
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border-radius: 20px; border: 1px solid var(--glass-border);
     width: 100%; height: 100%; 
     display: flex; flex-direction: column; justify-content: center; align-items: center;
     gap: clamp(1rem, 2vw, 1.5rem);
-    box-shadow: 0 0 30px rgba(0, 240, 255, 0.1);
+    box-shadow: 0 0 30px rgba(0, 240, 255, 0.1), inset 0 1px 0 var(--glass-highlight);
 }
 
 .tm-empty-icon-main { 
@@ -278,26 +294,33 @@
 }
 
 .tm-empty-state-main p { 
-    font-size: clamp(1rem, 2.5vw, 1.3rem); color: #888; font-weight: 500; line-height: 1.5; 
+    font-size: clamp(1rem, 2.5vw, 1.3rem); color: rgba(255,255,255,0.6); font-weight: 500; line-height: 1.5; 
 }
 
 /* Match Card */
 .tm-match-card {
     width: 100%; max-width: clamp(600px, 80vw, 900px);
-    background: linear-gradient(160deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0.01) 100%);
-    backdrop-filter: blur(16px);
+    /* FIX: True transparent glass gradient */
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.01) 100%);
+    backdrop-filter: blur(30px) saturate(200%);
+    -webkit-backdrop-filter: blur(30px) saturate(200%);
     border-radius: 20px;
-    border: 1px solid rgba(0, 240, 255, 0.25);
+    /* FIX: Brighter border to define the glass shape */
+    border: 1px solid rgba(255, 255, 255, 0.2);
     padding: clamp(1.5rem, 3vw, 2.5rem);
     display: flex; flex-direction: column; gap: clamp(1.5rem, 3vw, 2.5rem);
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 240, 255, 0.15);
+    box-shadow: 
+        0 20px 50px rgba(0, 0, 0, 0.4), 
+        0 0 30px rgba(0, 240, 255, 0.1),
+        /* FIX: Top inner highlight for glass thickness */
+        inset 0 1px 0 var(--glass-highlight); 
     position: relative; overflow: hidden;
     transition: all 0.3s ease;
 }
 
 .tm-match-card:hover {
-    border-color: rgba(0, 240, 255, 0.5);
-    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 40px rgba(0, 240, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6), 0 0 40px rgba(0, 240, 255, 0.3), inset 0 1px 0 rgba(255,255,255,0.4);
 }
 
 /* Teams Container */
@@ -311,18 +334,20 @@
 .tm-team-flag {
     width: clamp(60px, 10vw, 100px); height: clamp(60px, 10vw, 100px);
     border-radius: 50%;
-    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.15), rgba(0,0,0,0.6));
-    border: 2px solid rgba(0, 240, 255, 0.4);
+    /* FIX: Glassy flag background */
+    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2), rgba(0,0,0,0.4));
+    border: 2px solid rgba(255, 255, 255, 0.3);
     display: flex; align-items: center; justify-content: center;
     font-size: clamp(2rem, 4vw, 3.5rem);
-    box-shadow: 0 0 25px rgba(0, 240, 255, 0.3), inset 0 0 15px rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 25px rgba(0, 240, 255, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
     transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .tm-team:hover .tm-team-flag {
     transform: scale(1.1) rotate(-5deg);
     border-color: var(--neon-magenta);
-    box-shadow: 0 0 35px var(--neon-magenta);
+    box-shadow: 0 0 35px var(--neon-magenta), inset 0 2px 4px rgba(255,255,255,0.3);
 }
 
 .tm-team-name {
@@ -341,14 +366,14 @@
     border: 2px solid rgba(255, 255, 255, 0.4);
     transform: skewX(-12deg);
     border-radius: 16px;
-    box-shadow: 0 0 30px rgba(255, 0, 85, 0.5), 0 0 60px rgba(112, 0, 255, 0.3);
+    box-shadow: 0 0 30px rgba(255, 0, 85, 0.5), 0 0 60px rgba(112, 0, 255, 0.3), inset 0 1px 0 rgba(255,255,255,0.3);
     z-index: 2; position: relative;
     animation: vsPulse 2s ease-in-out infinite;
 }
 
 @keyframes vsPulse {
-    0%, 100% { box-shadow: 0 0 30px rgba(255, 0, 85, 0.5), 0 0 60px rgba(112, 0, 255, 0.3); }
-    50% { box-shadow: 0 0 50px rgba(255, 0, 85, 0.8), 0 0 100px rgba(112, 0, 255, 0.5); }
+    0%, 100% { box-shadow: 0 0 30px rgba(255, 0, 85, 0.5), 0 0 60px rgba(112, 0, 255, 0.3), inset 0 1px 0 rgba(255,255,255,0.3); }
+    50% { box-shadow: 0 0 50px rgba(255, 0, 85, 0.8), 0 0 100px rgba(112, 0, 255, 0.5), inset 0 1px 0 rgba(255,255,255,0.5); }
 }
 
 .tm-vs-badge::before {
@@ -371,7 +396,7 @@
 .tm-match-info {
     display: flex; justify-content: center; gap: clamp(1.5rem, 3vw, 3rem);
     padding-top: clamp(1rem, 2vw, 1.5rem);
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
     position: relative; z-index: 2;
 }
 
@@ -400,7 +425,7 @@
     line-height: 1;
 }
 
-.tm-counter-label { font-size: clamp(0.75rem, 1.3vw, 0.95rem); color: #888; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+.tm-counter-label { font-size: clamp(0.75rem, 1.3vw, 0.95rem); color: rgba(255,255,255,0.5); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
 
 .tm-navigation-dots { display: flex; gap: clamp(0.5rem, 1vw, 0.75rem); }
 
@@ -429,8 +454,12 @@
     position: absolute; inset: 0;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     gap: clamp(1.5rem, 3vw, 2.5rem);
-    z-index: 100; background: rgba(2, 2, 5, 0.95);
-    backdrop-filter: blur(20px); border-radius: inherit;
+    z-index: 100; 
+    /* FIX: Transparent glass for loading overlay */
+    background: rgba(2, 2, 5, 0.6);
+    backdrop-filter: blur(20px) saturate(150%);
+    -webkit-backdrop-filter: blur(20px) saturate(150%);
+    border-radius: inherit;
     animation: fadeIn 0.3s ease;
 }
 
@@ -521,7 +550,7 @@
 
 .tm-error-state-main p {
     font-family: 'Space Grotesk', sans-serif;
-    font-size: clamp(1rem, 2vw, 1.4rem); color: #888;
+    font-size: clamp(1rem, 2vw, 1.4rem); color: rgba(255,255,255,0.6);
 }
 
 .tm-retry-btn-main {
@@ -602,8 +631,8 @@
 /* High DPI / Retina displays */
 @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
     .tm-glass-overlay-main {
-        backdrop-filter: blur(30px) saturate(180%); 
-        -webkit-backdrop-filter: blur(30px) saturate(180%);
+        backdrop-filter: blur(50px) saturate(300%); 
+        -webkit-backdrop-filter: blur(50px) saturate(300%);
     }
 }
 
