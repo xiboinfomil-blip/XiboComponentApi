@@ -64,8 +64,8 @@ function renderMatchup(match) {
     }
 
     // --- TEXT UPDATES ---
-    const teamAName = normalizedMatch.homeTeam || normalizedMatch.team_a || 'Équipe A';
-    const teamBName = normalizedMatch.awayTeam || normalizedMatch.team_b || 'Équipe B';
+    const teamAName = normalizedMatch.homeTeam || normalizedMatch.team_a || normalizedMatch.teamA?.name || 'Équipe A';
+    const teamBName = normalizedMatch.awayTeam || normalizedMatch.team_b || normalizedMatch.teamB?.name || 'Équipe B';
     
     if (matchupEls.teamA.name && matchupEls.teamA.name.textContent !== teamAName) {
         matchupEls.teamA.name.textContent = teamAName;
@@ -75,8 +75,8 @@ function renderMatchup(match) {
     }
     
     // --- SCORE UPDATES ---
-    const scoreA = normalizedMatch.scoreInfo?.fulltime?.home;
-    const scoreB = normalizedMatch.scoreInfo?.fulltime?.away;
+    const scoreA = normalizedMatch.scoreInfo?.fulltime?.home ?? normalizedMatch.teamA?.score;
+    const scoreB = normalizedMatch.scoreInfo?.fulltime?.away ?? normalizedMatch.teamB?.score;
 
     updateScoreWithAnimation(matchupEls.teamA.score, scoreA, 'a');
     updateScoreWithAnimation(matchupEls.teamB.score, scoreB, 'b');
@@ -99,7 +99,7 @@ function renderMatchup(match) {
     if (matchupEls.vsBadge) matchupEls.vsBadge.style.display = 'flex';
 
     // --- STATUS & LIVE EFFECTS ---
-    applyStatus(normalizedMatch.statusInfo, normalizedMatch);
+    applyStatus(normalizedMatch.statusInfo || normalizedMatch.status, normalizedMatch);
     
     // --- TIMER DISPLAY ---
     updateTimerDisplay(normalizedMatch);
@@ -132,11 +132,11 @@ function updateScoreWithAnimation(el, newScore, teamKey) {
 }
 
 function updatePenaltyScores(match) {
-    if (!match.scoreInfo) return;
+    if (!match.scoreInfo && !match.penalty) return;
     
-    const hasPenalties = match.scoreInfo.hasPenalties;
-    const penaltyHome = match.scoreInfo.penalty?.home; 
-    const penaltyAway = match.scoreInfo.penalty?.away;
+    const hasPenalties = match.scoreInfo?.hasPenalties || match.penalty !== null;
+    const penaltyHome = match.scoreInfo?.penalty?.home ?? match.penalty?.teamA; 
+    const penaltyAway = match.scoreInfo?.penalty?.away ?? match.penalty?.teamB;
     
     updateTeamPenalty(matchupEls.teamA, hasPenalties, penaltyHome, 'a');
     updateTeamPenalty(matchupEls.teamB, hasPenalties, penaltyAway, 'b');
@@ -162,8 +162,8 @@ function updateTeamPenalty(teamObj, hasPenalties, score, key) {
 }
 
 function renderGoalEvents(match) {
-    const homeGoals = match.goals?.home || [];
-    const awayGoals = match.goals?.away || [];
+    const homeGoals = match.goals?.home || match.teamA?.scorers || [];
+    const awayGoals = match.goals?.away || match.teamB?.scorers || [];
     
     renderEventsList(matchupEls.teamA.events, homeGoals);
     renderEventsList(matchupEls.teamB.events, awayGoals);
@@ -184,12 +184,12 @@ function renderEventsList(container, goals) {
         const eventEl = document.createElement('div');
         eventEl.className = 'tm-event-matchup'; 
         
-        let timeText = goal.time;
-        if (goal.extra) timeText += ` +${goal.extra}`;
+        let timeText = goal.time || goal.minute;
+        if (goal.extra || goal.extra_time) timeText += ` +${goal.extra || goal.extra_time}`;
         
         eventEl.innerHTML = `
             <span class="tm-event-time-matchup">${timeText}'</span>
-            <span class="tm-event-player-matchup">${goal.player || 'Unknown'}</span>
+            <span class="tm-event-player-matchup">${goal.player || goal.name || 'Unknown'}</span>
         `;
         container.appendChild(eventEl);
     });
@@ -257,7 +257,7 @@ function setFlag(teamObj, url, fallbackText, teamKey) {
 function applyStatus(info, match) {
     if (!info) return;
 
-    const displayStatus = info.status || 'upcoming';
+    const displayStatus = info.status || info.state || 'upcoming';
     const isLive = info.isLive || false;
 
     if (matchupEls.statusBadge) {
@@ -284,10 +284,13 @@ function applyStatus(info, match) {
 function updateTimerDisplay(match) {
     if (!matchupEls.timer) return;
 
-    if (match.statusInfo) {
-        const time = match.statusInfo.timeString || 
-                     match.statusInfo.time || 
-                     match.statusInfo.clock || 
+    const statusInfo = match.statusInfo || match.status;
+    
+    if (statusInfo) {
+        const time = statusInfo.timeString || 
+                     statusInfo.time || 
+                     statusInfo.clock || 
+                     match.matchTime?.display ||
                      match.time || 
                      '--:--';
         
@@ -295,7 +298,7 @@ function updateTimerDisplay(match) {
             matchupEls.timer.textContent = time;
         }
         
-        if (match.statusInfo.isLive) {
+        if (statusInfo.isLive) {
             if (!matchupEls.timer.classList.contains('is-live-pulse')) {
                 matchupEls.timer.classList.add('is-live-pulse');
             }
@@ -315,35 +318,99 @@ function applyResult(match) {
 
     const card = matchupEls.card;
     
-    const a = match.scoreInfo?.fulltime?.home;
-    const b = match.scoreInfo?.fulltime?.away;
-    const hasPenalties = match.scoreInfo?.hasPenalties;
-    const winnerDraw = match.winner;
-
-    // Determine the new state safely
-    let newState = null;
-    if (a !== null && a !== undefined && b !== null && b !== undefined) {
-        if (winnerDraw === 'Draw') {
-            newState = 'draw';
-        } else if (winnerDraw) {
-            newState = winnerDraw === (match.homeTeam || match.team_a) ? 'a' : 'b';
+    // CRITICAL: Check if match is ACTUALLY FINISHED first
+    const isFinished = match.statusInfo?.isFinished === true || 
+                       match.statusInfo?.status === 'finished';
+    
+    // If match is NOT finished, clear all result states and return early
+    if (!isFinished) {
+        // FIX: Always clear states regardless of prevResultState
+        prevResultState = null;
+        card.classList.remove('is-winner', 'is-draw');
+        
+        if (matchupEls.teamA.container) matchupEls.teamA.container.classList.remove('is-winner', 'is-loser');
+        if (matchupEls.teamB.container) matchupEls.teamB.container.classList.remove('is-winner', 'is-loser');
+        
+        if (matchupEls.teamA.badge) { 
+            matchupEls.teamA.badge.style.opacity = '0'; 
+            matchupEls.teamA.badge.innerHTML = ''; 
         }
+        if (matchupEls.teamB.badge) { 
+            matchupEls.teamB.badge.style.opacity = '0'; 
+            matchupEls.teamB.badge.innerHTML = ''; 
+        }
+        
+        // FIX: Hide crowns immediately and CLEAR inline animations
+        // The 'forwards' fill mode keeps opacity: 1, so we must clear the animation string
+        if (matchupEls.teamA.crown) {
+            matchupEls.teamA.crown.style.display = 'none';
+            matchupEls.teamA.crown.style.animation = ''; 
+        }
+        if (matchupEls.teamB.crown) {
+            matchupEls.teamB.crown.style.display = 'none';
+            matchupEls.teamB.crown.style.animation = '';
+        }
+        
+        if (matchupEls.drawRibbon) {
+            matchupEls.drawRibbon.style.display = 'none';
+            matchupEls.drawRibbon.style.animation = '';
+        }
+        
+        return; // <-- EXIT EARLY if not finished
+    }
+    
+    // Only proceed if match is finished
+    const a = match.scoreInfo?.fulltime?.home ?? match.teamA?.score;
+    const b = match.scoreInfo?.fulltime?.away ?? match.teamB?.score;
+    const hasPenalties = match.scoreInfo?.hasPenalties || match.penalty !== null;
+    
+    // Determine winner team
+    let winnerTeam = null;
+    if (match.winner) {
+        if (match.winner === 'home') winnerTeam = match.homeTeam || match.team_a || match.teamA?.name;
+        else if (match.winner === 'away') winnerTeam = match.awayTeam || match.team_b || match.teamB?.name;
+        else if (match.winner === 'draw') winnerTeam = 'Draw';
+    } else if (match.teamA?.winner || match.teamB?.winner) {
+        if (match.teamA.winner) winnerTeam = match.teamA.name;
+        else if (match.teamB.winner) winnerTeam = match.teamB.name;
+        else if (match.teamA.isDraw) winnerTeam = 'Draw';
+    }
+
+    // Determine the new state
+    let newState = null;
+    if (winnerTeam === 'Draw' || winnerTeam === 'draw') {
+        newState = 'draw';
+    } else if (winnerTeam) {
+        const homeTeam = match.homeTeam || match.team_a || match.teamA?.name;
+        newState = winnerTeam === homeTeam ? 'a' : 'b';
     }
 
     // Only update DOM if the result state actually changed
     if (prevResultState === newState) return;
     prevResultState = newState;
 
-    // Clear previous states
+    // Clear previous states (in case switching from winner to draw or vice versa)
     card.classList.remove('is-winner', 'is-draw');
     if (matchupEls.teamA.container) matchupEls.teamA.container.classList.remove('is-winner', 'is-loser');
     if (matchupEls.teamB.container) matchupEls.teamB.container.classList.remove('is-winner', 'is-loser');
     
     if (matchupEls.teamA.badge) { matchupEls.teamA.badge.style.opacity = '0'; matchupEls.teamA.badge.innerHTML = ''; }
     if (matchupEls.teamB.badge) { matchupEls.teamB.badge.style.opacity = '0'; matchupEls.teamB.badge.innerHTML = ''; }
-    if (matchupEls.teamA.crown) matchupEls.teamA.crown.style.display = 'none';
-    if (matchupEls.teamB.crown) matchupEls.teamB.crown.style.display = 'none';
-    if (matchupEls.drawRibbon) matchupEls.drawRibbon.style.display = 'none';
+    
+    // FIX: Also clear crown animations here before applying new ones
+    if (matchupEls.teamA.crown) {
+        matchupEls.teamA.crown.style.display = 'none';
+        matchupEls.teamA.crown.style.animation = '';
+    }
+    if (matchupEls.teamB.crown) {
+        matchupEls.teamB.crown.style.display = 'none';
+        matchupEls.teamB.crown.style.animation = '';
+    }
+    
+    if (matchupEls.drawRibbon) {
+        matchupEls.drawRibbon.style.display = 'none';
+        matchupEls.drawRibbon.style.animation = '';
+    }
 
     if (newState === 'draw') {
         card.classList.add('is-draw');
@@ -388,8 +455,6 @@ style.textContent = `
         100% { opacity: 1; transform: translate(-50%, -50%) scaleX(1); }
     }
     
-    /* FIX: Updated animation to include translateX(-50%) so the crown stays centered while animating */
-    /* FIX: Updated animation to include translateX(-50%) so the crown stays centered while animating */
     @keyframes badgeSlideUp {
         0% { 
             opacity: 0; 
@@ -403,7 +468,6 @@ style.textContent = `
         100% { 
             opacity: 1; 
             transform: translateX(-50%) translateY(0) scale(1) rotate(0deg); 
-            /* Re-apply the full gold filter at the end */
             filter: 
                 drop-shadow(0 1px 0px #FFF8DC) 
                 drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6)) 
@@ -435,9 +499,6 @@ style.textContent = `
         color: #60a5fa;
         text-shadow: 0 0 15px rgba(59, 130, 246, 0.8);
     }
-    
-    /* FIX: REMOVED the old .tm-crown-matchup block that was forcing top: -20px. 
-       This was causing the crown to escape the container and get clipped by overflow: hidden. */
     
     .tm-penalty-section-matchup {
         display: none;

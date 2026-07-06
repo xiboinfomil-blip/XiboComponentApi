@@ -10,14 +10,12 @@ const STALE_CACHE_KEY = 'today_matches_stale_v1';
  */
 function getMsUntilNextExpiration() {
     const now = new Date();
-    // Target: 6 AM Mauritius = 2 AM UTC
     const targetHourUTC = 2; 
     
     const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
     let nextExpiration = new Date(today);
     nextExpiration.setUTCHours(targetHourUTC, 0, 0, 0);
 
-    // If 2 AM UTC has already passed today, set it to tomorrow
     if (now.getTime() >= nextExpiration.getTime()) {
         nextExpiration.setUTCDate(nextExpiration.getUTCDate() + 1);
     }
@@ -38,37 +36,185 @@ const formatDuration = (ms) => {
     return parts.join(' ');
 };
 
-const getMatchStatusInfo = (matchDateStr) => {
+const getMatchStatusInfo = (match) => {
     const now = new Date();
-    // Ensure date is parsed as UTC if string doesn't specify timezone
-    const matchDate = new Date(matchDateStr.replace(' ', 'T') + 'Z'); 
+    const matchDate = new Date(match.date.replace(' ', 'T') + '+04:00'); 
     const diffMs = matchDate.getTime() - now.getTime();
     
-    // Assume a match is "Live" for 2 hours after kickoff for this demo
-    const LIVE_WINDOW_MS = 2 * 60 * 60 * 1000; 
-
+    const LIVE_WINDOW_MS = 2 * 60 * 60 * 1000;
+    const currentStatus = (match.current_status || '').toLowerCase();
+    
+    // Use API's current_status if available
+    if (currentStatus === 'finished') {
+        return {
+            status: 'finished',
+            label: 'Terminé',
+            timeString: 'Terminé',
+            isLive: false,
+            isFinished: true
+        };
+    }
+    
+    if (['inprogress', 'playing', '1st_half', '2nd_half', 'halftime', 'extra_time', 'penalty', 'live'].includes(currentStatus)) {
+        return {
+            status: 'live',
+            label: 'EN DIRECT',
+            timeString: 'LIVE',
+            isLive: true,
+            isFinished: false
+        };
+    }
+    
+    // Fallback to time-based calculation
     if (diffMs > 0) {
         return {
             status: 'upcoming',
             label: 'À venir',
             timeString: formatDuration(diffMs),
-            isLive: false
+            isLive: false,
+            isFinished: false
         };
     } else if (Math.abs(diffMs) < LIVE_WINDOW_MS) {
         return {
             status: 'live',
             label: 'EN DIRECT',
             timeString: `+${formatDuration(Math.abs(diffMs))}`,
-            isLive: true
+            isLive: true,
+            isFinished: false
         };
     } else {
         return {
             status: 'finished',
-            label: 'Terminé', // Full Time
+            label: 'Terminé', 
             timeString: 'Terminé',
-            isLive: false
+            isLive: false,
+            isFinished: true
         };
     }
+};
+
+/**
+ * Maps raw API match data to the new structured object format.
+ * Handles the flat API structure with team_a, fulltime_a, scorers array, etc.
+ */
+const mapMatchData = (match) => {
+    const statusInfo = getMatchStatusInfo(match);
+    
+    // Get scores from flat structure
+    const scoreA = match.fulltime_a ?? null;
+    const scoreB = match.fulltime_b ?? null;
+    
+    // Determine actual finished state (overrides buggy fulltime field)
+    const isFinished = statusInfo.isFinished === true;
+    
+    // Parse scorers from flat array - split by team name
+    const rawScorers = Array.isArray(match.scorers) ? match.scorers : [];
+    
+    const scorersA = rawScorers
+        .filter(s => s.team?.name === match.team_a)
+        .map(s => ({
+            name: s.player?.name || 'Inconnu',
+            minute: s.time?.elapsed || 0,
+            extra_time: s.time?.extra || null,
+            detail: s.detail || ''
+        }))
+        .sort((a, b) => a.minute - b.minute);
+    
+    const scorersB = rawScorers
+        .filter(s => s.team?.name === match.team_b)
+        .map(s => ({
+            name: s.player?.name || 'Inconnu',
+            minute: s.time?.elapsed || 0,
+            extra_time: s.time?.extra || null,
+            detail: s.detail || ''
+        }))
+        .sort((a, b) => a.minute - b.minute);
+    
+    // Determine winner based on winner_draw field (contains winning team name or null)
+    let winnerA = false;
+    let winnerB = false;
+    let isDraw = false;
+    
+    if (isFinished) {
+        if (match.winner_draw === match.team_a) {
+            winnerA = true;
+        } else if (match.winner_draw === match.team_b) {
+            winnerB = true;
+        } else if (match.winner_draw === null || match.winner_draw === 'draw') {
+            isDraw = true;
+        }
+    }
+    
+    // Check for penalties
+    const hasPenalties = match.penalty_shootout === true && 
+                        match.penalty_a !== null && 
+                        match.penalty_b !== null;
+
+    return {
+        id: match.id || null,
+        date: match.date,
+        
+        // --- Competition & Context ---
+        competition: {
+            name: match.competition_name || match.tournament || "Euro 2024",
+            logo: match.competition_logo || null,
+            stage: match.phase || match.round || match.group || null
+        },
+        
+        // --- Venue Details ---
+        venue: {
+            name: match.stadium || null,
+            city: match.city || null,
+            capacity: match.capacity || null,
+            image: match.stadium_image || null
+        },
+
+        // --- Actual Match Minute & Period ---
+        matchTime: {
+            minute: match.minute || null,
+            period: match.period || null,
+            display: match.minute ? `${match.minute}'` : statusInfo.timeString
+        },
+
+        status: {
+            state: statusInfo.status,
+            label: statusInfo.label,
+            timeString: statusInfo.timeString,
+            isLive: statusInfo.isLive,
+            isFinished: isFinished
+        },
+
+        teamA: {
+            name: match.team_a,
+            id: match.team_a_id || null,
+            logo: match.logo_a || match.flag_a || null,
+            score: scoreA,
+            htScore: match.halftime_a ?? null,
+            scorers: scorersA,
+            cards: match.cards_a || match.events_cards_a || [],
+            substitutions: match.subs_a || match.events_subs_a || [],
+            winner: winnerA,
+            isDraw: isDraw
+        },
+        teamB: {
+            name: match.team_b,
+            id: match.team_b_id || null,
+            logo: match.logo_b || match.flag_b || null,
+            score: scoreB,
+            htScore: match.halftime_b ?? null,
+            scorers: scorersB,
+            cards: match.cards_b || match.events_cards_b || [],
+            substitutions: match.subs_b || match.events_subs_b || [],
+            winner: winnerB,
+            isDraw: isDraw
+        },
+        
+        // Penalty info
+        penalty: hasPenalties ? {
+            teamA: match.penalty_a,
+            teamB: match.penalty_b
+        } : null
+    };
 };
 
 /**
@@ -78,7 +224,6 @@ const getMatchStatusInfo = (matchDateStr) => {
  * @param {boolean} config.forceRefetch - Force bypass cache and pull fresh data
  */
 module.exports.getTodayMatches = async (config = {}) => {
-    // Destructure with defaults to ensure backward compatibility if called without config
     const { useDummyData = false, forceRefetch = false } = config;
     
     const apiUrl = "https://euro.omediainteractive.net/imleuro/items/matches";
@@ -93,24 +238,46 @@ module.exports.getTodayMatches = async (config = {}) => {
         const todayStr = new Date().toISOString().split('T')[0];
         return [
             {
+                id: 1,
                 date: `${todayStr} 18:00:00`,
-                group: "Groupe A",
+                competition_name: "UEFA Euro 2024",
+                phase: "Groupe A",
                 stadium: "Olympiastadion",
-                team_a: "Allemagne",
-                team_b: "Écosse",
-                fulltime: false,
-                fulltime_a: null,
-                fulltime_b: null
+                city: "Berlin",
+                capacity: 74475,
+                team_a: "Allemagne", team_a_id: "ger", logo_a: "/images/flags/ger.png",
+                team_b: "Écosse", team_b_id: "sco", logo_b: "/images/flags/sco.png",
+                fulltime_a: 5, fulltime_b: 1,
+                halftime_a: 3, halftime_b: 0,
+                current_status: "finished",
+                winner_draw: "Allemagne",
+                scorers: [
+                    { time: { elapsed: 10 }, team: { name: "Allemagne" }, player: { name: "Florian Wirtz" }, detail: "Normal Goal" },
+                    { time: { elapsed: 45 }, team: { name: "Allemagne" }, player: { name: "Jamal Musiala" }, detail: "Normal Goal" },
+                    { time: { elapsed: 68 }, team: { name: "Allemagne" }, player: { name: "Kai Havertz" }, detail: "Normal Goal" },
+                    { time: { elapsed: 87 }, team: { name: "Écosse" }, player: { name: "Antonio Rüdiger" }, detail: "Own Goal" }
+                ],
+                penalty_shootout: false,
+                penalty_a: null,
+                penalty_b: null
             },
             {
+                id: 2,
                 date: `${todayStr} 20:45:00`,
-                group: "Groupe B",
+                competition_name: "UEFA Euro 2024",
+                phase: "Groupe B",
                 stadium: "Allianz Arena",
-                team_a: "Espagne",
-                team_b: "Italie",
-                fulltime: false,
-                fulltime_a: null,
-                fulltime_b: null
+                city: "Munich",
+                team_a: "Espagne", team_a_id: "esp", logo_a: "/images/flags/esp.png",
+                team_b: "Italie", team_b_id: "ita", logo_b: "/images/flags/ita.png",
+                fulltime_a: null, fulltime_b: null,
+                halftime_a: null, halftime_b: null,
+                current_status: "pending",
+                winner_draw: null,
+                scorers: [],
+                penalty_shootout: false,
+                penalty_a: null,
+                penalty_b: null
             }
         ];
     };
@@ -124,8 +291,7 @@ module.exports.getTodayMatches = async (config = {}) => {
                 const cachedMatches = await kv.get(MATCHES_CACHE_KEY);
                 if (cachedMatches && Array.isArray(cachedMatches)) {
                     console.log("[getTodayMatches] ✅ Serving matches from Vercel KV cache");
-                    // Recalculate status info dynamically because time passes even if data is cached
-                    return cachedMatches.map(m => ({ ...m, statusInfo: getMatchStatusInfo(m.date) }));
+                    return cachedMatches.map(mapMatchData);
                 }
                 console.log("[getTodayMatches] ⚠️ Cache miss. Fetching from external API...");
             } catch (cacheError) {
@@ -148,7 +314,7 @@ module.exports.getTodayMatches = async (config = {}) => {
                     'User-Agent': 'Express-App/1.0', 
                     'Accept': 'application/json' 
                 }
-            }, 3); // 3 retries with exponential backoff
+            }, 3);
 
             const rawMatches = payload?.data || [];
             const todayStr = new Date().toISOString().split('T')[0];
@@ -162,33 +328,25 @@ module.exports.getTodayMatches = async (config = {}) => {
             console.log("[getTodayMatches] Filtered matches count:", matchesData.length);
         }
 
-        console.log("[getTodayMatches] Enriching matches with status info...");
-        const enrichedMatches = matchesData.map(match => ({
-            ...match,
-            statusInfo: getMatchStatusInfo(match.date)
-        }));
-
         // --- STEP 2: Save / Update KV Cache ---
-        if (enrichedMatches.length > 0 && !useDummyData) {
+        if (matchesData.length > 0 && !useDummyData) {
             try {
                 const msUntilExp = getMsUntilNextExpiration();
                 const secondsUntilExp = Math.floor(msUntilExp / 1000);
                 
-                // Store in KV with expiration
-                await kv.set(MATCHES_CACHE_KEY, enrichedMatches, { ex: secondsUntilExp });
+                await kv.set(MATCHES_CACHE_KEY, matchesData, { ex: secondsUntilExp });
+                await kv.set(STALE_CACHE_KEY, matchesData, { ex: 86400 });
                 
-                // Also store in stale cache for longer retention (24 hours)
-                await kv.set(STALE_CACHE_KEY, enrichedMatches, { ex: 86400 });
-                
-                console.log(`[getTodayMatches] 💾 Matches updated in KV for ${secondsUntilExp}s and stale cache for 24h.`);
+                console.log(`[getTodayMatches] 💾 Raw matches updated in KV for ${secondsUntilExp}s and stale cache for 24h.`);
             } catch (cacheWriteError) {
                 console.error("[getTodayMatches] Failed to write to KV cache:", cacheWriteError.message);
             }
         }
 
-        console.log("[getTodayMatches] ✅ Returning", enrichedMatches.length, "matches");
+        console.log("[getTodayMatches] ✅ Returning", matchesData.length, "matches");
         console.log("=".repeat(80));
-        return enrichedMatches;
+        
+        return matchesData.map(mapMatchData);
 
     } catch (error) {
         console.error("=".repeat(80));
@@ -197,21 +355,18 @@ module.exports.getTodayMatches = async (config = {}) => {
         console.error("[getTodayMatches] Stack:", error.stack);
         console.error("=".repeat(80));
         
-        // Fallback: Try to return cached data if API fails
         if (!useDummyData) {
             try {
-                // First try fresh cache
                 const fallbackCache = await kv.get(MATCHES_CACHE_KEY);
                 if (fallbackCache && Array.isArray(fallbackCache)) {
                     console.log("[getTodayMatches] ⚠️ API failed, returning fresh cache from KV");
-                    return fallbackCache.map(m => ({ ...m, statusInfo: getMatchStatusInfo(m.date) }));
+                    return fallbackCache.map(mapMatchData);
                 }
                 
-                // Then try stale cache (older but better than nothing)
                 const staleCache = await kv.get(STALE_CACHE_KEY);
                 if (staleCache && Array.isArray(staleCache)) {
                     console.log("[getTodayMatches] ⚠️⚠️ API failed, returning OLD stale cache from KV");
-                    return staleCache.map(m => ({ ...m, statusInfo: getMatchStatusInfo(m.date) }));
+                    return staleCache.map(mapMatchData);
                 }
                 
                 console.log("[getTodayMatches] ⚠️⚠️⚠️ No cache available, returning empty array");
@@ -224,5 +379,4 @@ module.exports.getTodayMatches = async (config = {}) => {
     }
 };
 
-// Export circuit breaker for monitoring/debugging
 module.exports.circuitBreaker = circuitBreaker;

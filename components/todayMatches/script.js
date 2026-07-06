@@ -72,123 +72,107 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     /* ---------- Data Normalization ---------- */
-    const normalizeMatchData = (apiMatch) => {
+  const normalizeMatchData = (apiMatch) => {
         if (!apiMatch) return null;
 
         const matchDate = new Date(apiMatch.date.replace(' ', 'T') + '+04:00'); 
         const now = new Date();
-        const currentStatus = apiMatch.current_status?.toLowerCase() || '';
         
-        // Check if match has actual scores
-        const hasScores = apiMatch.fulltime_a !== null && apiMatch.fulltime_b !== null;
-        const hasHalftimeScores = apiMatch.halftime_a !== null && apiMatch.halftime_b !== null;
-        const hasScorers = Array.isArray(apiMatch.scorers) && apiMatch.scorers.length > 0;
+        const apiStatusInfo = apiMatch.statusInfo || {};
+        const currentStatus = (apiMatch.current_status || '').toLowerCase();
         
-        // Calculate time differences in minutes
-        const minutesSinceStart = Math.floor((now - matchDate) / (1000 * 60));
-        const estimatedEndTime = new Date(matchDate.getTime() + (120 * 60 * 1000)); // 120 minutes max for regular + extra time
-        const minutesSinceEnd = Math.floor((now - estimatedEndTime) / (1000 * 60));
-        
-        const liveStatuses = ['inprogress', 'playing', '1st_half', '2nd_half', 'halftime', 'extra_time', 'penalty', 'live'];
-        const isApiLive = liveStatuses.some(status => currentStatus.includes(status));
+        const isApiLive = ['inprogress', 'playing', '1st_half', '2nd_half', 'halftime', 'extra_time', 'penalty', 'live'].includes(currentStatus);
         const isApiFinished = currentStatus === 'finished';
         const isApiPending = currentStatus === 'pending';
         
-        let statusKey = 'upcoming';
-        let isLive = false;
-        let isAwaitingScore = false;
-        let timeString = '';
-        let label = '';
+        let statusKey = apiStatusInfo.status || 'upcoming';
+        if (statusKey === 'pending') statusKey = 'upcoming';
+        
+        const isLive = apiStatusInfo.isLive === true || isApiLive;
+        const isFinished = statusKey === 'finished' || isApiFinished;
+        
+        const minutesSinceStart = Math.floor((now - matchDate) / (1000 * 60));
+        const estimatedEndTime = new Date(matchDate.getTime() + (120 * 60 * 1000)); 
+        const minutesSinceEnd = Math.floor((now - estimatedEndTime) / (1000 * 60));
+        
+        const scoreA = apiMatch.fulltime_a ?? null;
+        const scoreB = apiMatch.fulltime_b ?? null;
+        const hasScores = scoreA !== null && scoreB !== null && (scoreA > 0 || scoreB > 0 || isFinished);
+        
+        const hasPenalties = apiMatch.penalty_shootout === true && 
+                            apiMatch.penalty_a !== null && 
+                            apiMatch.penalty_b !== null;
 
         const timeOptions = { hour: '2-digit', minute: '2-digit' };
         const formattedTime = !isNaN(matchDate.getTime()) 
             ? matchDate.toLocaleTimeString('fr-FR', timeOptions) 
             : apiMatch.date.split(' ')[1]?.substring(0, 5);
 
-        // Determine status based on API status, scores, and time
-        if (isApiFinished) {
-            if (hasScores) {
-                // Finished with scores - check if penalties exist
-                statusKey = 'finished';
-                label = 'Match terminé';
-                timeString = formattedTime;
-            } else {
-                // Finished but NO scores yet - awaiting score
-                statusKey = 'awaiting_score';
-                isAwaitingScore = true;
-                label = 'En attente du score';
-                timeString = formattedTime;
-            }
-        } else if (isApiLive || (now > matchDate && minutesSinceStart < 120 && !hasScores)) {
-            // Live match: API says live OR started recently and no scores yet
-            statusKey = 'live';
-            isLive = true;
-            label = 'Live';
-            timeString = 'LIVE'; 
-        } else if (now > matchDate && minutesSinceStart >= 120 && !hasScores) {
-            // Should be finished based on time but no scores
-            if (minutesSinceEnd >= 30) {
-                // 30+ minutes after estimated end with no scores
-                statusKey = 'awaiting_score';
-                isAwaitingScore = true;
-                label = 'En attente du score';
-                timeString = formattedTime;
-            } else {
-                // Just finished, might still be updating
-                statusKey = 'finished';
-                label = 'Match terminé';
-                timeString = formattedTime;
-            }
-        } else if (isApiPending && now > matchDate) {
-            // API says pending but time has passed - likely live or just finished
-            if (!hasScores && minutesSinceStart < 120) {
-                statusKey = 'live';
-                isLive = true;
-                label = 'Live';
-                timeString = 'LIVE';
-            } else if (!hasScores) {
-                statusKey = 'awaiting_score';
-                isAwaitingScore = true;
-                label = 'En attente du score';
-                timeString = formattedTime;
-            } else {
-                statusKey = 'finished';
-                label = 'Match terminé';
-                timeString = formattedTime;
-            }
-        } else {
-            // Upcoming match
-            statusKey = 'upcoming';
-            label = 'À venir';
+        let label = apiStatusInfo.label || '';
+        let timeString = apiStatusInfo.timeString || formattedTime;
+
+        if (statusKey === 'upcoming') {
+            label = label || 'À venir';
+            timeString = formattedTime;
+        } else if (statusKey === 'live') {
+            label = label || 'Live';
+            timeString = 'LIVE';
+        } else if (statusKey === 'finished') {
+            label = label || 'Match terminé';
             timeString = formattedTime;
         }
 
-        // Parse Scorers from API
         const rawScorers = Array.isArray(apiMatch.scorers) ? apiMatch.scorers : [];
-        const goalsA = rawScorers.filter(s => s.team?.name === apiMatch.team_a).map(s => ({
-            player: s.player?.name || 'Inconnu',
-            time: s.time?.elapsed || 0,
-            extra: s.time?.extra || null,
-            detail: s.detail || ''
-        })).sort((a, b) => a.time - b.time);
+        
+        const goalsA = rawScorers
+            .filter(s => s.team?.name === apiMatch.team_a)
+            .map(s => ({
+                player: s.player?.name || 'Inconnu',
+                time: s.time?.elapsed || 0,
+                extra: s.time?.extra || null,
+                detail: s.detail || ''
+            }))
+            .sort((a, b) => a.time - b.time);
 
-        const goalsB = rawScorers.filter(s => s.team?.name === apiMatch.team_b).map(s => ({
-            player: s.player?.name || 'Inconnu',
-            time: s.time?.elapsed || 0,
-            extra: s.time?.extra || null,
-            detail: s.detail || ''
-        })).sort((a, b) => a.time - b.time);
+        const goalsB = rawScorers
+            .filter(s => s.team?.name === apiMatch.team_b)
+            .map(s => ({
+                player: s.player?.name || 'Inconnu',
+                time: s.time?.elapsed || 0,
+                extra: s.time?.extra || null,
+                detail: s.detail || ''
+            }))
+            .sort((a, b) => a.time - b.time);
 
-        const hasPenalties = apiMatch.penalty_shootout === true && 
-                            apiMatch.penalty_a !== null && 
-                            apiMatch.penalty_b !== null;
+        // ONLY determine winner if match is ACTUALLY FINISHED
+        let winnerKey = null;
+        if (isFinished) {
+            if (apiMatch.winner_draw === apiMatch.team_a) {
+                winnerKey = 'home';
+            } else if (apiMatch.winner_draw === apiMatch.team_b) {
+                winnerKey = 'away';
+            } else if (apiMatch.winner_draw === null || apiMatch.winner_draw === 'draw') {
+                winnerKey = 'draw';
+            }
+        }
 
         return {
             ...apiMatch,
+            id: apiMatch.id,
+            date: apiMatch.date,
+            team_a: apiMatch.team_a,
+            team_b: apiMatch.team_b,
+            fulltime_a: scoreA,
+            fulltime_b: scoreB,
+            halftime_a: apiMatch.halftime_a ?? null,
+            halftime_b: apiMatch.halftime_b ?? null,
+            
+            // CRITICAL: Add isFinished flag to statusInfo
             statusInfo: { 
                 status: statusKey, 
                 isLive, 
-                isAwaitingScore,
+                isFinished,  // <-- ADD THIS
+                isAwaitingScore: false, 
                 timeString, 
                 label,
                 minutesSinceStart,
@@ -197,7 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 hasPenalties
             },
             scoreInfo: {
-                fulltime: { home: apiMatch.fulltime_a ?? null, away: apiMatch.fulltime_b ?? null },
+                fulltime: { home: scoreA ?? null, away: scoreB ?? null },
                 halftime: { home: apiMatch.halftime_a ?? null, away: apiMatch.halftime_b ?? null },
                 penalty: hasPenalties ? { home: apiMatch.penalty_a, away: apiMatch.penalty_b } : null,
                 hasPenalties
@@ -205,8 +189,8 @@ document.addEventListener('DOMContentLoaded', () => {
             goals: { home: goalsA, away: goalsB },
             homeTeam: apiMatch.team_a,
             awayTeam: apiMatch.team_b,
-            winner: apiMatch.winner_draw,
-            finalScore: `${apiMatch.fulltime_a ?? '-'}-${apiMatch.fulltime_b ?? '-'}`,
+            winner: winnerKey, 
+            finalScore: `${scoreA ?? '-'}-${scoreB ?? '-'}`,
             penaltyScore: hasPenalties ? `${apiMatch.penalty_a}-${apiMatch.penalty_b}` : null
         };
     };
@@ -300,17 +284,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const queryString = params.toString();
             const REAL_BACKEND_URL = 'https://xibo-component-api.vercel.app';
-        const apiUrl = queryString 
-    ? `${REAL_BACKEND_URL}/api/todayMatches?${queryString}` 
-    : `${REAL_BACKEND_URL}/api/todayMatches`;
+            const apiUrl = queryString 
+                ? `${REAL_BACKEND_URL}/api/todayMatches?${queryString}` 
+                : `${REAL_BACKEND_URL}/api/todayMatches`;
+                
             const response = await fetch(apiUrl);
             if (!response.ok) throw new Error(`Network response was not ok: ${response.status}`);
             
             const result = await response.json();
+            console.log('Fetched matches:', result);
+            // Handle both { data: [...] } and direct array responses
             const rawData = result.data || result;
 
             if (rawData && Array.isArray(rawData) && rawData.length > 0) {
-                matches = rawData.map(normalizeMatchData);
+                matches = rawData.map(normalizeMatchData).filter(m => m !== null);
                 
                 if (currentMatchIndex >= matches.length) currentMatchIndex = 0;
                 
@@ -520,12 +507,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!match) return;
                 
                 if (match.statusInfo.isLive) {
-                    const matchStart = new Date(match.date.replace(' ', 'T') + '+04:00');
-                    const now = new Date();
-                    const elapsed = Math.floor((now - matchStart) / 1000);
-                    const minutes = Math.floor(elapsed / 60);
-                    const seconds = elapsed % 60;
-                    els.timerDisplay.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                    // Use backend match minute if available (more accurate)
+                    if (match.matchTime && match.matchTime.minute) {
+                        els.timerDisplay.textContent = match.matchTime.display;
+                    } else {
+                        const matchStart = new Date(match.date.replace(' ', 'T') + '+04:00');
+                        const now = new Date();
+                        const elapsed = Math.floor((now - matchStart) / 1000);
+                        const minutes = Math.floor(elapsed / 60);
+                        const seconds = elapsed % 60;
+                        els.timerDisplay.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                    }
                 } else if (match.statusInfo.status === 'upcoming') {
                     const matchStart = new Date(match.date.replace(' ', 'T') + '+04:00');
                     const now = new Date();
