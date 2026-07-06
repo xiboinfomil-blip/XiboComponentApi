@@ -237,49 +237,72 @@ module.exports.getTodayMatches = async (config = {}) => {
     const getDummyMatches = () => {
         const todayStr = new Date().toISOString().split('T')[0];
         return [
-            {
-                id: 1,
-                date: `${todayStr} 18:00:00`,
-                competition_name: "UEFA Euro 2024",
-                phase: "Groupe A",
-                stadium: "Olympiastadion",
-                city: "Berlin",
-                capacity: 74475,
-                team_a: "Allemagne", team_a_id: "ger", logo_a: "/images/flags/ger.png",
-                team_b: "Écosse", team_b_id: "sco", logo_b: "/images/flags/sco.png",
-                fulltime_a: 5, fulltime_b: 1,
-                halftime_a: 3, halftime_b: 0,
-                current_status: "finished",
-                winner_draw: "Allemagne",
-                scorers: [
-                    { time: { elapsed: 10 }, team: { name: "Allemagne" }, player: { name: "Florian Wirtz" }, detail: "Normal Goal" },
-                    { time: { elapsed: 45 }, team: { name: "Allemagne" }, player: { name: "Jamal Musiala" }, detail: "Normal Goal" },
-                    { time: { elapsed: 68 }, team: { name: "Allemagne" }, player: { name: "Kai Havertz" }, detail: "Normal Goal" },
-                    { time: { elapsed: 87 }, team: { name: "Écosse" }, player: { name: "Antonio Rüdiger" }, detail: "Own Goal" }
-                ],
-                penalty_shootout: false,
-                penalty_a: null,
-                penalty_b: null
-            },
-            {
-                id: 2,
-                date: `${todayStr} 20:45:00`,
-                competition_name: "UEFA Euro 2024",
-                phase: "Groupe B",
-                stadium: "Allianz Arena",
-                city: "Munich",
-                team_a: "Espagne", team_a_id: "esp", logo_a: "/images/flags/esp.png",
-                team_b: "Italie", team_b_id: "ita", logo_b: "/images/flags/ita.png",
-                fulltime_a: null, fulltime_b: null,
-                halftime_a: null, halftime_b: null,
-                current_status: "pending",
-                winner_draw: null,
-                scorers: [],
-                penalty_shootout: false,
-                penalty_a: null,
-                penalty_b: null
-            }
-        ];
+    {
+        id: 1,
+        date: `${todayStr} 18:00:00`,
+        competition_name: "UEFA Euro 2024",
+        phase: "Groupe A",
+        stadium: "Olympiastadion",
+        city: "Berlin",
+        capacity: 74475,
+        team_a: "Allemagne", team_a_id: "ger", logo_a: "/images/flags/ger.png",
+        team_b: "Écosse", team_b_id: "sco", logo_b: "/images/flags/sco.png",
+        fulltime_a: 5, fulltime_b: 1,
+        halftime_a: 3, halftime_b: 0,
+        current_status: "finished",
+        winner_draw: "Allemagne",
+        scorers: [
+            { time: { elapsed: 10 }, team: { name: "Allemagne" }, player: { name: "Florian Wirtz" }, detail: "Normal Goal" },
+            { time: { elapsed: 45 }, team: { name: "Allemagne" }, player: { name: "Jamal Musiala" }, detail: "Normal Goal" },
+            { time: { elapsed: 68 }, team: { name: "Allemagne" }, player: { name: "Kai Havertz" }, detail: "Normal Goal" },
+            { time: { elapsed: 87 }, team: { name: "Écosse" }, player: { name: "Antonio Rüdiger" }, detail: "Own Goal" }
+        ],
+        penalty_shootout: false,
+        penalty_a: null,
+        penalty_b: null
+    },
+    {
+        // --- NEW LIVE MATCH ---
+        id: 3,
+        date: `${todayStr} 21:00:00`,
+        competition_name: "UEFA Euro 2024",
+        phase: "Groupe F",
+        stadium: "Signal Iduna Park",
+        city: "Dortmund",
+        capacity: 65849,
+        team_a: "France", team_a_id: "fra", logo_a: "/images/flags/fra.png",
+        team_b: "Portugal", team_b_id: "por", logo_b: "/images/flags/por.png",
+        fulltime_a: 1, fulltime_b: 1, // Current live score
+        halftime_a: 1, halftime_b: 0,
+        current_status: "live", // Triggers the 'isLive' logic in your normalizer
+        winner_draw: null,
+        scorers: [
+            { time: { elapsed: 23 }, team: { name: "France" }, player: { name: "Kylian Mbappé" }, detail: "Normal Goal" },
+            { time: { elapsed: 55 }, team: { name: "Portugal" }, player: { name: "Cristiano Ronaldo" }, detail: "Normal Goal" }
+        ],
+        penalty_shootout: false,
+        penalty_a: null,
+        penalty_b: null
+    },
+    {
+        id: 2,
+        date: `${todayStr} 20:45:00`,
+        competition_name: "UEFA Euro 2024",
+        phase: "Groupe B",
+        stadium: "Allianz Arena",
+        city: "Munich",
+        team_a: "Espagne", team_a_id: "esp", logo_a: "/images/flags/esp.png",
+        team_b: "Italie", team_b_id: "ita", logo_b: "/images/flags/ita.png",
+        fulltime_a: null, fulltime_b: null,
+        halftime_a: null, halftime_b: null,
+        current_status: "pending",
+        winner_draw: null,
+        scorers: [],
+        penalty_shootout: false,
+        penalty_a: null,
+        penalty_b: null
+    }
+];
     };
 
     // --- STEP 1: Check KV Cache (Bypassed if refetch is true) ---

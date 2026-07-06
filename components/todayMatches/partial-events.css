@@ -1,0 +1,304 @@
+/* =========================================
+   FIFA WORLD CUP 2026 STYLE - FULL SUITE
+   ========================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@500;700;900&display=swap');
+
+:root {
+    --fifa-bg: #0a0a0c;
+    --fifa-surface: rgba(255, 255, 255, 0.03);
+    --fifa-border: rgba(255, 255, 255, 0.08);
+    --fifa-accent-gold: #FFD700;
+    --fifa-accent-orange: #FF5A00;
+    --fifa-accent-crimson: #E30613;
+    --fifa-accent-blue: #0057FF; 
+    --fifa-text-primary: #FFFFFF;
+    --fifa-text-secondary: #9CA3AF;
+}
+
+/* --- 1. PENALTY SECTION (The "Live Scoreboard" Badge) --- */
+.tm-penalty-section-matchup {
+    display: none;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(0.4rem, 1.2vmin, 0.8rem);
+    margin-top: clamp(0.5rem, 1.5vmin, 1rem);
+    padding: clamp(0.4rem, 1vmin, 0.8rem) clamp(1rem, 2.5vmin, 1.5rem);
+    background: linear-gradient(135deg, rgba(227, 6, 19, 0.15) 0%, rgba(255, 90, 0, 0.15) 100%);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    border-radius: 12px;
+    box-shadow: 
+        0 10px 30px -10px rgba(255, 90, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    opacity: 0;
+    transform: translateY(20px) scale(0.9);
+    transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.tm-penalty-section-matchup::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.2), transparent);
+    animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+.tm-penalty-section-matchup.visible {
+    opacity: 1;
+    display: flex !important;
+    transform: translateY(0) scale(1);
+}
+
+.tm-penalty-icon-matchup {
+    width: clamp(10px, 2vmin, 16px);
+    height: clamp(10px, 2vmin, 16px);
+    background: var(--fifa-accent-gold);
+    border-radius: 50%;
+    box-shadow: 0 0 15px var(--fifa-accent-gold), 0 0 5px var(--fifa-accent-orange);
+    position: relative;
+    flex-shrink: 0;
+}
+
+.tm-penalty-icon-matchup::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 200%;
+    height: 200%;
+    border: 2px solid var(--fifa-accent-gold);
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scale(0.5);
+    opacity: 0.5;
+    animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+}
+
+@keyframes pulse-ring {
+    0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0.8; }
+    100% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; }
+}
+
+.tm-penalty-label-matchup {
+    font-family: 'Montserrat', sans-serif;
+    font-size: clamp(0.65rem, 1.2vmin, 0.85rem);
+    font-weight: 800;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--fifa-text-secondary);
+    margin: 0;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+}
+
+.tm-penalty-score-matchup {
+    font-family: 'Bebas Neue', 'Oswald', sans-serif;
+    font-size: clamp(1.8rem, 5vmin, 3.5rem); 
+    font-weight: 400;
+    line-height: 1;
+    background: linear-gradient(180deg, #FFFFFF 0%, #FFD700 50%, #FF5A00 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 4px 12px rgba(255, 90, 0, 0.5));
+    margin-left: 0.2rem;
+    letter-spacing: 2px;
+}
+
+/* --- 2. GOAL EVENTS LIST (Base Styles) --- */
+.tm-goal-events-matchup {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(0.2rem, 0.8vmin, 0.6rem);
+    margin-top: clamp(0.5rem, 1.5vmin, 1rem);
+    width: 100%;
+    flex: 1;
+    min-height: 0;
+    max-height: 100%;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--fifa-accent-orange) transparent;
+    flex-shrink: 1;
+    padding: 4px;
+}
+
+.tm-goal-events-matchup::-webkit-scrollbar { width: 6px; }
+.tm-goal-events-matchup::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 10px;
+}
+.tm-goal-events-matchup::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, var(--fifa-accent-crimson), var(--fifa-accent-orange));
+    border-radius: 10px;
+    box-shadow: 0 0 5px var(--fifa-accent-orange);
+}
+
+.tm-event-matchup {
+    display: flex;
+    align-items: center;
+    gap: clamp(0.4rem, 1.2vmin, 0.8rem);
+    padding: clamp(0.4rem, 1vmin, 0.7rem) clamp(0.6rem, 1.5vmin, 1rem);
+    border-radius: 8px;
+    background: var(--fifa-surface);
+    border-left: 4px solid var(--fifa-accent-crimson);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    animation: eventSlideIn 0.6s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+    opacity: 0;
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s ease, background 0.3s ease, border-color 0.3s ease;
+}
+
+.tm-event-matchup::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, rgba(227, 6, 19, 0.1) 0%, transparent 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.tm-event-matchup:hover {
+    transform: translateX(6px) scale(1.02);
+    background: rgba(255, 255, 255, 0.06);
+    border-left-color: var(--fifa-accent-orange);
+    z-index: 10;
+}
+
+.tm-event-matchup:hover::before { opacity: 1; }
+
+@keyframes eventSlideIn {
+    from { opacity: 0; transform: translateX(-30px) scale(0.9); filter: blur(8px); }
+    to { opacity: 1; transform: translateX(0) scale(1); filter: blur(0); }
+}
+
+.tm-event-icon-matchup {
+    width: clamp(8px, 1.5vmin, 12px);
+    height: clamp(8px, 1.5vmin, 12px);
+    background: var(--fifa-accent-orange);
+    border-radius: 50%;
+    box-shadow: 0 0 10px var(--fifa-accent-orange);
+    flex-shrink: 0;
+    position: relative;
+    z-index: 2;
+}
+
+.tm-event-time-matchup {
+    font-family: 'Montserrat', sans-serif;
+    font-size: clamp(0.7rem, 1.2vmin, 0.9rem);
+    font-weight: 900;
+    color: var(--fifa-text-primary);
+    background: rgba(255, 90, 0, 0.15);
+    border: 1px solid rgba(255, 90, 0, 0.3);
+    padding: 0.15rem 0.5rem;
+    border-radius: 6px;
+    min-width: 2.5rem;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+    position: relative;
+    z-index: 2;
+}
+
+.tm-event-player-matchup {
+    font-family: 'Montserrat', sans-serif;
+    font-size: clamp(0.75rem, 1.3vmin, 1rem);
+    font-weight: 700;
+    color: var(--fifa-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+    letter-spacing: 0.5px;
+    position: relative;
+    z-index: 2;
+}
+
+/* --- 3. GROUPED TIMES & MULTI-GOAL (BRACE/HAT-TRICK) STYLES --- */
+.tm-event-times-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: clamp(0.2rem, 0.6vmin, 0.4rem);
+    margin-left: auto; /* Pushes times to the right for Team A */
+    align-items: center;
+}
+
+.tm-team-b-matchup .tm-event-times-container {
+    margin-left: 0;
+    margin-right: auto; 
+}
+
+/* Golden styling for players who score 2+ goals */
+.tm-event-multi-matchup {
+    border-left-color: var(--fifa-accent-gold) !important;
+    background: linear-gradient(90deg, rgba(255, 215, 0, 0.08) 0%, var(--fifa-surface) 60%) !important;
+    box-shadow: 0 4px 20px rgba(255, 215, 0, 0.15);
+}
+
+.tm-team-b-matchup .tm-event-multi-matchup {
+    border-right-color: var(--fifa-accent-gold) !important;
+    background: linear-gradient(270deg, rgba(255, 215, 0, 0.08) 0%, var(--fifa-surface) 60%) !important;
+}
+
+.tm-event-multi-matchup .tm-event-icon-matchup {
+    background: var(--fifa-accent-gold);
+    box-shadow: 0 0 12px var(--fifa-accent-gold), 0 0 4px var(--fifa-accent-orange);
+    width: clamp(10px, 1.8vmin, 14px);
+    height: clamp(10px, 1.8vmin, 14px);
+}
+
+.tm-event-multi-matchup .tm-event-player-matchup {
+    color: #FFF;
+    text-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
+}
+
+/* --- 4. TEAM B (AWAY) ADJUSTMENTS --- */
+.tm-team-b-matchup .tm-event-matchup {
+    flex-direction: row-reverse;
+    text-align: right;
+    border-left: none;
+    border-right: 4px solid var(--fifa-accent-blue);
+    animation-name: eventSlideInRight;
+}
+
+.tm-team-b-matchup .tm-event-matchup::before {
+    background: linear-gradient(270deg, rgba(0, 87, 255, 0.1) 0%, transparent 100%);
+}
+
+.tm-team-b-matchup .tm-event-matchup:hover {
+    transform: translateX(-6px) scale(1.02);
+    border-right-color: #3B82F6;
+}
+
+.tm-team-b-matchup .tm-event-time-matchup {
+    background: rgba(0, 87, 255, 0.15);
+    border-color: rgba(0, 87, 255, 0.3);
+}
+
+.tm-team-b-matchup .tm-event-icon-matchup {
+    background: var(--fifa-accent-blue);
+    box-shadow: 0 0 10px var(--fifa-accent-blue);
+}
+
+@keyframes eventSlideInRight {
+    from { opacity: 0; transform: translateX(30px) scale(0.9); filter: blur(8px); }
+    to { opacity: 1; transform: translateX(0) scale(1); filter: blur(0); }
+}

@@ -72,128 +72,126 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     /* ---------- Data Normalization ---------- */
-  const normalizeMatchData = (apiMatch) => {
-        if (!apiMatch) return null;
+const normalizeMatchData = (apiMatch) => {
+    if (!apiMatch) return null;
 
-        const matchDate = new Date(apiMatch.date.replace(' ', 'T') + '+04:00'); 
-        const now = new Date();
-        
-        const apiStatusInfo = apiMatch.statusInfo || {};
-        const currentStatus = (apiMatch.current_status || '').toLowerCase();
-        
-        const isApiLive = ['inprogress', 'playing', '1st_half', '2nd_half', 'halftime', 'extra_time', 'penalty', 'live'].includes(currentStatus);
-        const isApiFinished = currentStatus === 'finished';
-        const isApiPending = currentStatus === 'pending';
-        
-        let statusKey = apiStatusInfo.status || 'upcoming';
-        if (statusKey === 'pending') statusKey = 'upcoming';
-        
-        const isLive = apiStatusInfo.isLive === true || isApiLive;
-        const isFinished = statusKey === 'finished' || isApiFinished;
-        
-        const minutesSinceStart = Math.floor((now - matchDate) / (1000 * 60));
-        const estimatedEndTime = new Date(matchDate.getTime() + (120 * 60 * 1000)); 
-        const minutesSinceEnd = Math.floor((now - estimatedEndTime) / (1000 * 60));
-        
-        const scoreA = apiMatch.fulltime_a ?? null;
-        const scoreB = apiMatch.fulltime_b ?? null;
-        const hasScores = scoreA !== null && scoreB !== null && (scoreA > 0 || scoreB > 0 || isFinished);
-        
-        const hasPenalties = apiMatch.penalty_shootout === true && 
-                            apiMatch.penalty_a !== null && 
-                            apiMatch.penalty_b !== null;
+    const matchDate = new Date(apiMatch.date.replace(' ', 'T') + '+04:00'); 
+    const now = new Date();
+    
+    // 1. Map Status correctly from apiMatch.status
+    const apiStatus = apiMatch.status || {};
+    const statusKey = apiStatus.state || 'upcoming'; 
+    const isLive = apiStatus.isLive === true;
+    const isFinished = apiStatus.isFinished === true;
+    
+    const minutesSinceStart = Math.floor((now - matchDate) / (1000 * 60));
+    const estimatedEndTime = new Date(matchDate.getTime() + (120 * 60 * 1000)); 
+    const minutesSinceEnd = Math.floor((now - estimatedEndTime) / (1000 * 60));
+    
+    // 2. Map Scores correctly from teamA/teamB objects
+    const scoreA = apiMatch.teamA?.score ?? null;
+    const scoreB = apiMatch.teamB?.score ?? null;
+    const htScoreA = apiMatch.teamA?.htScore ?? null;
+    const htScoreB = apiMatch.teamB?.htScore ?? null;
+    
+    const hasScores = scoreA !== null && scoreB !== null && (scoreA > 0 || scoreB > 0 || isFinished);
+    
+    // 3. Map Penalties
+    const hasPenalties = apiMatch.penalty !== null && apiMatch.penalty !== undefined;
 
-        const timeOptions = { hour: '2-digit', minute: '2-digit' };
-        const formattedTime = !isNaN(matchDate.getTime()) 
-            ? matchDate.toLocaleTimeString('fr-FR', timeOptions) 
-            : apiMatch.date.split(' ')[1]?.substring(0, 5);
+    const timeOptions = { hour: '2-digit', minute: '2-digit' };
+    const formattedTime = !isNaN(matchDate.getTime()) 
+        ? matchDate.toLocaleTimeString('fr-FR', timeOptions) 
+        : apiMatch.date.split(' ')[1]?.substring(0, 5);
 
-        let label = apiStatusInfo.label || '';
-        let timeString = apiStatusInfo.timeString || formattedTime;
+    let label = apiStatus.label || '';
+    let timeString = apiStatus.timeString || formattedTime;
 
-        if (statusKey === 'upcoming') {
-            label = label || 'À venir';
-            timeString = formattedTime;
-        } else if (statusKey === 'live') {
-            label = label || 'Live';
-            timeString = 'LIVE';
-        } else if (statusKey === 'finished') {
-            label = label || 'Match terminé';
-            timeString = formattedTime;
+    if (statusKey === 'upcoming') {
+        label = label || 'À venir';
+        timeString = formattedTime;
+    } else if (statusKey === 'live') {
+        label = label || 'Live';
+        timeString = 'LIVE';
+    } else if (statusKey === 'finished') {
+        label = label || 'Match terminé';
+        timeString = formattedTime;
+    }
+
+    // 4. Map Scorers correctly from teamA.scorers and teamB.scorers
+    const rawScorersA = Array.isArray(apiMatch.teamA?.scorers) ? apiMatch.teamA.scorers : [];
+    const rawScorersB = Array.isArray(apiMatch.teamB?.scorers) ? apiMatch.teamB.scorers : [];
+    
+    const goalsA = rawScorersA
+        .map(s => ({
+            player: s.name || 'Inconnu',
+            time: s.minute || 0,
+            extra: s.extra_time || null,
+            detail: s.detail || ''
+        }))
+        .sort((a, b) => a.time - b.time);
+
+    const goalsB = rawScorersB
+        .map(s => ({
+            player: s.name || 'Inconnu',
+            time: s.minute || 0,
+            extra: s.extra_time || null,
+            detail: s.detail || ''
+        }))
+        .sort((a, b) => a.time - b.time);
+
+    // 5. Map Winner correctly from team booleans
+    let winnerKey = null;
+    if (isFinished) {
+        if (apiMatch.teamA?.winner) {
+            winnerKey = 'home';
+        } else if (apiMatch.teamB?.winner) {
+            winnerKey = 'away';
+        } else if (apiMatch.teamA?.isDraw || apiMatch.teamB?.isDraw) {
+            winnerKey = 'draw';
         }
+    }
 
-        const rawScorers = Array.isArray(apiMatch.scorers) ? apiMatch.scorers : [];
+    return {
+        ...apiMatch, // Preserves matchTime, venue, competition, etc. for other functions
+        id: apiMatch.id,
+        date: apiMatch.date,
         
-        const goalsA = rawScorers
-            .filter(s => s.team?.name === apiMatch.team_a)
-            .map(s => ({
-                player: s.player?.name || 'Inconnu',
-                time: s.time?.elapsed || 0,
-                extra: s.time?.extra || null,
-                detail: s.detail || ''
-            }))
-            .sort((a, b) => a.time - b.time);
-
-        const goalsB = rawScorers
-            .filter(s => s.team?.name === apiMatch.team_b)
-            .map(s => ({
-                player: s.player?.name || 'Inconnu',
-                time: s.time?.elapsed || 0,
-                extra: s.time?.extra || null,
-                detail: s.detail || ''
-            }))
-            .sort((a, b) => a.time - b.time);
-
-        // ONLY determine winner if match is ACTUALLY FINISHED
-        let winnerKey = null;
-        if (isFinished) {
-            if (apiMatch.winner_draw === apiMatch.team_a) {
-                winnerKey = 'home';
-            } else if (apiMatch.winner_draw === apiMatch.team_b) {
-                winnerKey = 'away';
-            } else if (apiMatch.winner_draw === null || apiMatch.winner_draw === 'draw') {
-                winnerKey = 'draw';
-            }
-        }
-
-        return {
-            ...apiMatch,
-            id: apiMatch.id,
-            date: apiMatch.date,
-            team_a: apiMatch.team_a,
-            team_b: apiMatch.team_b,
-            fulltime_a: scoreA,
-            fulltime_b: scoreB,
-            halftime_a: apiMatch.halftime_a ?? null,
-            halftime_b: apiMatch.halftime_b ?? null,
-            
-            // CRITICAL: Add isFinished flag to statusInfo
-            statusInfo: { 
-                status: statusKey, 
-                isLive, 
-                isFinished,  // <-- ADD THIS
-                isAwaitingScore: false, 
-                timeString, 
-                label,
-                minutesSinceStart,
-                minutesSinceEnd,
-                hasScores,
-                hasPenalties
-            },
-            scoreInfo: {
-                fulltime: { home: scoreA ?? null, away: scoreB ?? null },
-                halftime: { home: apiMatch.halftime_a ?? null, away: apiMatch.halftime_b ?? null },
-                penalty: hasPenalties ? { home: apiMatch.penalty_a, away: apiMatch.penalty_b } : null,
-                hasPenalties
-            },
-            goals: { home: goalsA, away: goalsB },
-            homeTeam: apiMatch.team_a,
-            awayTeam: apiMatch.team_b,
-            winner: winnerKey, 
-            finalScore: `${scoreA ?? '-'}-${scoreB ?? '-'}`,
-            penaltyScore: hasPenalties ? `${apiMatch.penalty_a}-${apiMatch.penalty_b}` : null
-        };
+        // Map to legacy keys in case external functions (applyStatus, renderMatchup) expect them
+        team_a: apiMatch.teamA?.name, 
+        team_b: apiMatch.teamB?.name,
+        fulltime_a: scoreA,
+        fulltime_b: scoreB,
+        halftime_a: htScoreA,
+        halftime_b: htScoreB,
+        
+        statusInfo: { 
+            status: statusKey, 
+            isLive, 
+            isFinished,  
+            isAwaitingScore: false, 
+            timeString, 
+            label,
+            minutesSinceStart,
+            minutesSinceEnd,
+            hasScores,
+            hasPenalties
+        },
+        scoreInfo: {
+            fulltime: { home: scoreA ?? null, away: scoreB ?? null },
+            halftime: { home: htScoreA ?? null, away: htScoreB ?? null },
+            penalty: hasPenalties ? apiMatch.penalty : null,
+            hasPenalties
+        },
+        goals: { home: goalsA, away: goalsB },
+        homeTeam: apiMatch.teamA?.name,
+        awayTeam: apiMatch.teamB?.name,
+        winner: winnerKey, 
+        finalScore: `${scoreA ?? '-'}-${scoreB ?? '-'}`,
+        // Adjust penalty score string based on your actual penalty object structure if it's not null
+        penaltyScore: hasPenalties ? `${apiMatch.penalty?.home ?? apiMatch.penalty?.scoreA ?? 0}-${apiMatch.penalty?.away ?? apiMatch.penalty?.scoreB ?? 0}` : null
     };
+};
 
     /* ---------- Smart Refetch Logic ---------- */
     const getRefetchKey = (type, matchId, time) => {

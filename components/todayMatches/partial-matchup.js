@@ -13,10 +13,7 @@ const matchupEls = {
         flag: document.getElementById('flag-a-matchup'),
         fallback: document.querySelector('#team-a-container-matchup .tm-flag-fallback-matchup'),
         badge: document.getElementById('badge-a-matchup'),
-        crown: document.getElementById('crown-a-matchup'),
-        penaltyScore: document.getElementById('penalty-score-a-matchup'),
-        penaltySection: document.getElementById('penalty-a-matchup'),
-        events: document.getElementById('events-a-matchup')
+        crown: document.getElementById('crown-a-matchup')
     },
     teamB: {
         container: document.getElementById('team-b-container-matchup'),
@@ -25,10 +22,7 @@ const matchupEls = {
         flag: document.getElementById('flag-b-matchup'),
         fallback: document.querySelector('#team-b-container-matchup .tm-flag-fallback-matchup'),
         badge: document.getElementById('badge-b-matchup'),
-        crown: document.getElementById('crown-b-matchup'),
-        penaltyScore: document.getElementById('penalty-score-b-matchup'),
-        penaltySection: document.getElementById('penalty-b-matchup'),
-        events: document.getElementById('events-b-matchup')
+        crown: document.getElementById('crown-b-matchup')
     }
 };
 
@@ -39,7 +33,6 @@ let currentMatchId = null;
 let prevFlags = { a: null, b: null };
 let prevResultState = null; // 'draw', 'a', 'b', or null
 let prevScores = { a: null, b: null };
-let prevPenalties = { a: null, b: null };
 
 function renderMatchup(match) {
     if (matchupEls.card && matchupEls.card.classList.contains('is-loading')) return;
@@ -60,7 +53,6 @@ function renderMatchup(match) {
         prevFlags = { a: null, b: null };
         prevResultState = null;
         prevScores = { a: null, b: null };
-        prevPenalties = { a: null, b: null };
     }
 
     // --- TEXT UPDATES ---
@@ -80,9 +72,6 @@ function renderMatchup(match) {
 
     updateScoreWithAnimation(matchupEls.teamA.score, scoreA, 'a');
     updateScoreWithAnimation(matchupEls.teamB.score, scoreB, 'b');
-
-    // --- PENALTY SCORES ---
-    updatePenaltyScores(normalizedMatch);
 
     // --- FLAGS (Only update if URL changed) ---
     const flagUrlA = flagUrl(teamAName);
@@ -104,11 +93,13 @@ function renderMatchup(match) {
     // --- TIMER DISPLAY ---
     updateTimerDisplay(normalizedMatch);
 
-    // --- GOAL EVENTS ---
-    renderGoalEvents(normalizedMatch);
-
     // --- RESULT LOGIC ---
     applyResult(normalizedMatch);
+
+    // --- EVENTS & PENALTIES (Delegated to partial-events.js) ---
+    if (typeof renderEventsPartial === 'function') {
+        renderEventsPartial(normalizedMatch);
+    }
 }
 
 function updateScoreWithAnimation(el, newScore, teamKey) {
@@ -129,70 +120,6 @@ function updateScoreWithAnimation(el, newScore, teamKey) {
         el.textContent = displayScore;
     }
     prevScores[teamKey] = displayScore;
-}
-
-function updatePenaltyScores(match) {
-    if (!match.scoreInfo && !match.penalty) return;
-    
-    const hasPenalties = match.scoreInfo?.hasPenalties || match.penalty !== null;
-    const penaltyHome = match.scoreInfo?.penalty?.home ?? match.penalty?.teamA; 
-    const penaltyAway = match.scoreInfo?.penalty?.away ?? match.penalty?.teamB;
-    
-    updateTeamPenalty(matchupEls.teamA, hasPenalties, penaltyHome, 'a');
-    updateTeamPenalty(matchupEls.teamB, hasPenalties, penaltyAway, 'b');
-}
-
-function updateTeamPenalty(teamObj, hasPenalties, score, key) {
-    if (!teamObj.penaltySection || !teamObj.penaltyScore) return;
-    
-    const displayScore = (hasPenalties && score !== null && score !== undefined) ? score : null;
-    
-    if (prevPenalties[key] !== displayScore) {
-        prevPenalties[key] = displayScore;
-        
-        if (displayScore !== null) {
-            teamObj.penaltySection.style.display = 'flex';
-            teamObj.penaltySection.classList.add('visible');
-            teamObj.penaltyScore.textContent = displayScore;
-        } else {
-            teamObj.penaltySection.style.display = 'none';
-            teamObj.penaltySection.classList.remove('visible');
-        }
-    }
-}
-
-function renderGoalEvents(match) {
-    const homeGoals = match.goals?.home || match.teamA?.scorers || [];
-    const awayGoals = match.goals?.away || match.teamB?.scorers || [];
-    
-    renderEventsList(matchupEls.teamA.events, homeGoals);
-    renderEventsList(matchupEls.teamB.events, awayGoals);
-}
-
-function renderEventsList(container, goals) {
-    if (!container) return;
-    
-    // Optimization: Only re-render the list if the goals array actually changed
-    const goalsJson = JSON.stringify(goals);
-    if (container.dataset.goals === goalsJson) return;
-    container.dataset.goals = goalsJson;
-    
-    container.innerHTML = '';
-    if (!goals || goals.length === 0) return;
-    
-    goals.forEach(goal => {
-        const eventEl = document.createElement('div');
-        eventEl.className = 'tm-event-matchup'; 
-        
-        let timeText = goal.time || goal.minute;
-        if (goal.extra || goal.extra_time) timeText += ` +${goal.extra || goal.extra_time}`;
-        
-        eventEl.innerHTML = `
-            <span class="tm-event-time-matchup">${timeText}'</span>
-            <span class="tm-event-player-matchup">${goal.player || goal.name || 'Unknown'}</span>
-        `;
-        container.appendChild(eventEl);
-    });
 }
 
 function resetFlagAnimations() {
@@ -318,53 +245,36 @@ function applyResult(match) {
 
     const card = matchupEls.card;
     
-    // CRITICAL: Check if match is ACTUALLY FINISHED first
     const isFinished = match.statusInfo?.isFinished === true || 
                        match.statusInfo?.status === 'finished';
     
-    // If match is NOT finished, clear all result states and return early
+    // IF MATCH IS NOT FINISHED
     if (!isFinished) {
-        // FIX: Always clear states regardless of prevResultState
         prevResultState = null;
         card.classList.remove('is-winner', 'is-draw');
         
         if (matchupEls.teamA.container) matchupEls.teamA.container.classList.remove('is-winner', 'is-loser');
         if (matchupEls.teamB.container) matchupEls.teamB.container.classList.remove('is-winner', 'is-loser');
         
-        if (matchupEls.teamA.badge) { 
-            matchupEls.teamA.badge.style.opacity = '0'; 
-            matchupEls.teamA.badge.innerHTML = ''; 
-        }
-        if (matchupEls.teamB.badge) { 
-            matchupEls.teamB.badge.style.opacity = '0'; 
-            matchupEls.teamB.badge.innerHTML = ''; 
-        }
+        if (matchupEls.teamA.badge) { matchupEls.teamA.badge.style.opacity = '0'; matchupEls.teamA.badge.innerHTML = ''; }
+        if (matchupEls.teamB.badge) { matchupEls.teamB.badge.style.opacity = '0'; matchupEls.teamB.badge.innerHTML = ''; }
         
-        // FIX: Hide crowns immediately and CLEAR inline animations
-        // The 'forwards' fill mode keeps opacity: 1, so we must clear the animation string
-        if (matchupEls.teamA.crown) {
-            matchupEls.teamA.crown.style.display = 'none';
-            matchupEls.teamA.crown.style.animation = ''; 
-        }
-        if (matchupEls.teamB.crown) {
-            matchupEls.teamB.crown.style.display = 'none';
-            matchupEls.teamB.crown.style.animation = '';
-        }
+        if (matchupEls.teamA.crown) matchupEls.teamA.crown.style.animation = '';
+        if (matchupEls.teamB.crown) matchupEls.teamB.crown.style.animation = '';
         
         if (matchupEls.drawRibbon) {
             matchupEls.drawRibbon.style.display = 'none';
             matchupEls.drawRibbon.style.animation = '';
         }
         
-        return; // <-- EXIT EARLY if not finished
+        return; 
     }
     
-    // Only proceed if match is finished
+    // DETERMINE WINNER LOGIC...
     const a = match.scoreInfo?.fulltime?.home ?? match.teamA?.score;
     const b = match.scoreInfo?.fulltime?.away ?? match.teamB?.score;
     const hasPenalties = match.scoreInfo?.hasPenalties || match.penalty !== null;
     
-    // Determine winner team
     let winnerTeam = null;
     if (match.winner) {
         if (match.winner === 'home') winnerTeam = match.homeTeam || match.team_a || match.teamA?.name;
@@ -376,20 +286,17 @@ function applyResult(match) {
         else if (match.teamA.isDraw) winnerTeam = 'Draw';
     }
 
-    // Determine the new state
     let newState = null;
-    if (winnerTeam === 'Draw' || winnerTeam === 'draw') {
-        newState = 'draw';
-    } else if (winnerTeam) {
+    if (winnerTeam === 'Draw' || winnerTeam === 'draw') newState = 'draw';
+    else if (winnerTeam) {
         const homeTeam = match.homeTeam || match.team_a || match.teamA?.name;
         newState = winnerTeam === homeTeam ? 'a' : 'b';
     }
 
-    // Only update DOM if the result state actually changed
     if (prevResultState === newState) return;
     prevResultState = newState;
 
-    // Clear previous states (in case switching from winner to draw or vice versa)
+    // CLEAR PREVIOUS STATES
     card.classList.remove('is-winner', 'is-draw');
     if (matchupEls.teamA.container) matchupEls.teamA.container.classList.remove('is-winner', 'is-loser');
     if (matchupEls.teamB.container) matchupEls.teamB.container.classList.remove('is-winner', 'is-loser');
@@ -397,21 +304,15 @@ function applyResult(match) {
     if (matchupEls.teamA.badge) { matchupEls.teamA.badge.style.opacity = '0'; matchupEls.teamA.badge.innerHTML = ''; }
     if (matchupEls.teamB.badge) { matchupEls.teamB.badge.style.opacity = '0'; matchupEls.teamB.badge.innerHTML = ''; }
     
-    // FIX: Also clear crown animations here before applying new ones
-    if (matchupEls.teamA.crown) {
-        matchupEls.teamA.crown.style.display = 'none';
-        matchupEls.teamA.crown.style.animation = '';
-    }
-    if (matchupEls.teamB.crown) {
-        matchupEls.teamB.crown.style.display = 'none';
-        matchupEls.teamB.crown.style.animation = '';
-    }
+    if (matchupEls.teamA.crown) matchupEls.teamA.crown.style.animation = '';
+    if (matchupEls.teamB.crown) matchupEls.teamB.crown.style.animation = '';
     
     if (matchupEls.drawRibbon) {
         matchupEls.drawRibbon.style.display = 'none';
         matchupEls.drawRibbon.style.animation = '';
     }
 
+    // APPLY NEW STATES
     if (newState === 'draw') {
         card.classList.add('is-draw');
         if (matchupEls.drawRibbon) {
@@ -433,7 +334,6 @@ function applyResult(match) {
         if (loserObj.container) loserObj.container.classList.add('is-loser');
         
         if (winnerObj.crown) {
-            winnerObj.crown.style.display = 'block';
             winnerObj.crown.style.animation = 'none';
             void winnerObj.crown.offsetWidth;
             winnerObj.crown.style.animation = 'badgeSlideUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards';
@@ -447,7 +347,7 @@ function flagUrl(name) {
     return `/assets/flags/${cleanName}.png`;
 }
 
-// Dynamic Styles Injection
+// Dynamic Styles Injection (Cleaned up to remove duplicate event styles)
 const style = document.createElement('style');
 style.textContent = `
     @keyframes drawRibbonExpand {
@@ -498,40 +398,6 @@ style.textContent = `
     .tm-vs-badge-matchup.is-live-pulse .tm-vs-text-matchup {
         color: #60a5fa;
         text-shadow: 0 0 15px rgba(59, 130, 246, 0.8);
-    }
-    
-    .tm-penalty-section-matchup {
-        display: none;
-        margin-top: 8px;
-        text-align: center;
-    }
-    
-    .tm-penalty-label-matchup {
-        font-size: 10px;
-        opacity: 0.7;
-        margin-right: 4px;
-    }
-    
-    .tm-penalty-score-matchup {
-        font-size: 14px;
-        font-weight: bold;
-    }
-    
-    .tm-goal-events-matchup {
-        margin-top: 8px;
-        font-size: 20px;
-    }
-    
-    .tm-goal-event-matchup {
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        margin: 2px 0;
-    }
-    
-    .tm-event-minute {
-        font-weight: bold;
-        color: #fbbf24;
     }
     
     /* SAFETY NETS */
