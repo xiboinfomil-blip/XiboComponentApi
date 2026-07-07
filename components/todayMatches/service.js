@@ -340,13 +340,38 @@ module.exports.getTodayMatches = async (config = {}) => {
             }, 3);
 
             const rawMatches = payload?.data || [];
-            const todayStr = new Date().toISOString().split('T')[0];
+            
+            // --- UPDATED FILTERING LOGIC ---
+            const now = new Date();
+            const todayStr = now.toISOString().split('T')[0];
+            
+            // Calculate yesterday's date string
+            const yesterdayDate = new Date(now);
+            yesterdayDate.setUTCDate(yesterdayDate.getUTCDate() - 1);
+            const yesterdayStr = yesterdayDate.toISOString().split('T')[0];
 
             matchesData = rawMatches.filter(match => {
                 if (!match.date) return false;
-                const matchDate = match.date.substring(0, 10);
-                return matchDate === todayStr;
+                
+                const matchDateStr = match.date.substring(0, 10);
+                const matchTimeStr = match.date.substring(11, 19); // "HH:mm:ss"
+                
+                // 1. Take today's matches
+                if (matchDateStr === todayStr) {
+                    return true;
+                }
+                
+                // 2. Also take previous day's matches if they were after 6 PM (18:00)
+                if (matchDateStr === yesterdayStr) {
+                    const hour = parseInt(matchTimeStr.substring(0, 2), 10);
+                    if (hour >= 18) {
+                        return true;
+                    }
+                }
+                
+                return false;
             });
+            // -----------------------------
 
             console.log("[getTodayMatches] Filtered matches count:", matchesData.length);
         }
