@@ -38,7 +38,7 @@ const formatDuration = (ms) => {
 
 const getMatchStatusInfo = (match) => {
     const now = new Date();
-    const matchDate = new Date(match.date.replace(' ', 'T') + '+04:00'); 
+const matchDate = new Date(match.date.replace(' ', 'T')); 
     const diffMs = matchDate.getTime() - now.getTime();
     
     const LIVE_WINDOW_MS = 2 * 60 * 60 * 1000;
