@@ -122,23 +122,39 @@ const normalizeMatchData = (apiMatch) => {
     const rawScorersA = Array.isArray(apiMatch.teamA?.scorers) ? apiMatch.teamA.scorers : [];
     const rawScorersB = Array.isArray(apiMatch.teamB?.scorers) ? apiMatch.teamB.scorers : [];
     
+// Helper function to parse time safely inside normalizeMatchData
+const getScorerTime = (s) => {
+    // Check if minute or time exists and is explicitly a number or valid string
+    if (s.minute !== undefined && s.minute !== null && s.minute !== '') return s.minute;
+    if (s.time !== undefined && s.time !== null && s.time !== '') return s.time;
+    
+    // If there is no minute/time mark, but a penalty shootout happened
+    if (hasPenalties) {
+        return 'Penalty'; 
+    }
+    
+    // Absolute fallback if everything else is missing
+    return 0;
+};
+
     const goalsA = rawScorersA
         .map(s => ({
             player: s.name || 'Inconnu',
-            time: s.minute || 0,
+            time: getScorerTime(s),
             extra: s.extra_time || null,
             detail: s.detail || ''
         }))
-        .sort((a, b) => a.time - b.time);
+        // Filter sorting safely since 'Penalty' is a string now
+        .sort((a, b) => (typeof a.time === 'number' && typeof b.time === 'number') ? a.time - b.time : 0);
 
     const goalsB = rawScorersB
         .map(s => ({
             player: s.name || 'Inconnu',
-            time: s.minute || 0,
+            time: getScorerTime(s),
             extra: s.extra_time || null,
             detail: s.detail || ''
         }))
-        .sort((a, b) => a.time - b.time);
+        .sort((a, b) => (typeof a.time === 'number' && typeof b.time === 'number') ? a.time - b.time : 0);
 
     // 5. Map Winner correctly from team booleans
     let winnerKey = null;
@@ -153,11 +169,10 @@ const normalizeMatchData = (apiMatch) => {
     }
 
     return {
-        ...apiMatch, // Preserves matchTime, venue, competition, etc. for other functions
+        ...apiMatch, 
         id: apiMatch.id,
         date: apiMatch.date,
         
-        // Map to legacy keys in case external functions (applyStatus, renderMatchup) expect them
         team_a: apiMatch.teamA?.name, 
         team_b: apiMatch.teamB?.name,
         fulltime_a: scoreA,
@@ -188,7 +203,6 @@ const normalizeMatchData = (apiMatch) => {
         awayTeam: apiMatch.teamB?.name,
         winner: winnerKey, 
         finalScore: `${scoreA ?? '-'}-${scoreB ?? '-'}`,
-        // Adjust penalty score string based on your actual penalty object structure if it's not null
         penaltyScore: hasPenalties ? `${apiMatch.penalty?.home ?? apiMatch.penalty?.scoreA ?? 0}-${apiMatch.penalty?.away ?? apiMatch.penalty?.scoreB ?? 0}` : null
     };
 };

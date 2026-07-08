@@ -286,9 +286,24 @@ function applyResult(match) {
         else if (match.teamA.isDraw) winnerTeam = 'Draw';
     }
 
+    // --- SMART PENALTY OVERRIDE ---
+    // If the API claims it's a draw but penalties are present, look up who won the shootout
+    if ((winnerTeam === 'Draw' || winnerTeam === 'draw' || a === b) && hasPenalties) {
+        const penObj = match.scoreInfo?.penalty || match.penalty;
+        const penA = penObj?.home ?? penObj?.scoreA ?? 0;
+        const penB = penObj?.away ?? penObj?.scoreB ?? 0;
+        
+        if (penA > penB) {
+            winnerTeam = match.homeTeam || match.team_a || match.teamA?.name;
+        } else if (penB > penA) {
+            winnerTeam = match.awayTeam || match.team_b || match.teamB?.name;
+        }
+    }
+
     let newState = null;
-    if (winnerTeam === 'Draw' || winnerTeam === 'draw') newState = 'draw';
-    else if (winnerTeam) {
+    if (winnerTeam === 'Draw' || winnerTeam === 'draw') {
+        newState = 'draw';
+    } else if (winnerTeam) {
         const homeTeam = match.homeTeam || match.team_a || match.teamA?.name;
         newState = winnerTeam === homeTeam ? 'a' : 'b';
     }
@@ -322,7 +337,7 @@ function applyResult(match) {
             matchupEls.drawRibbon.style.animation = 'drawRibbonExpand 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards';
             
             const textSpan = matchupEls.drawRibbon.querySelector('.tm-draw-text-matchup');
-            if(textSpan) textSpan.textContent = hasPenalties ? 'Match Nul (Après Tirs au But)' : 'Match Nul';
+            if(textSpan) textSpan.textContent = 'Match Nul';
         }
     } else if (newState === 'a' || newState === 'b') {
         card.classList.add('is-winner');
@@ -337,6 +352,17 @@ function applyResult(match) {
             winnerObj.crown.style.animation = 'none';
             void winnerObj.crown.offsetWidth;
             winnerObj.crown.style.animation = 'badgeSlideUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards';
+        }
+
+        // Optional: If won via shootout, leverage the draw ribbon slot to explicitly display the status
+        if (hasPenalties && matchupEls.drawRibbon) {
+            matchupEls.drawRibbon.style.display = 'flex';
+            matchupEls.drawRibbon.style.animation = 'none';
+            void matchupEls.drawRibbon.offsetWidth;
+            matchupEls.drawRibbon.style.animation = 'drawRibbonExpand 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards';
+            
+            const textSpan = matchupEls.drawRibbon.querySelector('.tm-draw-text-matchup');
+            if(textSpan) textSpan.textContent = 'Victoire aux Tirs au But';
         }
     }
 }

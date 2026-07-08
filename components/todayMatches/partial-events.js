@@ -106,9 +106,21 @@ function renderEventsList(container, goals) {
 
         // Generate HTML for all time badges for this player
         let timesHtml = group.times.map(goal => {
-            let timeText = goal.time || goal.minute;
-            if (goal.extra || goal.extra_time) timeText += ` +${goal.extra || goal.extra_time}`;
-            return `<span class="tm-event-time-matchup">${timeText}'</span>`;
+            let timeValue = goal.time || goal.minute;
+            let displayTime = '';
+
+            // Check if the time value is a custom string indicator instead of a number
+            if (typeof timeValue === 'string') {
+                displayTime = timeValue; // Renders "Penalty" directly without appending "'"
+            } else {
+                displayTime = `${timeValue || 0}`;
+                if (goal.extra || goal.extra_time) {
+                    displayTime += ` +${goal.extra || goal.extra_time}`;
+                }
+                displayTime += `'`; // Safely append minute symbol to regular times
+            }
+
+            return `<span class="tm-event-time-matchup">${displayTime}</span>`;
         }).join('');
 
         // Inject the grouped structure into the DOM
@@ -122,4 +134,4 @@ function renderEventsList(container, goals) {
         
         container.appendChild(eventEl);
     });
-}   
+}
