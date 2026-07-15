@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= title %></title>
+    <!-- Premium Geometric Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700;800&display=swap" rel="stylesheet">
     
     <script src="/assets/global/helpers/configHelper.js?v=<%= Version %>"></script>
-
     <link rel="stylesheet" href="/assets/<%= componentName %>/style.css?v=<%= Version %>">
-    
     <link rel="stylesheet" href="/assets/<%= componentName %>/partial-header.css?v=<%= Version %>">
     <link rel="stylesheet" href="/assets/<%= componentName %>/partial-podium.css?v=<%= Version %>">
     <link rel="stylesheet" href="/assets/<%= componentName %>/partial-table.css?v=<%= Version %>">
@@ -16,19 +16,27 @@
 <body style="background: transparent; margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; height: 100vh; width: 100vw; overflow: hidden;">
     
     <div id="leaderboard-container">
+        <!-- Sub-ambient background sweep -->
         <div class="ambient-glow"></div>
         
-        <%- include('partials/header/view') %>
+        <!-- [1] Header Container -->
+        <header class="header-container">
+            <%- include('partials/header/view') %>
+        </header>
         
-        <div id="podium-section" class="podium-container"></div>
+        <!-- [2] Podium Section (Midground layout) -->
+        <div id="podium-section" class="podium-container">
+            <!-- Partials generated inside partial-podium.js populate here -->
+        </div>
 
-        <%- include('partials/table/view') %>
+        <!-- [3] Hero Table Container -->
+        <div class="table-container">
+            <%- include('partials/table/view') %>
+        </div>
     </div>
 
-    
     <script src="/assets/<%= componentName %>/script.js?v=<%= Version %>"></script>
     <script src="/assets/<%= componentName %>/partial-podium.js?v=<%= Version %>"></script>
     <script src="/assets/<%= componentName %>/partial-table.js?v=<%= Version %>"></script>
-    
 </body>
 </html>
