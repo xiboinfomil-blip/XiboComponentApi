@@ -74,12 +74,15 @@ function renderPodium(data) {
                 <div class="trophy-glow">
                     ${trophySvg}
                 </div>
-                <div class="podium-rank">#${rank}</div>
-                <div class="podium-name">${(item.key || "INCONNU").toUpperCase()}</div>
+                <div class="podium-meta">
+                    <div class="podium-rank">#${rank}</div>
+                    <div class="podium-name" title="${item.key || "INCONNU"}">
+                        ${(item.key || "INCONNU").toUpperCase()}
+                    </div>
+                </div>
             </div>
             
             <div class="podium-bar ${positionClass}">
-                <!-- Added burning-points class -->
                 <div class="podium-bar-points burning-points">${item.point ?? 0} PTS</div>
             </div>
         </div>`;

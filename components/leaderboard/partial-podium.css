@@ -10,42 +10,40 @@
 }
 
 /* =========================================
-   CONTAINER (Adaptive to parent Flex)
+   CONTAINER (Adapts to parent's size context)
    ========================================= */
 .podium-container {
     display: none; 
     justify-content: center;
     align-items: flex-end;
-    padding: 12px 16px 0 16px;
+    padding: 8px 12px 0 12px;
     background: radial-gradient(circle at 50% 50%, var(--fifa-gold-dim) 0%, transparent 80%);
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     
-    /* Adapt to parent size strictly */
     width: 100%;
     height: 100%; 
-    min-height: 0; /* Critical: allows flex shrinking */
+    min-height: 0; /* Critical: allows proper shrinking in flex parents */
     box-sizing: border-box;
     overflow: hidden;
     opacity: 0;
     animation: podiumContainerFade 0.8s ease-out forwards;
     
-    /* Sets up modern container query units */
+    /* Configures container size context for absolute children scaling */
     container-type: size;
 }
 
 .podium-flex {
     display: flex;
     justify-content: center;
-    align-items: flex-end; /* Locks elements directly to the base ground line */
-    gap: clamp(8px, 2.5cqw, 32px); 
+    align-items: flex-end; 
+    gap: clamp(4px, 2cqmin, 24px); 
     width: 100%;
     max-width: 1000px; 
     height: 100%;
-    padding-bottom: 0;
 }
 
 /* =========================================
-   PODIUM ITEM & CONTENT ALIGNMENT
+   PODIUM ITEM & INTERNAL ELASTIC SCALING
    ========================================= */
 .podium-item {
     flex: 1;
@@ -59,26 +57,26 @@
     
     opacity: 0;
     transform: translateY(30px) scale(0.98);
-    
     animation: 
         podiumItemEntrance 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards,
         podiumFloat 6s ease-in-out infinite;
 }
 
-/* Sequential Animation Delays */
 .podium-item.first { animation-delay: 0s, 0.8s; }
 .podium-item.second { animation-delay: 0.15s, 1.0s; }
 .podium-item.third { animation-delay: 0.3s, 1.2s; }
 
+/* Podium content wraps trophy + text cleanly */
 .podium-content {
     display: flex;
-    flex-direction: column-reverse;
+    flex-direction: column;
     align-items: center;
-    z-index: 2;
-    margin-bottom: clamp(6px, 1.5cqh, 16px);
-    text-align: center;
+    justify-content: flex-end;
+    flex: 1; /* Automatically consumes all remaining vertical space above podium-bar */
     width: 100%;
-    box-sizing: border-box;
+    min-height: 0; /* Prevents overflow inside flex layouts */
+    z-index: 2;
+    margin-bottom: clamp(4px, 1.5cqh, 12px);
     
     opacity: 0;
     transform: translateY(-8px);
@@ -86,18 +84,25 @@
     animation-delay: calc(var(--item-delay, 0s) + 0.3s);
 }
 
+.podium-meta {
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: center;
+    width: 100%;
+}
+
 /* =========================================
-   ADAPTIVE BAR HEIGHTS (Dynamic % Layout)
+   ADAPTIVE BAR HEIGHTS (Strict % of parent)
    ========================================= */
 .podium-bar {
     width: 100%;
-    border-radius: 12px 12px 0 0;
+    border-radius: 8px 8px 0 0;
     position: relative;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    padding: 8px 4px;
+    padding: 6px 4px;
     box-sizing: border-box;
     border: 2px solid rgba(255, 255, 255, 0.1);
     border-bottom: none;
@@ -111,22 +116,21 @@
     animation-delay: var(--item-delay, 0s);
 }
 
-/* Stepped Heights based on Container Percentage */
 .podium-bar.first {
-    height: 48%; /* Tallest */
+    height: 42%; /* Gold */
     background: linear-gradient(180deg, rgba(255, 215, 0, 0.25) 0%, rgba(255, 215, 0, 0.03) 100%);
     border-color: rgba(255, 215, 0, 0.4);
     box-shadow: 0 -8px 25px rgba(255, 215, 0, 0.15);
 }
 
 .podium-bar.second {
-    height: 35%; /* Medium */
+    height: 31%; /* Silver */
     background: linear-gradient(180deg, rgba(226, 232, 240, 0.2) 0%, rgba(226, 232, 240, 0.03) 100%);
     border-color: rgba(226, 232, 240, 0.3);
 }
 
 .podium-bar.third {
-    height: 24%; /* Shortest */
+    height: 22%; /* Bronze */
     background: linear-gradient(180deg, rgba(249, 115, 22, 0.18) 0%, rgba(249, 115, 22, 0.02) 100%);
     border-color: rgba(249, 115, 22, 0.25);
 }
@@ -143,16 +147,17 @@
 }
 
 /* =========================================
-   TYPOGRAPHY & TROPHY SCALING
+   TYPOGRAPHY & TROPHY SCALING (Flex-Elastic)
    ========================================= */
 
-/* Trophies scale dynamically based on the width of their specific columns */
 .trophy-glow {
     display: flex;
     justify-content: center;
     align-items: center;
     width: 100%;
-    margin-bottom: clamp(4px, 1cqh, 12px);
+    flex: 1; /* Grow and shrink flexibly based on space */
+    min-height: 0; /* Important context to allow SVGs to shrink gracefully */
+    margin-bottom: clamp(2px, 1cqh, 8px);
     position: relative;
     
     opacity: 0;
@@ -164,46 +169,47 @@
 
 .podium-trophy-icon {
     width: auto;
-    height: clamp(35px, 15cqh, 85px); /* Adapts beautifully to container height */
-    max-width: 90%;
+    height: 100%;
+    max-height: clamp(30px, 16cqh, 75px); /* Limits height proportionally to prevent container breaks */
     display: block;
     filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));
 }
 
-/* High-Contrast Points Text */
+/* Points Text */
 .podium-bar-points {
     font-family: 'Inter', sans-serif;
     font-weight: 900;
-    font-size: clamp(14px, 2.8cqw, 28px); /* Proportional scaling */
-    letter-spacing: 1px;
+    font-size: clamp(10px, 2.8cqw, 24px); 
+    letter-spacing: 0.5px;
     z-index: 2;
     position: relative; 
+    white-space: nowrap;
     
     opacity: 0;
     animation: pointsFade 0.5s ease-out forwards;
     animation-delay: calc(var(--item-delay, 0s) + 0.5s);
 }
 
-/* Clean, Highly-Scalable Name Badges */
+/* Name Badges */
 .podium-name {
     font-family: 'Montserrat', sans-serif;
     font-weight: 900;
     color: var(--text-white);
-    font-size: clamp(11px, 2.2cqw, 18px); 
+    font-size: clamp(8px, 2.2cqw, 15px); 
     line-height: 1.2;
-    margin: 0 auto 4px auto;
+    margin: 0 auto 2px auto;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    width: 95%;
+    width: 90%;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     
     background: rgba(8, 12, 24, 0.8);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    padding: clamp(4px, 1cqh, 8px) clamp(6px, 1.2cqw, 14px);
-    border-radius: 8px; 
+    padding: clamp(2px, 0.8cqh, 6px) clamp(4px, 1cqw, 12px);
+    border-radius: 6px; 
     border: 1px solid rgba(255, 255, 255, 0.1);
     box-sizing: border-box;
     
@@ -213,7 +219,7 @@
     animation-delay: calc(var(--item-delay, 0s) + 0.45s);
 }
 
-/* Giant Dynamic Ranks */
+/* Giant Ranks */
 .podium-rank {
     font-family: 'Montserrat', sans-serif;
     font-weight: 900;
@@ -228,105 +234,105 @@
 }
 
 .podium-item.first .podium-rank {
-    font-size: clamp(36px, 7.5cqh, 72px); 
+    font-size: clamp(24px, 7.5cqh, 64px); 
     background: linear-gradient(180deg, #FFFFFF 0%, #FFD700 60%, #B8860B 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.4));
+    filter: drop-shadow(0 0 12px rgba(255, 215, 0, 0.4));
 }
 
 .podium-item.second .podium-rank {
-    font-size: clamp(30px, 6cqh, 56px);
+    font-size: clamp(20px, 6cqh, 50px);
     color: var(--fifa-silver);
-    text-shadow: 0 0 10px rgba(226, 232, 240, 0.3);
+    text-shadow: 0 0 8px rgba(226, 232, 240, 0.3);
 }
 
 .podium-item.third .podium-rank {
-    font-size: clamp(26px, 5cqh, 48px);
+    font-size: clamp(18px, 5cqh, 42px);
     color: var(--fifa-bronze);
-    text-shadow: 0 0 10px rgba(249, 115, 22, 0.3);
+    text-shadow: 0 0 8px rgba(249, 115, 22, 0.3);
 }
 
 /* =========================================
    GLOWS & GLINTS
    ========================================= */
-.podium-item.first .trophy-glow { filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.6)); }
-.podium-item.second .trophy-glow { filter: drop-shadow(0 0 12px rgba(226, 232, 240, 0.4)); }
-.podium-item.third .trophy-glow { filter: drop-shadow(0 0 10px rgba(249, 115, 22, 0.4)); }
+.podium-item.first .trophy-glow { filter: drop-shadow(0 0 12px rgba(255, 215, 0, 0.5)); }
+.podium-item.second .trophy-glow { filter: drop-shadow(0 0 10px rgba(226, 232, 240, 0.35)); }
+.podium-item.third .trophy-glow { filter: drop-shadow(0 0 8px rgba(249, 115, 22, 0.35)); }
 
 .podium-item.first .trophy-glow::after {
     content: '';
     position: absolute;
     width: 100%; height: 100%;
-    background: radial-gradient(circle, rgba(255,215,0,0.15) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(255,215,0,0.12) 0%, transparent 70%);
     z-index: -1;
 }
 
-/* Points Text Glows */
+/* Burning Text FX */
 .podium-bar.first .burning-points {
     color: #FFFDF0;
-    text-shadow: 0 0 6px #ffcc00, 0 -4px 12px #ff9900;
+    text-shadow: 0 0 4px #ffcc00, 0 -3px 8px #ff9900;
     animation: pointsFade 0.5s ease-out forwards, burnPulseSharp 1.5s infinite alternate;
 }
 .podium-bar.second .burning-points {
     color: #F8FAFC;
-    text-shadow: 0 0 6px #cbd5e1, 0 -4px 12px #94a3b8;
+    text-shadow: 0 0 4px #cbd5e1, 0 -3px 8px #94a3b8;
     animation: pointsFade 0.5s ease-out forwards, burnPulseSilver 2s infinite alternate;
 }
 .podium-bar.third .burning-points {
     color: #FFF1E2;
-    text-shadow: 0 0 6px #fed7aa, 0 -4px 12px #ea580c;
+    text-shadow: 0 0 4px #fed7aa, 0 -3px 8px #ea580c;
     animation: pointsFade 0.5s ease-out forwards, burnPulseSharp 1.8s infinite alternate;
 }
 
 /* =========================================
-   RESPONSIVE OVERRIDES (Mobile Layouts)
+   ADAPTIVE CONTAINER FALLBACKS
    ========================================= */
-@container (max-width: 500px) {
+@container (max-width: 480px) or (max-height: 250px) {
     .podium-flex {
-        gap: 8px;
+        gap: 6px;
     }
     .podium-name {
-        font-size: 10px;
-        padding: 4px;
-        border-radius: 6px;
+        font-size: 8px;
+        padding: 2px 4px;
+        border-radius: 4px;
     }
     .podium-bar-points {
-        font-size: 12px;
+        font-size: clamp(8px, 2.5cqw, 11px);
     }
-    .podium-trophy-icon {
-        height: clamp(30px, 12cqh, 45px);
+    .podium-rank {
+        margin-bottom: 0px;
     }
 }
 
 /* =========================================
-   STANDARD ANIMATION RE-DECLARATIONS
+   ANIMATIONS
    ========================================= */
 @keyframes podiumContainerFade { from { opacity: 0; } to { opacity: 1; } }
 @keyframes podiumItemEntrance {
-    0% { opacity: 0; transform: translateY(30px) scale(0.98); }
+    0% { opacity: 0; transform: translateY(20px) scale(0.98); }
     100% { opacity: 1; transform: translateY(0) scale(1); }
 }
 @keyframes podiumFloat {
     0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-4px); }
+    50% { transform: translateY(-3px); }
 }
-@keyframes podiumContentFade { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes podiumContentFade { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes rankPop { 0% { opacity: 0; transform: scale(0.5); } 100% { opacity: 1; transform: scale(1); } }
 @keyframes nameSlide { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
-@keyframes pointsFade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes pointsFade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes barRise { from { opacity: 0; transform: scaleY(0); } to { opacity: 1; transform: scaleY(1); } }
 @keyframes barShimmer { 0% { left: -150%; } 100% { left: 150%; } }
 @keyframes trophySpin { from { opacity: 0; transform: scale(0) rotate(-180deg); } to { opacity: 1; transform: scale(1) rotate(0deg); } }
 @keyframes fifaTrophyPulse {
     from { transform: scale(1) translateY(0); }
-    to { transform: scale(1.05) translateY(-3px); }
+    to { transform: scale(1.03) translateY(-2px); }
 }
 @keyframes burnPulseSharp {
-    from { text-shadow: 0 0 5px #ffcc00, 0 -3px 8px #ff9900; }
-    to { text-shadow: 0 0 8px #ffcc00, 0 -5px 12px #ff6600; }
+    from { text-shadow: 0 0 4px #ffcc00, 0 -2px 6px #ff9900; }
+    to { text-shadow: 0 0 6px #ffcc00, 0 -4px 10px #ff6600; }
 }
 @keyframes burnPulseSilver {
-    from { text-shadow: 0 0 5px #cbd5e1, 0 -3px 8px #94a3b8; }
-    to { text-shadow: 0 0 8px #cbd5e1, 0 -5px 12px #94a3b8; }
+    from { text-shadow: 0 0 4px #cbd5e1, 0 -2px 6px #94a3b8; }
+    to { text-shadow: 0 0 6px #cbd5e1, 0 -4px 10px #94a3b8; }
 }
