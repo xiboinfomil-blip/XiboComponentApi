@@ -2,7 +2,6 @@
    WORLD-CLASS PREMIUM DESIGN SYSTEM
    ========================================= */
 :root {
-    /* Color Palette: Deep Obsidian, Bright Neon, and Precious Metals */
     --fifa-bg-dark: #030611;
     --glass-bg: rgba(9, 15, 30, 0.65);
     --glass-border: rgba(255, 255, 255, 0.07);
@@ -31,7 +30,6 @@
     -webkit-font-smoothing: antialiased;
 }
 
-/* Base resets allowing fluid parent injection */
 html, body { 
     height: 100%; 
     width: 100%; 
@@ -39,21 +37,20 @@ html, body {
 }
 
 /* =========================================
-   THE GLASS CONTAINER (Parent-Adaptive)
+   THE GLASS CONTAINER (Fits Parent)
    ========================================= */
 #leaderboard-container {
     width: 100%;
     height: 100%;
-    /* No viewport-locked dimensions; constraints are inherited from parent */
     max-width: 100%;
     max-height: 100%;
-    padding: clamp(12px, 3cqi, 32px); /* Uses Container Query Units for padding scaling */
+    padding: clamp(10px, 2.5cqmin, 24px); /* Scales proportionally dynamically */
     
     background: var(--glass-bg);
     backdrop-filter: blur(var(--blur-strength)) saturate(190%);
     -webkit-backdrop-filter: blur(var(--blur-strength)) saturate(190%);
     
-    border-radius: clamp(12px, 3cqi, 28px);
+    border-radius: clamp(12px, 3cqmin, 24px);
     border: 1px solid var(--glass-border);
     box-shadow: 
         0 0 0 1px var(--glass-highlight) inset,
@@ -64,13 +61,13 @@ html, body {
     position: relative;
     display: flex;
     flex-direction: column;
-    gap: clamp(8px, 2cqi, 24px);
+    gap: clamp(8px, 2cqmin, 16px);
     
-    /* Absolute Magic Key: Establishes container query context */
-    container-type: inline-size; 
+    /* Strict size containment container context (listens to both width & height) */
+    container-type: size; 
 }
 
-/* Smooth ambient animated background (restricted to container) */
+/* Ambient dynamic background */
 #leaderboard-container::before {
     content: '';
     position: absolute;
@@ -84,11 +81,11 @@ html, body {
 }
 
 /* =========================================
-   DEFAULT MOBILE-FIRST / COMPACT CONTAINER LAYOUT
+   COMPACT HEIGHT FALLBACK LAYOUT (Under 400px tall)
    ========================================= */
 .header-container {
     flex: 0 0 auto;
-    padding-bottom: 8px;
+    padding-bottom: 6px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
@@ -98,26 +95,25 @@ html, body {
     grid-template-columns: repeat(3, 1fr);
     gap: 8px;
     align-items: end;
-    padding: 8px 0;
+    padding: 6px 0;
 }
 
 .table-container {
-    flex: 1 1 auto; /* Allows container to grow and scroll organically inside small heights */
+    flex: 1 1 auto;
     background: rgba(0, 0, 0, 0.15);
-    border-radius: 16px;
+    border-radius: 12px;
     padding: 6px;
-    overflow-y: auto; /* Ensures internal scrolling when space is cramped */
+    overflow-y: auto;
 }
 
 /* =========================================
-   DESKTOP / WIDE PARENT CONTAINER (The 1:2:4 Engine)
+   THE 1:2:4 FLEX ENGINE 
+   (Active when parent has enough vertical/horizontal room)
    ========================================= */
-@container (min-width: 680px) {
+@container (min-height: 400px) and (min-width: 480px) {
     /* [1] Header: Flex 1 */
     .header-container {
         flex: 1 1 0%;
-        min-height: 60px;
-        max-height: 90px;
         display: flex;
         align-items: center;
         border-bottom: 1px solid rgba(255, 255, 255, 0.04);
@@ -126,22 +122,20 @@ html, body {
     /* [2] Podium: Flex 2 */
     #podium-section {
         flex: 2 1 0%;
-        min-height: 120px;
-        max-height: 200px;
         display: flex;
         align-items: flex-end;
         justify-content: center;
-        gap: 16px;
+        gap: 12px;
     }
 
-    /* [3] Table (The Hero): Flex 4 */
+    /* [3] Table (Hero): Flex 4 */
     .table-container {
         flex: 4 1 0%;
-        min-height: 0; /* Ensures inner flex layouts do not overflow */
+        min-height: 0; /* Prevents overflow from breaking flex-basis */
         background: rgba(0, 0, 0, 0.25);
-        border-radius: 20px;
+        border-radius: 16px;
         border: 1px solid rgba(255, 255, 255, 0.02);
-        padding: 12px;
+        padding: 10px;
         overflow-y: auto;
         
         scrollbar-width: thin;
@@ -153,71 +147,73 @@ html, body {
    PREMIUM HIGH-TECH INTERFACE ELEMENTS
    ========================================= */
 
-/* The Glass Rows */
+/* Adaptable Glass Rows */
 .table-row {
     display: grid;
     grid-template-columns: 40px 1fr 80px;
     align-items: center;
-    padding: clamp(8px, 1.5cqi, 16px) clamp(10px, 2cqi, 24px);
-    margin-bottom: 8px;
+    padding: clamp(6px, 1.5cqmin, 14px) clamp(8px, 2cqmin, 20px);
+    margin-bottom: 6px;
     background: linear-gradient(90deg, rgba(255,255,255,0.01) 0%, rgba(255,255,255,0.02) 100%);
     border: 1px solid rgba(255, 255, 255, 0.02);
-    border-radius: 12px;
+    border-radius: 10px;
     transition: var(--transition-premium);
     position: relative;
 }
 
-@container (min-width: 500px) {
+@container (min-width: 550px) {
     .table-row {
         grid-template-columns: 50px 1fr 90px;
+        padding: 12px 20px;
+        margin-bottom: 8px;
     }
 }
 
 /* Ultra-Smooth Micro-interactions */
 @media (hover: hover) {
     .table-row:hover {
-        transform: translateY(-2px) scale(1.005);
+        transform: translateY(-1px) scale(1.002);
         background: linear-gradient(90deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.05) 100%);
         border-color: rgba(255, 255, 255, 0.1);
         box-shadow: 
-            0 12px 24px rgba(0, 0, 0, 0.4),
-            inset 4px 0 0 var(--accent-neon-green);
+            0 8px 20px rgba(0, 0, 0, 0.4),
+            inset 3px 0 0 var(--accent-neon-green);
     }
 }
 
 /* Rank Badging with Metallic Textures */
 .rank-badge {
     font-weight: 800;
-    font-size: clamp(0.85rem, 2cqi, 1.1rem);
+    font-size: clamp(0.8rem, 2cqmin, 1.1rem);
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: clamp(24px, 5cqi, 32px);
-    height: clamp(24px, 5cqi, 32px);
+    width: clamp(22px, 4cqmin, 32px);
+    height: clamp(22px, 4cqmin, 32px);
     border-radius: 50%;
 }
 
 .rank-badge-1 {
     background: var(--metal-gold);
     color: #1e1500;
-    box-shadow: 0 0 15px rgba(255, 224, 102, 0.3);
+    box-shadow: 0 0 12px rgba(255, 224, 102, 0.25);
 }
 
 .rank-badge-2 {
     background: var(--metal-silver);
     color: #1a202c;
-    box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+    box-shadow: 0 0 12px rgba(255, 255, 255, 0.15);
 }
 
 .rank-badge-3 {
     background: var(--metal-bronze);
     color: #fff;
-    box-shadow: 0 0 15px rgba(240, 178, 122, 0.2);
+    box-shadow: 0 0 12px rgba(240, 178, 122, 0.15);
 }
 
 /* Scrollbar Beautification (Webkit) */
 .table-container::-webkit-scrollbar {
-    width: 6px;
+    width: 4px;
 }
 .table-container::-webkit-scrollbar-track {
     background: transparent;
