@@ -31,16 +31,47 @@
     -webkit-font-smoothing: antialiased;
 }
 
+/* Base resets allowing fluid parent injection */
 html, body { 
     height: 100%; 
     width: 100%; 
-    overflow: hidden; 
-    background-color: var(--fifa-bg-dark);
     font-family: 'Space Grotesk', -apple-system, sans-serif;
 }
 
-/* Smooth ambient animated background */
-body::before {
+/* =========================================
+   THE GLASS CONTAINER (Parent-Adaptive)
+   ========================================= */
+#leaderboard-container {
+    width: 100%;
+    height: 100%;
+    /* No viewport-locked dimensions; constraints are inherited from parent */
+    max-width: 100%;
+    max-height: 100%;
+    padding: clamp(12px, 3cqi, 32px); /* Uses Container Query Units for padding scaling */
+    
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--blur-strength)) saturate(190%);
+    -webkit-backdrop-filter: blur(var(--blur-strength)) saturate(190%);
+    
+    border-radius: clamp(12px, 3cqi, 28px);
+    border: 1px solid var(--glass-border);
+    box-shadow: 
+        0 0 0 1px var(--glass-highlight) inset,
+        0 30px 100px rgba(0, 0, 0, 0.8), 
+        0 0 80px rgba(112, 0, 255, 0.03);
+        
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(8px, 2cqi, 24px);
+    
+    /* Absolute Magic Key: Establishes container query context */
+    container-type: inline-size; 
+}
+
+/* Smooth ambient animated background (restricted to container) */
+#leaderboard-container::before {
     content: '';
     position: absolute;
     top: -50%; left: -50%; width: 200%; height: 200%;
@@ -53,41 +84,39 @@ body::before {
 }
 
 /* =========================================
-   THE GLASS CONTAINER (The 1:2:4 Engine)
+   DEFAULT MOBILE-FIRST / COMPACT CONTAINER LAYOUT
    ========================================= */
-#leaderboard-container {
-    width: 100%;
-    height: 100%;
-    max-height: 100vh;
-    padding: clamp(16px, 2.5vw, 32px);
-    
-    background: var(--glass-bg);
-    backdrop-filter: blur(var(--blur-strength)) saturate(190%);
-    -webkit-backdrop-filter: blur(var(--blur-strength)) saturate(190%);
-    
-    border-radius: clamp(16px, 3vw, 36px);
-    border: 1px solid var(--glass-border);
-    box-shadow: 
-        0 0 0 1px var(--glass-highlight) inset,
-        0 30px 100px rgba(0, 0, 0, 0.8), 
-        0 0 80px rgba(112, 0, 255, 0.03);
-        
-    overflow: hidden;
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    gap: clamp(12px, 2vw, 24px);
-    container-type: inline-size; /* Enables Container Queries */
+.header-container {
+    flex: 0 0 auto;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+#podium-section {
+    flex: 0 0 auto;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    align-items: end;
+    padding: 8px 0;
+}
+
+.table-container {
+    flex: 1 1 auto; /* Allows container to grow and scroll organically inside small heights */
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 16px;
+    padding: 6px;
+    overflow-y: auto; /* Ensures internal scrolling when space is cramped */
 }
 
 /* =========================================
-   DESKTOP / LANDSCAPE LAYOUT RATIO (1:2:4)
+   DESKTOP / WIDE PARENT CONTAINER (The 1:2:4 Engine)
    ========================================= */
-@media (min-height: 580px) and (min-width: 768px) {
+@container (min-width: 680px) {
     /* [1] Header: Flex 1 */
     .header-container {
         flex: 1 1 0%;
-        min-height: 70px;
+        min-height: 60px;
         max-height: 90px;
         display: flex;
         align-items: center;
@@ -97,7 +126,7 @@ body::before {
     /* [2] Podium: Flex 2 */
     #podium-section {
         flex: 2 1 0%;
-        min-height: 130px;
+        min-height: 120px;
         max-height: 200px;
         display: flex;
         align-items: flex-end;
@@ -108,7 +137,7 @@ body::before {
     /* [3] Table (The Hero): Flex 4 */
     .table-container {
         flex: 4 1 0%;
-        min-height: 0; /* Enables internal scroll */
+        min-height: 0; /* Ensures inner flex layouts do not overflow */
         background: rgba(0, 0, 0, 0.25);
         border-radius: 20px;
         border: 1px solid rgba(255, 255, 255, 0.02);
@@ -121,60 +150,30 @@ body::before {
 }
 
 /* =========================================
-   MOBILE / PORTRAIT RESPONSIVE BEAUTIFICATION
-   ========================================= */
-@media (max-width: 767px) or (max-height: 579px) {
-    #leaderboard-container {
-        padding: 16px;
-        border-radius: 16px;
-        gap: 16px;
-        overflow-y: auto; /* Allow entire screen scroll if device is ultra-short */
-    }
-
-    .header-container {
-        flex: 0 0 auto;
-        padding-bottom: 8px;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    }
-
-    /* Mobile Podium: Sleek compact cards instead of massive pillars */
-    #podium-section {
-        flex: 0 0 auto;
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 8px;
-        align-items: end;
-        padding: 8px 0;
-    }
-
-    .table-container {
-        flex: 0 0 auto;
-        background: rgba(0, 0, 0, 0.15);
-        border-radius: 16px;
-        padding: 6px;
-        overflow-y: visible; /* Prevents double scrolling bugs on mobile */
-    }
-}
-
-/* =========================================
    PREMIUM HIGH-TECH INTERFACE ELEMENTS
    ========================================= */
 
 /* The Glass Rows */
 .table-row {
     display: grid;
-    grid-template-columns: 50px 1fr 90px;
+    grid-template-columns: 40px 1fr 80px;
     align-items: center;
-    padding: clamp(10px, 1.5vw, 16px) clamp(12px, 2vw, 24px);
+    padding: clamp(8px, 1.5cqi, 16px) clamp(10px, 2cqi, 24px);
     margin-bottom: 8px;
     background: linear-gradient(90deg, rgba(255,255,255,0.01) 0%, rgba(255,255,255,0.02) 100%);
     border: 1px solid rgba(255, 255, 255, 0.02);
-    border-radius: 14px;
+    border-radius: 12px;
     transition: var(--transition-premium);
     position: relative;
 }
 
-/* Ultra-Smooth Micro-interactions (Only on Hover-Capable Devices) */
+@container (min-width: 500px) {
+    .table-row {
+        grid-template-columns: 50px 1fr 90px;
+    }
+}
+
+/* Ultra-Smooth Micro-interactions */
 @media (hover: hover) {
     .table-row:hover {
         transform: translateY(-2px) scale(1.005);
@@ -182,19 +181,19 @@ body::before {
         border-color: rgba(255, 255, 255, 0.1);
         box-shadow: 
             0 12px 24px rgba(0, 0, 0, 0.4),
-            inset 4px 0 0 var(--accent-neon-green); /* Beautiful left neon light glow */
+            inset 4px 0 0 var(--accent-neon-green);
     }
 }
 
 /* Rank Badging with Metallic Textures */
 .rank-badge {
     font-weight: 800;
-    font-size: clamp(0.95rem, 1.2vw, 1.2rem);
+    font-size: clamp(0.85rem, 2cqi, 1.1rem);
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
-    height: 32px;
+    width: clamp(24px, 5cqi, 32px);
+    height: clamp(24px, 5cqi, 32px);
     border-radius: 50%;
 }
 
